@@ -1,25 +1,45 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-
-const SETTINGS_PATH = path.join(process.cwd(), "data", "settings.json");
-
-function readSettings() {
-  try {
-    if (!fs.existsSync(SETTINGS_PATH)) return null;
-    return JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf-8"));
-  } catch {
-    return null;
-  }
-}
+import { prisma } from "@/lib/db";
 
 export async function GET() {
-  const settings = readSettings();
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+
+  // Fetch videos from Video table
+  const videos = await prisma.video.findMany({ orderBy: { sortOrder: "asc" } });
+
   if (!settings) {
-    return NextResponse.json({ priceOverrides: {}, presets: {}, videos: [] });
+    return NextResponse.json({
+      priceOverrides: {},
+      presets: {},
+      videos: videos.map((v) => ({
+        id: v.id, title: v.title, cat: v.cat, client: v.client,
+        year: v.year, views: v.views, duration: v.duration, ytId: v.ytId,
+        desc: v.desc, thumbnail: v.thumbnail,
+      })),
+      heroVideoId: "",
+      clientLogos: [],
+      founder: null,
+      customCatalogItems: [],
+      customServices: [],
+      testimonials: [],
+      catalogEdits: {},
+    });
   }
-  // Never expose password to clients
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password: _pw, ...pub } = settings;
-  return NextResponse.json(pub);
+
+  return NextResponse.json({
+    priceOverrides: settings.priceOverrides,
+    presets: settings.presets,
+    heroVideoId: settings.heroVideoId,
+    clientLogos: settings.clientLogos,
+    founder: settings.founder,
+    customCatalogItems: settings.customCatalogItems,
+    customServices: settings.customServices,
+    testimonials: settings.testimonials,
+    catalogEdits: settings.catalogEdits,
+    videos: videos.map((v) => ({
+      id: v.id, title: v.title, cat: v.cat, client: v.client,
+      year: v.year, views: v.views, duration: v.duration, ytId: v.ytId,
+      desc: v.desc, thumbnail: v.thumbnail,
+    })),
+  });
 }

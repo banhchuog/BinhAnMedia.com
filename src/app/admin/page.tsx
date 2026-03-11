@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { CATALOG, GROUPS, DEFAULT_PRESETS } from "@/lib/catalog";
 import type { CatalogItem, PresetItem } from "@/lib/catalog";
 import {
   Lock, LogOut, DollarSign, Package, Video, Settings,
-  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles,
+  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -36,6 +36,7 @@ type TestimonialItem = {
   role: string;
   body: string;
 };
+type CatalogEdit = { name?: string; unit?: string };
 type AdminSettings = {
   priceOverrides: Record<string, number>;
   presets: Record<string, PresetItem[]>;
@@ -46,6 +47,7 @@ type AdminSettings = {
   customCatalogItems: CatalogItem[];
   customServices: CustomService[];
   testimonials: TestimonialItem[];
+  catalogEdits: Record<string, CatalogEdit>;
 };
 const EMPTY_VIDEO = (): VideoItem => ({
   id: Date.now().toString(), title: "", cat: "TVC", client: "", year: new Date().getFullYear().toString(),
@@ -80,7 +82,7 @@ const svgSize = (svg: string, size: number) => {
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [sessionPw, setSessionPw] = useState("");
-  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [] });
+  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {} });
   const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "leads" | "settings">("homepage");
   const [toastMsg, setToastMsg] = useState("");
 
@@ -101,6 +103,7 @@ export default function AdminPage() {
       customCatalogItems: Array.isArray(data.customCatalogItems) ? data.customCatalogItems : [],
       customServices: Array.isArray(data.customServices) ? data.customServices : [],
       testimonials: Array.isArray(data.testimonials) ? data.testimonials : [],
+      catalogEdits: data.catalogEdits || {},
     });
   }, []);
 
@@ -207,7 +210,8 @@ export default function AdminPage() {
           <PricesTab
             priceOverrides={settings.priceOverrides}
             customCatalogItems={settings.customCatalogItems}
-            onSave={(overrides) => save({ priceOverrides: overrides })}
+            catalogEdits={settings.catalogEdits}
+            onSave={(overrides, catalogEdits) => save({ priceOverrides: overrides, catalogEdits })}
             onSaveCustomItems={(customCatalogItems) => save({ customCatalogItems })}
           />
         )}
@@ -304,15 +308,19 @@ function LoginScreen({ onLogin }: { onLogin: (pw: string) => Promise<boolean> })
 function PricesTab({
   priceOverrides,
   customCatalogItems,
+  catalogEdits,
   onSave,
   onSaveCustomItems,
 }: {
   priceOverrides: Record<string, number>;
   customCatalogItems: CatalogItem[];
-  onSave: (o: Record<string, number>) => Promise<void>;
+  catalogEdits: Record<string, CatalogEdit>;
+  onSave: (o: Record<string, number>, edits: Record<string, CatalogEdit>) => Promise<void>;
   onSaveCustomItems: (items: CatalogItem[]) => Promise<void>;
 }) {
   const [edited, setEdited] = useState<Record<string, number>>({ ...priceOverrides });
+  const [nameEdits, setNameEdits] = useState<Record<string, CatalogEdit>>({ ...catalogEdits });
+  const [editingRow, setEditingRow] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -321,6 +329,7 @@ function PricesTab({
   const [newItem, setNewItem] = useState({ name: "", group: GROUPS[0], unit: "ngày", unitPrice: 0 });
 
   useEffect(() => { setEdited({ ...priceOverrides }); }, [priceOverrides]);
+  useEffect(() => { setNameEdits({ ...catalogEdits }); }, [catalogEdits]);
   useEffect(() => { setCustomItems(customCatalogItems); }, [customCatalogItems]);
 
   const ALL_CATALOG = useMemo(() => [...CATALOG, ...customItems], [customItems]);
@@ -330,8 +339,16 @@ function PricesTab({
   }, [customItems]);
 
   const effective = (item: CatalogItem) => edited[item.id] ?? item.unitPrice;
-  const isDirty = (item: CatalogItem) =>
+  const isPriceDirty = (item: CatalogItem) =>
     edited[item.id] !== undefined && edited[item.id] !== item.unitPrice;
+  const isNameDirty = (item: CatalogItem) =>
+    nameEdits[item.id] !== undefined &&
+    ((nameEdits[item.id].name !== undefined && nameEdits[item.id].name !== item.name) ||
+     (nameEdits[item.id].unit !== undefined && nameEdits[item.id].unit !== item.unit));
+  const isDirty = (item: CatalogItem) => isPriceDirty(item) || isNameDirty(item);
+
+  const displayName = (item: CatalogItem) => nameEdits[item.id]?.name || item.name;
+  const displayUnit = (item: CatalogItem) => nameEdits[item.id]?.unit || item.unit;
 
   const handleSave = async () => {
     setSaving(true);
@@ -341,7 +358,17 @@ function PricesTab({
         overrides[item.id] = edited[item.id];
       }
     });
-    await onSave(overrides);
+    // Clean up nameEdits: only keep actual changes
+    const cleanEdits: Record<string, CatalogEdit> = {};
+    Object.entries(nameEdits).forEach(([id, edit]) => {
+      const orig = ALL_CATALOG.find((c) => c.id === id);
+      if (!orig) return;
+      const e: CatalogEdit = {};
+      if (edit.name && edit.name !== orig.name) e.name = edit.name;
+      if (edit.unit && edit.unit !== orig.unit) e.unit = edit.unit;
+      if (e.name || e.unit) cleanEdits[id] = e;
+    });
+    await onSave(overrides, cleanEdits);
     setSaving(false);
   };
 
@@ -390,7 +417,7 @@ function PricesTab({
             {dirtyCount > 0 ? (
               <span className="text-[#C9972A] font-medium">{dirtyCount} hạng mục đã thay đổi · </span>
             ) : null}
-            Sửa giá, nhấn <strong>Lưu</strong> để áp dụng ngay cho tất cả khách hàng.
+            Sửa tên, đơn vị, giá → nhấn <strong>Lưu</strong> để áp dụng ngay cho tất cả khách hàng.
           </p>
         </div>
         <div className="flex gap-2">
@@ -401,7 +428,7 @@ function PricesTab({
             <Plus size={12} /> Thêm hạng mục
           </button>
           <button
-            onClick={() => setEdited({})}
+            onClick={() => { setEdited({}); setNameEdits({}); setEditingRow(null); }}
             className="flex items-center gap-1.5 text-xs text-[#8E8E93] border border-black/10 px-3 py-2 rounded-xl hover:text-[#1C1C1E] transition"
           >
             <RotateCcw size={12} /> Reset tất cả
@@ -541,13 +568,55 @@ function PricesTab({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-black/5">
-                      {items.map((item) => (
+                      {items.map((item) => {
+                        const isEditing = editingRow === item.id;
+                        return (
                         <tr key={item.id} className={isDirty(item) ? "bg-[#C9972A]/4" : customIds.has(item.id) ? "bg-blue-50/50" : "hover:bg-black/3 transition"}>
                           <td className="px-5 py-3 text-[#1C1C1E]">
-                            {item.name}
-                            <span className="text-[#C7C7CC] ml-1 text-xs">/ {item.unit}</span>
-                            {customIds.has(item.id) && (
-                              <span className="ml-2 text-[9px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">TUỲ CHỈNH</span>
+                            {isEditing ? (
+                              <div className="flex items-center gap-2">
+                                <input
+                                  autoFocus
+                                  value={displayName(item)}
+                                  onChange={(e) =>
+                                    setNameEdits((prev) => ({ ...prev, [item.id]: { ...prev[item.id], name: e.target.value } }))
+                                  }
+                                  className="bg-[#F2F2F7] border border-[#C9972A] rounded-lg px-2 py-1 text-sm text-[#1C1C1E] focus:outline-none flex-1 min-w-0"
+                                  placeholder="Tên hạng mục"
+                                />
+                                <span className="text-[#8E8E93] text-xs">/</span>
+                                <input
+                                  value={displayUnit(item)}
+                                  onChange={(e) =>
+                                    setNameEdits((prev) => ({ ...prev, [item.id]: { ...prev[item.id], unit: e.target.value } }))
+                                  }
+                                  className="bg-[#F2F2F7] border border-[#C9972A] rounded-lg px-2 py-1 text-sm text-[#1C1C1E] focus:outline-none w-20"
+                                  placeholder="đơn vị"
+                                />
+                                <button onClick={() => setEditingRow(null)} className="text-[#C9972A] hover:text-[#B8841E] transition" title="Xong">
+                                  <Check size={14} />
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5 group">
+                                <button
+                                  onClick={() => setEditingRow(item.id)}
+                                  className="text-[#C7C7CC] hover:text-[#C9972A] transition opacity-0 group-hover:opacity-100 flex-shrink-0"
+                                  title="Sửa tên & đơn vị"
+                                >
+                                  <Pencil size={11} />
+                                </button>
+                                <span>
+                                  {displayName(item)}
+                                  <span className="text-[#C7C7CC] ml-1 text-xs">/ {displayUnit(item)}</span>
+                                </span>
+                                {isNameDirty(item) && (
+                                  <span className="text-[9px] font-bold text-[#C9972A] bg-[#C9972A]/10 px-1.5 py-0.5 rounded">ĐÃ SỬA</span>
+                                )}
+                                {customIds.has(item.id) && (
+                                  <span className="text-[9px] font-bold text-blue-500 bg-blue-50 px-1.5 py-0.5 rounded">TUỲ CHỈNH</span>
+                                )}
+                              </div>
                             )}
                           </td>
                           <td className="px-3 py-3 text-right text-[#8E8E93] text-xs whitespace-nowrap">
@@ -562,7 +631,7 @@ function PricesTab({
                                   setEdited((prev) => ({ ...prev, [item.id]: parseInt(e.target.value) || 0 }))
                                 }
                                 className={`w-32 text-right bg-[#F2F2F7] border rounded-lg px-2 py-1.5 text-xs focus:outline-none transition ${
-                                  isDirty(item)
+                                  isPriceDirty(item)
                                     ? "border-[#C9972A] text-[#C9972A] font-bold"
                                     : "border-black/10 text-[#1C1C1E] focus:border-[#C9972A]"
                                 }`}
@@ -574,9 +643,11 @@ function PricesTab({
                             <div className="flex items-center gap-1 justify-end">
                               {isDirty(item) && (
                                 <button
-                                  onClick={() =>
-                                    setEdited((prev) => { const n = { ...prev }; delete n[item.id]; return n; })
-                                  }
+                                  onClick={() => {
+                                    setEdited((prev) => { const n = { ...prev }; delete n[item.id]; return n; });
+                                    setNameEdits((prev) => { const n = { ...prev }; delete n[item.id]; return n; });
+                                    setEditingRow(null);
+                                  }}
                                   className="text-[#8E8E93] hover:text-red-400 transition"
                                   title="Reset về mặc định"
                                 >
@@ -595,7 +666,8 @@ function PricesTab({
                             </div>
                           </td>
                         </tr>
-                      ))}
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -1093,8 +1165,46 @@ function VideosTab({
   const [heroId, setHeroId] = useState(initialHeroId);
   const [saving, setSaving] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<string | null>(null);
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   useEffect(() => { setList(videos); setHeroId(initialHeroId); }, [videos, initialHeroId]);
+
+  const compressImage = (file: File, maxWidth = 640, quality = 0.8): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let w = img.width, h = img.height;
+          if (w > maxWidth) { h = (maxWidth / w) * h; w = maxWidth; }
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d")!;
+          ctx.drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL("image/webp", quality));
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleThumbnailUpload = async (videoId: string, file: File) => {
+    if (!file.type.startsWith("image/")) return;
+    setUploading(videoId);
+    try {
+      const dataUrl = await compressImage(file);
+      setList((prev) => prev.map((v) => (v.id === videoId ? { ...v, thumbnail: dataUrl } : v)));
+    } catch (err) {
+      console.error("Lỗi nén ảnh:", err);
+    } finally {
+      setUploading(null);
+    }
+  };
 
   const update = (id: string, field: keyof VideoItem, val: string) => {
     setList((prev) => prev.map((v) => (v.id === id ? { ...v, [field]: val } : v)));
@@ -1300,26 +1410,51 @@ function VideosTab({
                     Ảnh Thumbnail tuỳ chỉnh <span className="text-[10px] text-[#C7C7CC]">(bỏ trống = lấy từ YouTube)</span>
                   </label>
                   <input
-                    value={v.thumbnail || ""}
-                    onChange={(e) => update(v.id, "thumbnail", e.target.value.trim())}
-                    placeholder="https://example.com/thumbnail.jpg"
-                    className="w-full bg-[#F2F2F7] border border-black/10 rounded-xl px-4 py-2.5 text-sm text-[#1C1C1E] placeholder:text-[#C7C7CC] focus:border-[#C9972A] focus:outline-none transition font-mono"
+                    ref={(el) => { fileInputRefs.current[v.id] = el; }}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleThumbnailUpload(v.id, file);
+                      e.target.value = "";
+                    }}
                   />
-                  {v.thumbnail && (
-                    <div className="mt-2 flex items-start gap-3">
+                  {v.thumbnail ? (
+                    <div className="mt-1 flex items-start gap-3">
                       <img
                         src={v.thumbnail}
                         alt="custom thumbnail"
                         className="rounded-xl h-24 aspect-video object-cover border border-[#C9972A]/30"
                         onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
                       />
-                      <button
-                        onClick={() => update(v.id, "thumbnail", "")}
-                        className="text-xs text-red-400 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition flex-shrink-0 mt-1"
-                      >
-                        <Trash2 size={10} className="inline mr-1" />Xoá
-                      </button>
+                      <div className="flex flex-col gap-1.5 mt-1">
+                        <button
+                          onClick={() => fileInputRefs.current[v.id]?.click()}
+                          className="text-xs text-[#C9972A] border border-[#C9972A]/30 px-2.5 py-1.5 rounded-lg hover:bg-[#C9972A]/8 transition flex-shrink-0 flex items-center gap-1"
+                        >
+                          <Upload size={10} />Đổi ảnh
+                        </button>
+                        <button
+                          onClick={() => update(v.id, "thumbnail", "")}
+                          className="text-xs text-red-400 border border-red-200 px-2.5 py-1.5 rounded-lg hover:bg-red-50 transition flex-shrink-0 flex items-center gap-1"
+                        >
+                          <Trash2 size={10} />Xoá
+                        </button>
+                      </div>
                     </div>
+                  ) : (
+                    <button
+                      onClick={() => fileInputRefs.current[v.id]?.click()}
+                      disabled={uploading === v.id}
+                      className="w-full mt-1 flex items-center justify-center gap-2 bg-[#F2F2F7] border-2 border-dashed border-black/15 rounded-xl px-4 py-4 text-sm text-[#8E8E93] hover:border-[#C9972A]/50 hover:text-[#C9972A] hover:bg-[#C9972A]/5 transition cursor-pointer disabled:opacity-50"
+                    >
+                      {uploading === v.id ? (
+                        <><span className="animate-spin">⏳</span> Đang xử lý...</>
+                      ) : (
+                        <><Upload size={16} /> Chọn ảnh thumbnail</>
+                      )}
+                    </button>
                   )}
                 </div>
                 <div className="sm:col-span-2">

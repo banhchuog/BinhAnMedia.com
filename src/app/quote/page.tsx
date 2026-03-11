@@ -77,6 +77,7 @@ function QuoteBuilder() {
   const [customPresets, setCustomPresets] = useState<Record<string, PresetItem[]>>({});
   const [customCatalogItems, setCustomCatalogItems] = useState<CatalogItem[]>([]);
   const [customServices, setCustomServices] = useState<ServiceDef[]>([]);
+  const [catalogEdits, setCatalogEdits] = useState<Record<string, { name?: string; unit?: string }>>({});
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -86,6 +87,7 @@ function QuoteBuilder() {
         if (data.presets) setCustomPresets(data.presets);
         if (Array.isArray(data.customCatalogItems)) setCustomCatalogItems(data.customCatalogItems);
         if (Array.isArray(data.customServices)) setCustomServices(data.customServices);
+        if (data.catalogEdits) setCatalogEdits(data.catalogEdits);
       })
       .catch(() => {});
   }, []);
@@ -114,6 +116,8 @@ function QuoteBuilder() {
 
   const effectiveCatalog: Omit<LineItem, "qty">[] = allCatalog.map((item) => ({
     ...item,
+    name: catalogEdits[item.id]?.name || item.name,
+    unit: catalogEdits[item.id]?.unit || item.unit,
     unitPrice: priceOverrides[item.id] ?? item.unitPrice,
   }));
 

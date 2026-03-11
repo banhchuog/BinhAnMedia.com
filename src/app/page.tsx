@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Play, Film, Music, Building2, Smartphone, Camera, Sparkles } from "lucide-react";
 import FeaturedWorks from "@/components/FeaturedWorks";
-import fs from "fs";
-import path from "path";
+import { prisma } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -16,17 +15,6 @@ function extractYtId(raw: string): string {
   if (m) return m[1];
   if (/^[A-Za-z0-9_-]{11}$/.test(raw)) return raw;
   return raw;
-}
-
-function getHeroVideoId(): string {
-  try {
-    const data = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), "data/settings.json"), "utf-8")
-    );
-    return extractYtId(data.heroVideoId || "") || "jtj_nHxkGGY";
-  } catch {
-    return "jtj_nHxkGGY";
-  }
 }
 
 const stats = [
@@ -75,30 +63,30 @@ const DEFAULT_FOUNDER: FounderData = {
   linkLabel: "anhemphim.com.vn",
 };
 
-function getPageSettings(): { clientLogos: string[]; founder: FounderData; testimonials: TestimonialItem[] } {
+async function getPageData() {
   try {
-    const data = JSON.parse(
-      fs.readFileSync(path.join(process.cwd(), "data/settings.json"), "utf-8")
-    );
-    const founder: FounderData = data.founder
-      ? { ...DEFAULT_FOUNDER, ...data.founder, bio: Array.isArray(data.founder.bio) ? data.founder.bio : DEFAULT_FOUNDER.bio }
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+    if (!settings) {
+      return { heroId: "jtj_nHxkGGY", clientLogos: [] as string[], founder: DEFAULT_FOUNDER, testimonials: DEFAULT_TESTIMONIALS };
+    }
+    const heroId = extractYtId(settings.heroVideoId || "") || "jtj_nHxkGGY";
+    const clientLogos = Array.isArray(settings.clientLogos) ? settings.clientLogos as string[] : [];
+    const rawFounder = settings.founder as Record<string, unknown> | null;
+    const founder: FounderData = rawFounder
+      ? { ...DEFAULT_FOUNDER, ...rawFounder as FounderData, bio: Array.isArray((rawFounder as FounderData).bio) ? (rawFounder as FounderData).bio : DEFAULT_FOUNDER.bio }
       : DEFAULT_FOUNDER;
-    const testimonials: TestimonialItem[] = Array.isArray(data.testimonials) && data.testimonials.length > 0
-      ? data.testimonials
+    const rawTestimonials = settings.testimonials as TestimonialItem[] | null;
+    const testimonials = Array.isArray(rawTestimonials) && rawTestimonials.length > 0
+      ? rawTestimonials
       : DEFAULT_TESTIMONIALS;
-    return {
-      clientLogos: Array.isArray(data.clientLogos) ? data.clientLogos : [],
-      founder,
-      testimonials,
-    };
+    return { heroId, clientLogos, founder, testimonials };
   } catch {
-    return { clientLogos: [], founder: DEFAULT_FOUNDER, testimonials: DEFAULT_TESTIMONIALS };
+    return { heroId: "jtj_nHxkGGY", clientLogos: [] as string[], founder: DEFAULT_FOUNDER, testimonials: DEFAULT_TESTIMONIALS };
   }
 }
 
-export default function HomePage() {
-  const heroId = getHeroVideoId();
-  const { clientLogos, founder, testimonials } = getPageSettings();
+export default async function HomePage() {
+  const { heroId, clientLogos, founder, testimonials } = await getPageData();
   return (
     <>
       {/* HERO 16:9 */}

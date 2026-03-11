@@ -1,44 +1,79 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { prisma } from "@/lib/db";
 
-const SETTINGS_PATH = path.join(process.cwd(), "data", "settings.json");
 const DEFAULT_PASSWORD = "admin@2026";
 
-function readSettings() {
-  try {
-    if (!fs.existsSync(SETTINGS_PATH)) return { password: DEFAULT_PASSWORD };
-    return JSON.parse(fs.readFileSync(SETTINGS_PATH, "utf-8"));
-  } catch {
-    return { password: DEFAULT_PASSWORD };
-  }
+async function getPassword(): Promise<string> {
+  const s = await prisma.settings.findUnique({ where: { id: 1 } });
+  return s?.password || DEFAULT_PASSWORD;
 }
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { password, priceOverrides, presets, videos, newPassword, heroVideoId, clientLogos, founder, customCatalogItems, customServices, testimonials } = body;
+    const {
+      password, priceOverrides, presets, newPassword, heroVideoId,
+      clientLogos, founder, customCatalogItems, customServices, testimonials,
+      catalogEdits, videos,
+    } = body;
 
-    const current = readSettings();
-    if (password !== (current.password || DEFAULT_PASSWORD)) {
+    const storedPw = await getPassword();
+    if (password !== storedPw) {
       return NextResponse.json({ error: "Sai mật khẩu" }, { status: 401 });
     }
 
-    const toSave = {
-      priceOverrides: priceOverrides ?? current.priceOverrides ?? {},
-      presets:        presets        ?? current.presets        ?? {},
-      videos:         videos         ?? current.videos         ?? [],
-      heroVideoId:    heroVideoId    ?? current.heroVideoId    ?? "",
-      clientLogos:    clientLogos    ?? current.clientLogos    ?? [],
-      founder:        founder        ?? current.founder        ?? null,
-      customCatalogItems: customCatalogItems ?? current.customCatalogItems ?? [],
-      customServices: customServices ?? current.customServices ?? [],
-      testimonials:   testimonials   ?? current.testimonials   ?? [],
-      password:       newPassword    || current.password       || DEFAULT_PASSWORD,
-    };
+    // Upsert settings (single row, id=1)
+    await prisma.settings.upsert({
+      where: { id: 1 },
+      create: {
+        id: 1,
+        password: newPassword || DEFAULT_PASSWORD,
+        heroVideoId: heroVideoId ?? "",
+        priceOverrides: priceOverrides ?? {},
+        presets: presets ?? {},
+        clientLogos: clientLogos ?? [],
+        founder: founder ?? undefined,
+        customCatalogItems: customCatalogItems ?? [],
+        customServices: customServices ?? [],
+        testimonials: testimonials ?? [],
+        catalogEdits: catalogEdits ?? {},
+      },
+      update: {
+        ...(newPassword ? { password: newPassword } : {}),
+        ...(heroVideoId !== undefined ? { heroVideoId } : {}),
+        ...(priceOverrides !== undefined ? { priceOverrides } : {}),
+        ...(presets !== undefined ? { presets } : {}),
+        ...(clientLogos !== undefined ? { clientLogos } : {}),
+        ...(founder !== undefined ? { founder } : {}),
+        ...(customCatalogItems !== undefined ? { customCatalogItems } : {}),
+        ...(customServices !== undefined ? { customServices } : {}),
+        ...(testimonials !== undefined ? { testimonials } : {}),
+        ...(catalogEdits !== undefined ? { catalogEdits } : {}),
+      },
+    });
 
-    fs.mkdirSync(path.dirname(SETTINGS_PATH), { recursive: true });
-    fs.writeFileSync(SETTINGS_PATH, JSON.stringify(toSave, null, 2), "utf-8");
+    // Sync videos if provided
+    if (Array.isArray(videos)) {
+      // Delete existing videos and re-create (simple sync)
+      await prisma.video.deleteMany();
+      if (videos.length > 0) {
+        await prisma.video.createMany({
+          data: videos.map((v: Record<string, string>, i: number) => ({
+            id: v.id || undefined,
+            title: v.title || "",
+            cat: v.cat || "TVC",
+            client: v.client || "",
+            year: v.year || "",
+            views: v.views || "",
+            duration: v.duration || "",
+            ytId: v.ytId || "",
+            desc: v.desc || "",
+            thumbnail: v.thumbnail || "",
+            sortOrder: i,
+          })),
+        });
+      }
+    }
 
     return NextResponse.json({ ok: true });
   } catch (err) {
