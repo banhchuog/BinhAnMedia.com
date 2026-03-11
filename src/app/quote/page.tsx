@@ -406,26 +406,20 @@ function QuoteBuilder() {
               <button
                 key={s.id}
                 onClick={() => loadPreset(s.id)}
-                className={`group w-full aspect-square rounded-2xl border transition-all text-left flex flex-col p-4 ${
+                className={`group w-full p-4 rounded-2xl border transition-all text-left flex items-center gap-3.5 ${
                   isBudget
                     ? "bg-[#0F1A12] border-emerald-500/15 active:border-emerald-400/50 active:bg-emerald-500/8 hover:border-emerald-400/50 hover:bg-emerald-500/8"
                     : "bg-[#161616] border-white/8 active:border-[#C9972A]/50 active:bg-[#C9972A]/8 hover:border-[#C9972A]/50 hover:bg-[#C9972A]/8"
                 }`}
               >
-                {/* Icon */}
-                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition [&>svg]:w-[20px] [&>svg]:h-[20px] ${
+                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition [&>svg]:w-[18px] [&>svg]:h-[18px] ${
                   isBudget
                     ? "bg-emerald-500/10 border-emerald-500/20 group-hover:bg-emerald-500/20 text-emerald-400"
                     : "bg-[#C9972A]/10 border-[#C9972A]/20 group-hover:bg-[#C9972A]/20 text-[#C9972A]"
                 }`} dangerouslySetInnerHTML={{ __html: s.svgIcon }} />
-
-                {/* Spacer */}
-                <div className="flex-1" />
-
-                {/* Name + desc */}
-                <div>
-                  <div className="text-white font-bold text-[15px] leading-snug mb-1">{s.label}</div>
-                  <div className="text-white/40 text-[12px] leading-relaxed">{s.desc}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-white font-bold text-sm leading-snug">{s.label}</div>
+                  <div className="text-white/40 text-xs mt-0.5 leading-relaxed">{s.desc}</div>
                 </div>
               </button>
             );
@@ -447,7 +441,7 @@ function QuoteBuilder() {
                   <span className="text-[10px] text-emerald-400/50">dưới 60 triệu</span>
                   <div className="flex-1 h-px bg-emerald-500/10" />
                 </div>
-                <div className="grid grid-cols-2 gap-3 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
                   {budget.map((s) => renderCard(s, "budget"))}
                 </div>
               </>
@@ -462,7 +456,7 @@ function QuoteBuilder() {
                   <span className="text-[10px] text-[#C9972A]/50">từ 60 triệu</span>
                   <div className="flex-1 h-px bg-[#C9972A]/15" />
                 </div>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {premium.map((s) => renderCard(s, "premium"))}
                 </div>
               </>
@@ -482,7 +476,7 @@ function QuoteBuilder() {
               <div className="mb-4 bg-[#161616] border border-white/8 rounded-2xl overflow-hidden">
                 <div className="aspect-video w-full">
                   <iframe
-                    src={`https://www.youtube.com/embed/${svcVid}?rel=0&autoplay=1&mute=1&playsinline=1`}
+                    src={`https://www.youtube.com/embed/${svcVid}?rel=0`}
                     className="w-full h-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
