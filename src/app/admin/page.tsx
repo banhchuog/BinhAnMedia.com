@@ -939,13 +939,18 @@ function ServicesTab({
   // Always start with defaults, then merge in any saved customizations
   const mergeWithDefaults = useCallback((saved: CustomService[]) => {
     if (saved.length === 0) return DEFAULT_SERVICES_SEED.map((s) => ({ ...s }));
-    // Check if saved list contains the default IDs — if so, treat as full replacement
-    const defaultIds = new Set(DEFAULT_SERVICES_SEED.map((s) => s.id));
+    const defaultMap = new Map(DEFAULT_SERVICES_SEED.map((s) => [s.id, s]));
     const savedIds = new Set(saved.map((s) => s.id));
     const hasDefaults = DEFAULT_SERVICES_SEED.every((d) => savedIds.has(d.id));
-    if (hasDefaults) return saved;
-    // Otherwise merge: defaults + any extras that aren't defaults
-    const extras = saved.filter((s) => !defaultIds.has(s.id));
+    if (hasDefaults) {
+      // Merge: saved values win, but fill in any missing fields (unitCount, unitLabel…) from seed defaults
+      return saved.map((s) => {
+        const def = defaultMap.get(s.id);
+        return def ? { unitCount: def.unitCount, unitLabel: def.unitLabel, ...s } : s;
+      });
+    }
+    // Partial save: defaults + any extras not in defaults
+    const extras = saved.filter((s) => !defaultMap.has(s.id));
     return [...DEFAULT_SERVICES_SEED.map((s) => ({ ...s })), ...extras];
   }, []);
 

@@ -98,15 +98,22 @@ function QuoteBuilder() {
   // Any extras from admin (IDs not in defaults) are appended.
   const allServices: ServiceDef[] = useMemo(() => {
     if (customServices.length === 0) return DEFAULT_SERVICE_OPTIONS;
-    const defaultIds = new Set(DEFAULT_SERVICE_OPTIONS.map((d) => d.id));
+    const defaultMap = new Map(DEFAULT_SERVICE_OPTIONS.map((d) => [d.id, d]));
     const savedIds = new Set(customServices.map((s) => s.id));
     const hasAllDefaults = DEFAULT_SERVICE_OPTIONS.every((d) => savedIds.has(d.id));
     if (hasAllDefaults) {
-      // Admin saved the full list — use it as-is
-      return customServices;
+      // Admin saved the full list — use it, but fill in any missing fields from defaults
+      return customServices.map((s) => {
+        const def = defaultMap.get(s.id);
+        return {
+          unitCount: def?.unitCount,
+          unitLabel: def?.unitLabel,
+          ...s,
+        };
+      });
     }
     // Partial save: keep defaults + append extras
-    const extras = customServices.filter((s) => !defaultIds.has(s.id));
+    const extras = customServices.filter((s) => !defaultMap.has(s.id));
     return [...DEFAULT_SERVICE_OPTIONS, ...extras];
   }, [customServices]);
 
