@@ -19,17 +19,6 @@ const CAT_COLORS: Record<string, { text: string; thumb: string }> = {
   Motion:    { text: "text-pink-400",   thumb: "from-pink-900/50 to-pink-900/20" },
 };
 
-// Desktop: serpentine Z-pattern (feature card alternates left ↔ right each row)
-// Mobile: full-wide / half-half / full-wide / half-half
-const COL_SPANS = [
-  "col-span-2 lg:col-span-2",   // row 1 — feature LEFT   (wide)
-  "col-span-1 lg:col-span-1",   // row 1 — small right
-  "col-span-1 lg:col-span-1",   // row 2 — small left
-  "col-span-2 lg:col-span-2",   // row 2 — feature RIGHT  (wide)  ← Z-flip
-  "col-span-1 lg:col-span-1",   // row 3 — small left
-  "col-span-1 lg:col-span-2",   // row 3 — feature RIGHT  (desktop wide, mobile half)
-];
-
 const FALLBACK: Project[] = [
   { id: "1", title: "TVC Tết – Vinamilk 2025",        cat: "TVC",       client: "Vinamilk",    year: "2025", views: "12M views",  ytId: "" },
   { id: "2", title: "MV 'Bình Yên' – Hà Anh Tuấn",   cat: "MV",        client: "Hà Anh Tuấn", year: "2024", views: "8M views",   ytId: "" },
@@ -80,17 +69,16 @@ export default function FeaturedWorks() {
           </Link>
         </div>
 
-        {/* Mosaic bento grid — serpentine Z-pattern */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {featured.map((p, idx) => {
+        {/* Grid — equal 16:9 cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+          {featured.map((p) => {
             const cc = CAT_COLORS[p.cat] || CAT_COLORS["TVC"];
             const ytId = extractYtId(p.ytId);
-            const isWide = idx === 0 || idx === 3 || idx === 5;
             return (
               <Link
                 key={p.id}
                 href="/showreel"
-                className={`${COL_SPANS[idx]} group relative w-full aspect-video overflow-hidden bg-black ${isWide ? "rounded-2xl" : "rounded-xl sm:rounded-2xl"}`}
+                className="group relative w-full aspect-video rounded-2xl overflow-hidden bg-black"
               >
                 {/* Thumbnail */}
                 {p.thumbnail ? (
@@ -125,7 +113,7 @@ export default function FeaturedWorks() {
                 <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
                   <div className="bg-black/70 backdrop-blur-md rounded-xl px-3 py-2 shadow-lg max-w-[80%]">
                     <span className={`text-[9px] font-bold uppercase tracking-wider ${cc.text} block leading-none mb-0.5`}>{p.cat}</span>
-                    <span className={`text-white font-bold leading-tight line-clamp-1 block ${isWide ? "text-[13px] sm:text-[14px]" : "text-[11px] sm:text-[12px]"}`}>{p.title}</span>
+                    <span className="text-white font-bold text-[12px] leading-tight line-clamp-1 block">{p.title}</span>
                     {p.views && <span className="text-white/50 text-[10px]">{p.views}</span>}
                   </div>
                 </div>
