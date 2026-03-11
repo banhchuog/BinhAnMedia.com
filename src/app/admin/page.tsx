@@ -749,6 +749,13 @@ function PresetsTab({
 
   const count = editingPreset.length;
 
+  const presetTotal = useMemo(() => {
+    return editingPreset.reduce((sum, p) => {
+      const item = ALL_CATALOG.find((c) => c.id === p.id);
+      return sum + (item ? item.unitPrice * p.qty : 0);
+    }, 0);
+  }, [editingPreset, ALL_CATALOG]);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
@@ -785,10 +792,19 @@ function PresetsTab({
         ))}
       </div>
 
-      <p className="text-xs text-[#8E8E93] mb-3">
-        Đang cấu hình: <strong className="text-[#C9972A]">{allServiceLabels[svc]}</strong> ·{" "}
-        <span>{count} hạng mục được chọn</span>
-      </p>
+      <div className="flex items-center justify-between mb-3 bg-white border border-black/8 rounded-2xl px-4 py-3 flex-wrap gap-2">
+        <p className="text-xs text-[#8E8E93]">
+          Đang cấu hình: <strong className="text-[#C9972A]">{allServiceLabels[svc]}</strong>
+          {" · "}<span className="font-medium text-[#1C1C1E]">{count} hạng mục</span>
+        </p>
+        {count > 0 && (
+          <div className="text-right">
+            <div className="text-[10px] text-[#8E8E93] mb-0.5">Tổng gói (chưa VAT)</div>
+            <div className="text-sm font-black text-[#C9972A]">{presetTotal.toLocaleString("vi-VN")}đ</div>
+            <div className="text-[10px] text-[#8E8E93]">→ {Math.round(presetTotal * 1.1).toLocaleString("vi-VN")}đ <span className="text-[#C7C7CC]">(+10% VAT)</span></div>
+          </div>
+        )}
+      </div>
 
       <div className="space-y-3">
         {ALL_GROUPS.map((group) => {
@@ -832,16 +848,21 @@ function PresetsTab({
                         {item.unitPrice.toLocaleString("vi-VN")}đ
                       </span>
                       {isIn && (
-                        <div className="flex items-center gap-1 flex-shrink-0">
-                          <span className="text-xs text-[#8E8E93]">Qty</span>
-                          <input
-                            type="number"
-                            min={1}
-                            value={presetItem?.qty ?? 1}
-                            onChange={(e) => setQty(item.id, parseInt(e.target.value) || 1)}
-                            onClick={(e) => e.stopPropagation()}
-                            className="w-14 text-center bg-white border border-[#C9972A]/30 rounded-lg px-1 py-1 text-xs text-[#C9972A] font-bold focus:outline-none focus:border-[#C9972A]"
-                          />
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-[#8E8E93]">SL</span>
+                            <input
+                              type="number"
+                              min={1}
+                              value={presetItem?.qty ?? 1}
+                              onChange={(e) => setQty(item.id, parseInt(e.target.value) || 1)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-14 text-center bg-white border border-[#C9972A]/30 rounded-lg px-1 py-1 text-xs text-[#C9972A] font-bold focus:outline-none focus:border-[#C9972A]"
+                            />
+                          </div>
+                          <span className="text-xs font-semibold text-[#C9972A] w-24 text-right tabular-nums">
+                            {(item.unitPrice * (presetItem?.qty ?? 1)).toLocaleString("vi-VN")}đ
+                          </span>
                         </div>
                       )}
                     </div>
