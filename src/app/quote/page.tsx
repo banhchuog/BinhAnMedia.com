@@ -106,9 +106,9 @@ function QuoteBuilder() {
       return customServices.map((s) => {
         const def = defaultMap.get(s.id);
         return {
-          unitCount: def?.unitCount,
-          unitLabel: def?.unitLabel,
           ...s,
+          unitCount: (s as ServiceDef & { unitCount?: number }).unitCount ?? def?.unitCount,
+          unitLabel: (s as ServiceDef & { unitLabel?: string }).unitLabel ?? def?.unitLabel,
         };
       });
     }

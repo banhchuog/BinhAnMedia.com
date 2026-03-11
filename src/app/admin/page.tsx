@@ -946,7 +946,11 @@ function ServicesTab({
       // Merge: saved values win, but fill in any missing fields (unitCount, unitLabel…) from seed defaults
       return saved.map((s) => {
         const def = defaultMap.get(s.id);
-        return def ? { unitCount: def.unitCount, unitLabel: def.unitLabel, ...s } : s;
+        return def ? {
+          ...s,
+          unitCount: s.unitCount ?? def.unitCount,
+          unitLabel: s.unitLabel ?? def.unitLabel,
+        } : s;
       });
     }
     // Partial save: defaults + any extras not in defaults
