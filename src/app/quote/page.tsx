@@ -494,19 +494,28 @@ function QuoteBuilder() {
               <div className="pointer-events-auto bg-[#111] border border-[#C9972A]/25 rounded-xl sm:rounded-2xl p-3 sm:p-5 shadow-[0_8px_40px_rgba(0,0,0,0.5)]">
                 <div className="flex items-center justify-between gap-3 sm:gap-4">
                   <div className="flex-1 min-w-0">
-                    <p className="text-[10px] sm:text-xs text-white/40 mb-0.5">Chi phí ước tính <span className="text-white/25">(chưa VAT)</span></p>
-                    <p className="text-2xl sm:text-5xl font-black text-[#C9972A] tracking-tight leading-none">
-                      {subtotal.toLocaleString("vi-VN")}
-                      <span className="text-sm sm:text-lg font-bold text-[#C9972A]/60 ml-0.5">đ</span>
-                    </p>
-                    {/* Per-unit hint for combo packages */}
-                    {selectedSvc?.unitCount && selectedSvc.unitCount > 1 && (
-                      <p className="text-[10px] sm:text-xs text-[#C9972A]/70 mt-0.5 font-medium">
-                        ≈ {(subtotal / selectedSvc.unitCount).toLocaleString("vi-VN")}đ/{selectedSvc.unitLabel || "unit"}
-                        <span className="text-white/25 font-normal ml-1">({selectedSvc.unitCount} {selectedSvc.unitLabel || "unit"}/gói)</span>
-                      </p>
+                    {selectedSvc?.unitCount && selectedSvc.unitCount > 1 ? (
+                      <>
+                        <p className="text-[10px] sm:text-xs text-white/40 mb-0.5">Chi phí ước tính / {selectedSvc.unitLabel || "unit"} <span className="text-white/25">(chưa VAT)</span></p>
+                        <p className="text-2xl sm:text-5xl font-black text-[#C9972A] tracking-tight leading-none">
+                          {Math.round(subtotal / selectedSvc.unitCount).toLocaleString("vi-VN")}
+                          <span className="text-sm sm:text-lg font-bold text-[#C9972A]/60 ml-0.5">đ/{selectedSvc.unitLabel || "unit"}</span>
+                        </p>
+                        <p className="text-[10px] sm:text-xs text-white/40 mt-1">
+                          = <span className="text-white/60 font-semibold">{subtotal.toLocaleString("vi-VN")}đ</span> / cả gói {selectedSvc.unitCount} {selectedSvc.unitLabel || "unit"}
+                        </p>
+                        <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5 truncate">{items.length} hạng mục · VAT 10%: {vat.toLocaleString("vi-VN")}đ · Tổng: {total.toLocaleString("vi-VN")}đ</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-[10px] sm:text-xs text-white/40 mb-0.5">Chi phí ước tính <span className="text-white/25">(chưa VAT)</span></p>
+                        <p className="text-2xl sm:text-5xl font-black text-[#C9972A] tracking-tight leading-none">
+                          {subtotal.toLocaleString("vi-VN")}
+                          <span className="text-sm sm:text-lg font-bold text-[#C9972A]/60 ml-0.5">đ</span>
+                        </p>
+                        <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5 sm:mt-1.5 truncate">{items.length} hạng mục · VAT 10%: {vat.toLocaleString("vi-VN")}đ · Tổng: {total.toLocaleString("vi-VN")}đ</p>
+                      </>
                     )}
-                    <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5 sm:mt-1.5 truncate">{items.length} hạng mục · VAT 10%: {vat.toLocaleString("vi-VN")}đ · Tổng: {total.toLocaleString("vi-VN")}đ</p>
                   </div>
                   {/* Desktop buttons */}
                   <div className="hidden sm:flex sm:flex-col md:flex-row gap-2">
