@@ -38,12 +38,37 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
-  const { id, contacted, password } = await req.json();
+  const body = await req.json();
+  const { id, contacted, password, action, items, total, service, note, name, phone } = body;
   const stored = await getStoredPassword();
   if (password !== stored) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   if (!prisma) return NextResponse.json({ error: "Database chưa kết nối" }, { status: 503 });
+
+  // action=updateQuote: update items/total/service/note/name/phone
+  if (action === "updateQuote") {
+    await prisma.lead.update({
+      where: { id },
+      data: {
+        ...(items !== undefined ? { items } : {}),
+        ...(total !== undefined ? { total } : {}),
+        ...(service !== undefined ? { service } : {}),
+        ...(note !== undefined ? { note } : {}),
+        ...(name !== undefined ? { name } : {}),
+        ...(phone !== undefined ? { phone } : {}),
+      },
+    });
+    return NextResponse.json({ ok: true });
+  }
+
+  // action=delete: xoá lead
+  if (action === "delete") {
+    await prisma.lead.delete({ where: { id } });
+    return NextResponse.json({ ok: true });
+  }
+
+  // default: toggle contacted
   await prisma.lead.update({
     where: { id },
     data: { contacted },

@@ -5,7 +5,7 @@ import { CATALOG, GROUPS, DEFAULT_PRESETS } from "@/lib/catalog";
 import type { CatalogItem, PresetItem } from "@/lib/catalog";
 import {
   Lock, LogOut, DollarSign, Package, Video, Settings,
-  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil,
+  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -1484,18 +1484,96 @@ function VideosTab({
 }
 
 // ─── Leads Tab ────────────────────────────────────────────────────
+type LeadItem = { id: string; name: string; unit?: string; qty: number; unitPrice: number };
 type Lead = {
   id: string; name: string; phone: string; note?: string;
-  service: string; total: number; items: { id: string; name: string; qty: number; unitPrice: number }[];
+  service: string; total: number; items: LeadItem[];
   date: string; contacted: boolean;
 };
 const SERVICE_LABEL_MAP: Record<string, string> = {
-  tvc: "TVC", mv: "MV", corporate: "Corporate", social: "Social", event: "Event",
+  tvc: "TVC", mv: "MV Ca nhạc", corporate: "Phim doanh nghiệp", social: "Social Content",
+  event: "Event & Livestream", event_recap: "Recap sự kiện", small_ad: "Video quảng cáo nhỏ", social_bulk: "Gói Social 10+ video",
 };
+
+// ─── Quote HTML Generator ─────────────────────────────────────────
+function generateQuoteHTML(lead: Lead) {
+  const today = new Date();
+  const dateStr = today.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const quoteId = `BA-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*9000)+1000)}`;
+  const svcLabel = SERVICE_LABEL_MAP[lead.service] || lead.service;
+  const subtotal = Math.round(lead.total / 1.1);
+  const vat = lead.total - subtotal;
+
+  const itemRows = lead.items.map((item, idx) => `
+    <tr>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#333;">${idx+1}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;color:#333;">${item.name}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#333;">${item.unit||"ngày"}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;color:#333;">${item.qty}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;color:#333;white-space:nowrap;">${item.unitPrice.toLocaleString("vi-VN")}đ</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;color:#333;font-weight:600;white-space:nowrap;">${(item.unitPrice*item.qty).toLocaleString("vi-VN")}đ</td>
+    </tr>`).join("");
+
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Báo giá ${quoteId}</title>
+  <style>
+    @page{size:A4;margin:15mm 12mm}
+    body{font-family:'Segoe UI',Arial,sans-serif;color:#222;margin:0;padding:24px;font-size:13px;line-height:1.5}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;padding-bottom:20px;border-bottom:3px solid #C9972A}
+    .brand{font-size:22px;font-weight:900;color:#111}.brand span{color:#C9972A}
+    .company-info{font-size:11px;color:#666;margin-top:6px;line-height:1.7}
+    .quote-meta{text-align:right}.quote-meta .id{font-size:16px;font-weight:800;color:#C9972A}
+    .quote-meta .date{font-size:12px;color:#888;margin-top:4px}
+    .section-title{font-size:15px;font-weight:700;margin:24px 0 10px;color:#111}
+    .client-box{background:#f8f8f8;border:1px solid #eee;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:12px}
+    table{width:100%;border-collapse:collapse;font-size:12px}
+    thead th{background:#111;color:#fff;padding:10px 12px;text-align:left;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px}
+    thead th:nth-child(3),thead th:nth-child(4){text-align:center}thead th:nth-child(5),thead th:nth-child(6){text-align:right}
+    .summary{margin-top:20px;display:flex;justify-content:flex-end}
+    .summary-table{width:280px}.summary-table td{padding:6px 0;font-size:13px}
+    .summary-table .total{font-size:20px;font-weight:900;color:#C9972A;border-top:2px solid #C9972A;padding-top:10px}
+    .footer{margin-top:40px;padding-top:16px;border-top:1px solid #ddd;font-size:10px;color:#999;text-align:center}
+    .note{background:#fffbeb;border:1px solid #f0e6c0;border-radius:8px;padding:14px 16px;margin-top:24px;font-size:11px;color:#8B7220}
+    @media print{body{padding:0}}
+  </style></head><body>
+    <div class="header">
+      <div>
+        <div class="brand">BinhAn<span>Media</span><span style="font-size:14px;opacity:0.7">.com</span></div>
+        <div class="company-info"><strong>CÔNG TY TNHH BÌNH AN MEDIA</strong><br>📞 0901 234 567 &nbsp;&nbsp; ✉ hello@binhanmedia.com<br>🌐 binhanmedia.com</div>
+      </div>
+      <div class="quote-meta">
+        <div class="id">${quoteId}</div>
+        <div class="date">Ngày báo giá: ${dateStr}</div>
+        <div style="margin-top:8px;font-size:12px;color:#555;">Dịch vụ: <strong>${svcLabel}</strong></div>
+      </div>
+    </div>
+    <div class="client-box">
+      <strong>Khách hàng:</strong> ${lead.name} &nbsp;|&nbsp; <strong>Liên hệ:</strong> ${lead.phone}
+      ${lead.note ? `&nbsp;|&nbsp; <strong>Ghi chú:</strong> ${lead.note}` : ""}
+    </div>
+    <div class="section-title">BẢNG BÁO GIÁ CHI TIẾT</div>
+    <table>
+      <thead><tr>
+        <th style="width:30px">STT</th><th>Hạng mục</th>
+        <th style="width:70px">Đơn vị</th><th style="width:50px">SL</th>
+        <th style="width:100px">Đơn giá</th><th style="width:110px">Thành tiền</th>
+      </tr></thead>
+      <tbody>${itemRows}</tbody>
+    </table>
+    <div class="summary"><table class="summary-table">
+      <tr><td>Tạm tính</td><td style="text-align:right;font-weight:600;">${subtotal.toLocaleString("vi-VN")}đ</td></tr>
+      <tr><td>VAT (10%)</td><td style="text-align:right;font-weight:600;">${vat.toLocaleString("vi-VN")}đ</td></tr>
+      <tr><td class="total">TỔNG CỘNG</td><td class="total" style="text-align:right;">${lead.total.toLocaleString("vi-VN")}đ</td></tr>
+    </table></div>
+    <div class="note">⚠ Báo giá có hiệu lực 15 ngày. Giá chưa bao gồm chi phí phát sinh ngoài phạm vi thỏa thuận.</div>
+    <div class="footer">© ${today.getFullYear()} Bình An Media — binhanmedia.com</div>
+  </body></html>`;
+}
 function LeadsTab({ sessionPw }: { sessionPw: string }) {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const fetchLeads = useCallback(async () => {
     setLoading(true);
@@ -1515,10 +1593,180 @@ function LeadsTab({ sessionPw }: { sessionPw: string }) {
     setLeads((prev) => prev.map((l) => (l.id === id ? { ...l, contacted } : l)));
   };
 
+  const deleteLead = async (id: string) => {
+    if (!confirm("Xoá yêu cầu này?")) return;
+    await fetch("/api/admin/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, action: "delete", password: sessionPw }),
+    });
+    setLeads((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const downloadLead = (lead: Lead) => {
+    const html = generateQuoteHTML(lead);
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const w = window.open(url, "_blank");
+    if (w) w.onload = () => setTimeout(() => w.print(), 400);
+  };
+
+  const saveEdit = async () => {
+    if (!editingLead) return;
+    setSavingEdit(true);
+    const newTotal = Math.round(editingLead.items.reduce((s, i) => s + i.unitPrice * i.qty, 0) * 1.1);
+    const updated = { ...editingLead, total: newTotal };
+    await fetch("/api/admin/leads", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: updated.id,
+        action: "updateQuote",
+        password: sessionPw,
+        items: updated.items,
+        total: newTotal,
+        service: updated.service,
+        note: updated.note,
+        name: updated.name,
+        phone: updated.phone,
+      }),
+    });
+    setLeads((prev) => prev.map((l) => l.id === updated.id ? updated : l));
+    setEditingLead(null);
+    setSavingEdit(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40">
         <div className="w-5 h-5 border-2 border-[#C9972A] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // ── Edit Modal ──
+  if (editingLead) {
+    const updateItem = (idx: number, patch: Partial<LeadItem>) =>
+      setEditingLead((prev) => prev ? { ...prev, items: prev.items.map((it, i) => i === idx ? { ...it, ...patch } : it) } : prev);
+    const removeItem = (idx: number) =>
+      setEditingLead((prev) => prev ? { ...prev, items: prev.items.filter((_, i) => i !== idx) } : prev);
+    const addItem = () =>
+      setEditingLead((prev) => prev ? { ...prev, items: [...prev.items, { id: `custom_${Date.now()}`, name: "", unit: "ngày", qty: 1, unitPrice: 0 }] } : prev);
+    const previewTotal = Math.round(editingLead.items.reduce((s, i) => s + i.unitPrice * i.qty, 0) * 1.1);
+
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setEditingLead(null)} className="text-[#8E8E93] hover:text-[#1C1C1E] transition">
+              <X size={18} />
+            </button>
+            <div>
+              <h2 className="text-lg font-black text-[#1C1C1E]">Sửa báo giá — {editingLead.name}</h2>
+              <p className="text-xs text-[#8E8E93]">{editingLead.phone}</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => downloadLead(editingLead)}
+              className="flex items-center gap-1.5 text-xs text-[#8E8E93] border border-black/10 px-3 py-2 rounded-xl hover:text-[#1C1C1E] transition"
+            >
+              <Download size={12} /> Tải báo giá
+            </button>
+            <button
+              onClick={saveEdit}
+              disabled={savingEdit}
+              className="flex items-center gap-1.5 bg-[#C9972A] text-white text-xs font-bold px-4 py-2 rounded-xl hover:bg-[#B8841E] transition disabled:opacity-50"
+            >
+              <Save size={12} /> {savingEdit ? "Đang lưu…" : "Lưu thay đổi"}
+            </button>
+          </div>
+        </div>
+
+        {/* Client info */}
+        <div className="bg-white rounded-2xl border border-black/8 p-5 mb-4">
+          <h3 className="text-xs font-bold text-[#8E8E93] uppercase tracking-wider mb-3">Thông tin khách hàng</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1 block">Tên</label>
+              <input value={editingLead.name} onChange={(e) => setEditingLead((p) => p ? { ...p, name: e.target.value } : p)}
+                className="w-full bg-[#F2F2F7] border border-black/10 rounded-xl px-3 py-2 text-sm text-[#1C1C1E] focus:border-[#C9972A] focus:outline-none" />
+            </div>
+            <div>
+              <label className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1 block">SĐT</label>
+              <input value={editingLead.phone} onChange={(e) => setEditingLead((p) => p ? { ...p, phone: e.target.value } : p)}
+                className="w-full bg-[#F2F2F7] border border-black/10 rounded-xl px-3 py-2 text-sm text-[#1C1C1E] focus:border-[#C9972A] focus:outline-none" />
+            </div>
+            <div>
+              <label className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1 block">Dịch vụ</label>
+              <select value={editingLead.service} onChange={(e) => setEditingLead((p) => p ? { ...p, service: e.target.value } : p)}
+                className="w-full bg-[#F2F2F7] border border-black/10 rounded-xl px-3 py-2 text-sm text-[#1C1C1E] focus:border-[#C9972A] focus:outline-none">
+                {Object.entries(SERVICE_LABEL_MAP).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="mt-3">
+            <label className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1 block">Ghi chú</label>
+            <input value={editingLead.note || ""} onChange={(e) => setEditingLead((p) => p ? { ...p, note: e.target.value } : p)}
+              className="w-full bg-[#F2F2F7] border border-black/10 rounded-xl px-3 py-2 text-sm text-[#1C1C1E] focus:border-[#C9972A] focus:outline-none" />
+          </div>
+        </div>
+
+        {/* Items table */}
+        <div className="bg-white rounded-2xl border border-black/8 overflow-hidden mb-4">
+          <table className="w-full text-sm min-w-[600px]">
+            <thead>
+              <tr className="bg-black/3 text-[#8E8E93] text-xs uppercase tracking-wider">
+                <th className="text-left px-4 py-2.5 font-medium">Hạng mục</th>
+                <th className="text-center px-3 py-2.5 font-medium w-20">Đơn vị</th>
+                <th className="text-center px-3 py-2.5 font-medium w-16">SL</th>
+                <th className="text-right px-3 py-2.5 font-medium w-32">Đơn giá (đ)</th>
+                <th className="text-right px-3 py-2.5 font-medium w-28">Thành tiền</th>
+                <th className="w-10" />
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-black/5">
+              {editingLead.items.map((item, idx) => (
+                <tr key={idx} className="hover:bg-black/2">
+                  <td className="px-4 py-2">
+                    <input value={item.name} onChange={(e) => updateItem(idx, { name: e.target.value })}
+                      className="w-full bg-[#F2F2F7] border border-black/10 rounded-lg px-2 py-1 text-xs text-[#1C1C1E] focus:border-[#C9972A] focus:outline-none" />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input value={item.unit || "ngày"} onChange={(e) => updateItem(idx, { unit: e.target.value })}
+                      className="w-full bg-[#F2F2F7] border border-black/10 rounded-lg px-2 py-1 text-xs text-center text-[#1C1C1E] focus:border-[#C9972A] focus:outline-none" />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input type="number" min="1" value={item.qty} onChange={(e) => updateItem(idx, { qty: parseInt(e.target.value) || 1 })}
+                      className="w-full bg-[#F2F2F7] border border-black/10 rounded-lg px-2 py-1 text-xs text-center text-[#1C1C1E] focus:border-[#C9972A] focus:outline-none" />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input type="number" min="0" value={item.unitPrice} onChange={(e) => updateItem(idx, { unitPrice: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-[#F2F2F7] border border-black/10 rounded-lg px-2 py-1 text-xs text-right text-[#1C1C1E] focus:border-[#C9972A] focus:outline-none" />
+                  </td>
+                  <td className="px-3 py-2 text-right text-xs font-medium text-[#C9972A] whitespace-nowrap">
+                    {(item.unitPrice * item.qty).toLocaleString("vi-VN")}đ
+                  </td>
+                  <td className="pr-3 text-center">
+                    <button onClick={() => removeItem(idx)} className="text-[#C7C7CC] hover:text-red-500 transition">
+                      <Trash2 size={12} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="px-4 py-3 border-t border-black/5 flex items-center justify-between">
+            <button onClick={addItem}
+              className="flex items-center gap-1.5 text-xs text-[#C9972A] hover:text-[#B8841E] transition font-medium">
+              <Plus size={12} /> Thêm hạng mục
+            </button>
+            <div className="text-right">
+              <div className="text-xs text-[#8E8E93]">Tạm tính: {Math.round(previewTotal / 1.1).toLocaleString("vi-VN")}đ + VAT 10%</div>
+              <div className="text-base font-black text-[#C9972A]">Tổng: {previewTotal.toLocaleString("vi-VN")}đ</div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1570,16 +1818,40 @@ function LeadsTab({ sessionPw }: { sessionPw: string }) {
                     {new Date(lead.date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                   </div>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); toggleContacted(lead.id, !lead.contacted); }}
-                  className={`flex-shrink-0 text-xs px-3 py-1.5 rounded-xl border transition ${
-                    lead.contacted
-                      ? "border-green-200 text-green-600 hover:bg-green-50"
-                      : "border-[#C9972A]/30 text-[#C9972A] hover:bg-[#C9972A]/8"
-                  }`}
-                >
-                  {lead.contacted ? "Bỏ đánh dấu" : "Đã liên hệ"}
-                </button>
+                {/* Action buttons */}
+                <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => downloadLead(lead)}
+                    className="flex items-center gap-1 text-xs text-[#8E8E93] border border-black/10 px-2.5 py-1.5 rounded-xl hover:text-[#1C1C1E] hover:border-black/20 transition"
+                    title="Tải báo giá"
+                  >
+                    <Download size={11} /> <span className="hidden sm:inline">Tải</span>
+                  </button>
+                  <button
+                    onClick={() => { setEditingLead(lead); setExpanded(null); }}
+                    className="flex items-center gap-1 text-xs text-[#C9972A] border border-[#C9972A]/30 px-2.5 py-1.5 rounded-xl hover:bg-[#C9972A]/8 transition"
+                    title="Sửa báo giá"
+                  >
+                    <Pencil size={11} /> <span className="hidden sm:inline">Sửa</span>
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); toggleContacted(lead.id, !lead.contacted); }}
+                    className={`flex-shrink-0 text-xs px-2.5 py-1.5 rounded-xl border transition ${
+                      lead.contacted
+                        ? "border-green-200 text-green-600 hover:bg-green-50"
+                        : "border-[#C9972A]/30 text-[#C9972A] hover:bg-[#C9972A]/8"
+                    }`}
+                  >
+                    {lead.contacted ? <Check size={11} /> : <Phone size={11} />}
+                  </button>
+                  <button
+                    onClick={() => deleteLead(lead.id)}
+                    className="text-[#C7C7CC] hover:text-red-500 transition p-1.5"
+                    title="Xoá"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
                 {expanded === lead.id ? <ChevronUp size={14} className="text-[#8E8E93] flex-shrink-0" /> : <ChevronDown size={14} className="text-[#8E8E93] flex-shrink-0" />}
               </div>
               {expanded === lead.id && (
@@ -1591,13 +1863,19 @@ function LeadsTab({ sessionPw }: { sessionPw: string }) {
                     </p>
                   )}
                   <p className="text-xs text-[#8E8E93] mb-2 font-medium uppercase tracking-wider">{lead.items?.length} hạng mục</p>
-                  <div className="space-y-1 max-h-40 overflow-y-auto">
-                    {(lead.items || []).map((item) => (
-                      <div key={item.id} className="flex justify-between text-xs py-0.5">
-                        <span className="text-[#3C3C43] flex-1 truncate pr-3">{item.name} ×{item.qty}</span>
+                  <div className="space-y-1 max-h-52 overflow-y-auto">
+                    {(lead.items || []).map((item, i) => (
+                      <div key={i} className="flex justify-between text-xs py-1 border-b border-black/4 last:border-0">
+                        <span className="text-[#3C3C43] flex-1 truncate pr-3">{item.name} <span className="text-[#C7C7CC]">×{item.qty} {item.unit||""}</span></span>
                         <span className="text-[#8E8E93] flex-shrink-0">{(item.unitPrice * item.qty).toLocaleString("vi-VN")}đ</span>
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-black/5 flex justify-end">
+                    <div className="text-right">
+                      <div className="text-xs text-[#8E8E93]">Tổng (chưa VAT): {Math.round(lead.total/1.1).toLocaleString("vi-VN")}đ</div>
+                      <div className="text-sm font-black text-[#C9972A]">Tổng cộng (10% VAT): {lead.total.toLocaleString("vi-VN")}đ</div>
+                    </div>
                   </div>
                 </div>
               )}
