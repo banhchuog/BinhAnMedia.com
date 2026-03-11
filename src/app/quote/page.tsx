@@ -527,6 +527,13 @@ function QuoteBuilder() {
                       {subtotal.toLocaleString("vi-VN")}
                       <span className="text-sm sm:text-lg font-bold text-[#C9972A]/60 ml-0.5">đ</span>
                     </p>
+                    {/* Per-unit hint for combo packages */}
+                    {selectedSvc?.unitCount && selectedSvc.unitCount > 1 && (
+                      <p className="text-[10px] sm:text-xs text-[#C9972A]/70 mt-0.5 font-medium">
+                        ≈ {(subtotal / selectedSvc.unitCount).toLocaleString("vi-VN")}đ/{selectedSvc.unitLabel || "unit"}
+                        <span className="text-white/25 font-normal ml-1">({selectedSvc.unitCount} {selectedSvc.unitLabel || "unit"}/gói)</span>
+                      </p>
+                    )}
                     <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5 sm:mt-1.5 truncate">{items.length} hạng mục · VAT 10%: {vat.toLocaleString("vi-VN")}đ · Tổng: {total.toLocaleString("vi-VN")}đ</p>
                   </div>
                   {/* Desktop buttons */}
