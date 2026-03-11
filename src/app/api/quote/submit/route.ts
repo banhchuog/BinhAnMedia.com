@@ -10,6 +10,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Thiếu thông tin" }, { status: 400 });
     }
 
+    if (!prisma) {
+      return NextResponse.json({ ok: true, id: "offline" });
+    }
+
     const lead = await prisma.lead.create({
       data: {
         name,

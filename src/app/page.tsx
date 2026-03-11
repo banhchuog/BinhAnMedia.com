@@ -65,6 +65,7 @@ const DEFAULT_FOUNDER: FounderData = {
 
 async function getPageData() {
   try {
+    if (!prisma) throw new Error("No DB");
     const settings = await prisma.settings.findUnique({ where: { id: 1 } });
     if (!settings) {
       return { heroId: "jtj_nHxkGGY", clientLogos: [] as string[], founder: DEFAULT_FOUNDER, testimonials: DEFAULT_TESTIMONIALS };

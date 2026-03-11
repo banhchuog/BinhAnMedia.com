@@ -4,8 +4,13 @@ import { prisma } from "@/lib/db";
 const DEFAULT_PASSWORD = "admin@2026";
 
 async function getPassword(): Promise<string> {
-  const s = await prisma.settings.findUnique({ where: { id: 1 } });
-  return s?.password || DEFAULT_PASSWORD;
+  if (!prisma) return DEFAULT_PASSWORD;
+  try {
+    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    return s?.password || DEFAULT_PASSWORD;
+  } catch {
+    return DEFAULT_PASSWORD;
+  }
 }
 
 export async function POST(req: Request) {
@@ -20,6 +25,10 @@ export async function POST(req: Request) {
     const storedPw = await getPassword();
     if (password !== storedPw) {
       return NextResponse.json({ error: "Sai mật khẩu" }, { status: 401 });
+    }
+
+    if (!prisma) {
+      return NextResponse.json({ error: "Database chưa kết nối" }, { status: 503 });
     }
 
     // Upsert settings (single row, id=1)

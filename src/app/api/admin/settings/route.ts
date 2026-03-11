@@ -1,7 +1,23 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+const EMPTY_RESPONSE = {
+  priceOverrides: {},
+  presets: {},
+  videos: [],
+  heroVideoId: "",
+  clientLogos: [],
+  founder: null,
+  customCatalogItems: [],
+  customServices: [],
+  testimonials: [],
+  catalogEdits: {},
+};
+
 export async function GET() {
+  if (!prisma) return NextResponse.json(EMPTY_RESPONSE);
+
+  try {
   const settings = await prisma.settings.findUnique({ where: { id: 1 } });
 
   // Fetch videos from Video table
@@ -42,4 +58,8 @@ export async function GET() {
       desc: v.desc, thumbnail: v.thumbnail,
     })),
   });
+  } catch (e) {
+    console.error("[settings] DB error:", e);
+    return NextResponse.json(EMPTY_RESPONSE);
+  }
 }

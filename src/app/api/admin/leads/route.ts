@@ -4,8 +4,13 @@ import { prisma } from "@/lib/db";
 const DEFAULT_PASSWORD = "admin@2026";
 
 async function getStoredPassword(): Promise<string> {
-  const s = await prisma.settings.findUnique({ where: { id: 1 } });
-  return s?.password || DEFAULT_PASSWORD;
+  if (!prisma) return DEFAULT_PASSWORD;
+  try {
+    const s = await prisma.settings.findUnique({ where: { id: 1 } });
+    return s?.password || DEFAULT_PASSWORD;
+  } catch {
+    return DEFAULT_PASSWORD;
+  }
 }
 
 export async function GET(req: Request) {
@@ -15,6 +20,7 @@ export async function GET(req: Request) {
   if (password !== stored) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!prisma) return NextResponse.json([]);
   const leads = await prisma.lead.findMany({ orderBy: { createdAt: "desc" } });
   return NextResponse.json(
     leads.map((l) => ({
@@ -37,6 +43,7 @@ export async function POST(req: Request) {
   if (password !== stored) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!prisma) return NextResponse.json({ error: "Database chưa kết nối" }, { status: 503 });
   await prisma.lead.update({
     where: { id },
     data: { contacted },
