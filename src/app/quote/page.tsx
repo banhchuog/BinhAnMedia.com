@@ -148,8 +148,8 @@ function QuoteBuilder() {
       groupedItems[item.group].push(item);
     });
     const subtotal = items.reduce((s, i) => s + i.unitPrice * i.qty, 0);
-    const vat = Math.round(subtotal * 0.1);
-    return { groupedItems, subtotal, vat, total: subtotal + vat };
+    const vat = Math.round(subtotal * 0.08);
+    return { groupedItems, subtotal, vat, total: subtotal };
   }, [items]);
 
   const updateQty = (id: string, delta: number) => {
@@ -290,9 +290,8 @@ function QuoteBuilder() {
       </table>
 
       <div class="summary"><table class="summary-table">
-        <tr><td>Tạm tính</td><td style="text-align:right;font-weight:600;">${subtotal.toLocaleString("vi-VN")}đ</td></tr>
-        <tr><td>VAT (10%)</td><td style="text-align:right;font-weight:600;">${vat.toLocaleString("vi-VN")}đ</td></tr>
-        <tr><td class="total">TỔNG CỘNG</td><td class="total" style="text-align:right;">${total.toLocaleString("vi-VN")}đ</td></tr>
+        <tr><td class="total">TỔNG CỘNG</td><td class="total" style="text-align:right;">${subtotal.toLocaleString("vi-VN")}đ</td></tr>
+        <tr><td style="font-size:11px;color:#999;">Chưa bao gồm VAT 8%</td><td style="text-align:right;font-size:11px;color:#999;">+${vat.toLocaleString("vi-VN")}đ khi xuất hoá đơn</td></tr>
       </table></div>
 
       <div class="note">
@@ -504,7 +503,7 @@ function QuoteBuilder() {
                         <p className="text-[10px] sm:text-xs text-white/40 mt-1">
                           = <span className="text-white/60 font-semibold">{subtotal.toLocaleString("vi-VN")}đ</span> / cả gói {selectedSvc.unitCount} {selectedSvc.unitLabel || "unit"}
                         </p>
-                        <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5 truncate">{items.length} hạng mục · VAT 10%: {vat.toLocaleString("vi-VN")}đ · Tổng: {total.toLocaleString("vi-VN")}đ</p>
+                        <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5">{items.length} hạng mục · chưa bao gồm VAT 8%</p>
                       </>
                     ) : (
                       <>
@@ -513,7 +512,7 @@ function QuoteBuilder() {
                           {subtotal.toLocaleString("vi-VN")}
                           <span className="text-sm sm:text-lg font-bold text-[#C9972A]/60 ml-0.5">đ</span>
                         </p>
-                        <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5 sm:mt-1.5 truncate">{items.length} hạng mục · VAT 10%: {vat.toLocaleString("vi-VN")}đ · Tổng: {total.toLocaleString("vi-VN")}đ</p>
+                        <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5 sm:mt-1.5">{items.length} hạng mục · chưa bao gồm VAT 8%</p>
                       </>
                     )}
                   </div>
