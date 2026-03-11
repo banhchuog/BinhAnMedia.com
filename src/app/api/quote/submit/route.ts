@@ -6,18 +6,14 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { name, phone, note, service, total, items } = body;
 
-    if (!name || !phone) {
-      return NextResponse.json({ error: "Thiếu thông tin" }, { status: 400 });
-    }
-
     if (!prisma) {
       return NextResponse.json({ ok: true, id: "offline" });
     }
 
     const lead = await prisma.lead.create({
       data: {
-        name,
-        phone,
+        name: name || "(chưa điền)",
+        phone: phone || "(chưa điền)",
         note: note || "",
         service: service || "",
         total: total || 0,
