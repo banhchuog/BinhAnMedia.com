@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Play, Film, Music, Building2, Smartphone, Camera, Sparkles } from "lucide-react";
+import { ArrowRight, Play, Film, Music, Building2, Smartphone, Camera, Sparkles, Calculator } from "lucide-react";
 import FeaturedWorks from "@/components/FeaturedWorks";
 import { prisma } from "@/lib/db";
 
@@ -110,26 +110,26 @@ export default async function HomePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
         <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/60 to-transparent" />
-        <div className="absolute inset-x-0 bottom-[5%] flex justify-center px-3 sm:px-4">
-          <div className="flex flex-col items-center gap-2 sm:gap-4">
-            <h1 className="text-white text-center font-black text-base sm:text-4xl md:text-5xl tracking-[-0.03em] leading-tight drop-shadow-lg max-w-2xl">
+        <div className="absolute inset-x-0 bottom-[8%] sm:bottom-[10%] flex justify-center px-4 sm:px-6">
+          <div className="flex flex-col items-center gap-3 sm:gap-6 pb-2 sm:pb-8 w-full max-w-4xl mx-auto">
+            <h1 className="text-white text-center font-black text-[27px] leading-[1.12] sm:text-5xl md:text-6xl tracking-tight sm:leading-[1.1] drop-shadow-xl">
               Sản xuất video<br className="hidden sm:block" /> chuyên nghiệp
             </h1>
-            <p className="text-white/60 text-[10px] sm:text-sm text-center max-w-md hidden sm:block">
-              TVC · MV · Phim doanh nghiệp · Social Content — Từ ý tưởng đến thành phẩm
+            <p className="text-white/80 text-[14px] sm:text-[17px] font-medium text-center max-w-[300px] sm:max-w-xl mx-auto leading-relaxed tracking-wide drop-shadow-md mb-1 sm:mb-2">
+              TVC · MV · Phim doanh nghiệp<span className="hidden sm:inline"> · Social Content — Từ ý tưởng đến thành phẩm</span>
             </p>
-            <div className="flex flex-row gap-2 items-center">
+            <div className="flex flex-row gap-3 items-center w-full justify-center px-2 sm:px-0 max-w-[340px] sm:max-w-none mx-auto">
             <Link
               href="/quote"
-              className="inline-flex items-center justify-center gap-1.5 bg-[#C9972A] text-black font-bold px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-[11px] sm:text-[13px] hover:bg-[#B8841E] transition-colors"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold px-5 py-3.5 sm:px-9 sm:py-4 rounded-full text-[14px] sm:text-base hover:bg-[#DBA93A] transition-all shadow-xl shadow-black/40 active:scale-95"
             >
-              Báo giá ngay <ArrowRight size={10} strokeWidth={2.5} className="sm:hidden" /><ArrowRight size={12} strokeWidth={2.5} className="hidden sm:block" />
+              Báo giá ngay <ArrowRight size={16} strokeWidth={2.5} />
             </Link>
             <Link
               href="/showreel"
-              className="inline-flex items-center justify-center gap-1.5 border border-white/20 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-[11px] sm:text-[13px] hover:border-white/45 transition-colors font-medium"
+              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 border border-white/20 bg-black/40 backdrop-blur-md text-white px-5 py-3.5 sm:px-9 sm:py-4 rounded-full text-[14px] sm:text-base hover:bg-white/10 transition-all font-medium active:scale-95"
             >
-              <Play size={8} fill="currentColor" className="flex-shrink-0" /> Xem showreel
+              <Play size={13} fill="currentColor" className="text-[#C9972A]" /> Xem portfolio
             </Link>
           </div>
           </div>
@@ -308,6 +308,15 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      <div className="fixed bottom-5 left-4 z-[90] sm:hidden">
+        <Link
+          href="/quote"
+          className="flex items-center gap-2 bg-[#C9972A] text-black px-4 py-3 rounded-full shadow-2xl shadow-[#C9972A]/20 border border-white/20 font-bold text-[13px] active:scale-95 transition-transform"
+        >
+          <Calculator size={16} strokeWidth={2.5} />
+          Báo giá
+        </Link>
+      </div>
     </>
   );
 }
