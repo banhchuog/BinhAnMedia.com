@@ -1,0 +1,325 @@
+{
+  "priceOverrides": {},
+  "presets": {
+    "tvc": [
+      {
+        "id": "scr_concept",
+        "qty": 1
+      },
+      {
+        "id": "scr_tvc",
+        "qty": 1
+      },
+      {
+        "id": "scr_treatment",
+        "qty": 1
+      },
+      {
+        "id": "scr_storyboard",
+        "qty": 1
+      },
+      {
+        "id": "scr_shotlist",
+        "qty": 1
+      },
+      {
+        "id": "scr_ppmeeting",
+        "qty": 1
+      },
+      {
+        "id": "scr_callsheet",
+        "qty": 1
+      },
+      {
+        "id": "dir",
+        "qty": 1
+      },
+      {
+        "id": "dop",
+        "qty": 1
+      },
+      {
+        "id": "1ad",
+        "qty": 1
+      },
+      {
+        "id": "producer",
+        "qty": 1
+      },
+      {
+        "id": "pm",
+        "qty": 1
+      },
+      {
+        "id": "cam_op1",
+        "qty": 1
+      },
+      {
+        "id": "focus",
+        "qty": 1
+      },
+      {
+        "id": "gaffer",
+        "qty": 1
+      },
+      {
+        "id": "bestboy",
+        "qty": 1
+      },
+      {
+        "id": "sound_mix",
+        "qty": 1
+      },
+      {
+        "id": "boom",
+        "qty": 1
+      },
+      {
+        "id": "makeup",
+        "qty": 1
+      },
+      {
+        "id": "eq_pyxis6k",
+        "qty": 1
+      },
+      {
+        "id": "eq_prime3",
+        "qty": 1
+      },
+      {
+        "id": "eq_tripod",
+        "qty": 1
+      },
+      {
+        "id": "eq_gimbal_rs3",
+        "qty": 1
+      },
+      {
+        "id": "eq_monitor",
+        "qty": 1
+      },
+      {
+        "id": "eq_aputure600",
+        "qty": 2
+      },
+      {
+        "id": "eq_ledpanel",
+        "qty": 1
+      },
+      {
+        "id": "eq_softbox",
+        "qty": 1
+      },
+      {
+        "id": "eq_reflector",
+        "qty": 1
+      },
+      {
+        "id": "eq_expendables",
+        "qty": 1
+      },
+      {
+        "id": "eq_zoomf8",
+        "qty": 1
+      },
+      {
+        "id": "eq_lav",
+        "qty": 1
+      },
+      {
+        "id": "eq_boom_mic",
+        "qty": 1
+      },
+      {
+        "id": "loc_studio",
+        "qty": 1
+      },
+      {
+        "id": "loc_scout",
+        "qty": 1
+      },
+      {
+        "id": "food_main",
+        "qty": 10
+      },
+      {
+        "id": "food_teabreak",
+        "qty": 10
+      },
+      {
+        "id": "food_water",
+        "qty": 2
+      },
+      {
+        "id": "trans_7",
+        "qty": 1
+      },
+      {
+        "id": "trans_truck",
+        "qty": 1
+      },
+      {
+        "id": "post_edit",
+        "qty": 3
+      },
+      {
+        "id": "post_color_basic",
+        "qty": 1
+      },
+      {
+        "id": "post_sound_mix",
+        "qty": 1
+      },
+      {
+        "id": "post_music_lib",
+        "qty": 1
+      },
+      {
+        "id": "del_export",
+        "qty": 1
+      },
+      {
+        "id": "del_cloud",
+        "qty": 1
+      }
+    ]
+  },
+  "videos": [
+    {
+      "id": "1773148901776",
+      "title": "Gunny PC 16 năm",
+      "cat": "TVC",
+      "client": "",
+      "year": "2026",
+      "views": "",
+      "duration": "",
+      "ytId": "https://youtu.be/jtj_nHxkGGY?si=3tx_plEvqI8yKprc",
+      "desc": ""
+    },
+    {
+      "id": "1773149888210",
+      "title": "Gunny Vua Hải Tặc",
+      "cat": "TVC",
+      "client": "",
+      "year": "2026",
+      "views": "",
+      "duration": "",
+      "ytId": "https://www.youtube.com/watch?v=__OG8NUN9s8",
+      "desc": ""
+    },
+    {
+      "id": "1773149952462",
+      "title": "Mùa worl cup",
+      "cat": "TVC",
+      "client": "",
+      "year": "2026",
+      "views": "",
+      "duration": "",
+      "ytId": "https://www.youtube.com/watch?v=MkfH0jOFf9k",
+      "desc": ""
+    },
+    {
+      "id": "1773150087540",
+      "title": "Mv Quang Hà",
+      "cat": "MV",
+      "client": "",
+      "year": "2026",
+      "views": "",
+      "duration": "",
+      "ytId": "https://www.youtube.com/watch?v=DI_NSjrhbrI",
+      "desc": ""
+    },
+    {
+      "id": "1773150364896",
+      "title": "UHP X WOWY ",
+      "cat": "MV",
+      "client": "",
+      "year": "2026",
+      "views": "",
+      "duration": "",
+      "ytId": "https://www.youtube.com/watch?v=ceSd7Hu40NI&list=RDceSd7Hu40NI&start_radio=1",
+      "desc": ""
+    },
+    {
+      "id": "1773150568809",
+      "title": "Sinh nhât 3 tuổi",
+      "cat": "TVC",
+      "client": "",
+      "year": "2026",
+      "views": "",
+      "duration": "",
+      "ytId": "https://www.youtube.com/watch?v=vFTyTn45dhU",
+      "desc": ""
+    }
+  ],
+  "heroVideoId": "",
+  "clientLogos": [
+    "https://mondialbrand.com/wp-content/uploads/2024/02/vng_corporation-logo_brandlogos.net_ysr15.png",
+    "https://quyhyvong.com/wp-content/uploads/2022/12/logo-fpt-shop-removebg-preview.png",
+    "https://thenewgym.vn/wp-content/uploads/2025/09/cropped-cropped-LogoTNG_full-color.webp"
+  ],
+  "founder": {
+    "name": "Đinh Công Hiếu",
+    "title": "Founder & Đạo diễn",
+    "photoUrl": "https://scontent.fsgn2-7.fna.fbcdn.net/v/t1.6435-9/49937662_1032607680257120_7187747603738525696_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=1d70fc&_nc_eui2=AeGBizo9ByadwPLamGr-RO68faAt7bkRM8B9oC3tuREzwLzN8FiHNoqV1ieHT_oIpiEWdws-pTiDhVej1JnTEg58&_nc_ohc=KNpJzyuMnOMQ7kNvwESadhN&_nc_oc=Adkuf6mwGDzy1xFXsqx_FIr4XHcCeshYvftei3gRidRsgWjfggUmhMYj4eMl7KLwk6I&_nc_zt=23&_nc_ht=scontent.fsgn2-7.fna&_nc_gid=7MpNDj_QGUA1zQjj8k1fIg&_nc_ss=8&oh=00_AfwaZQ19Mv6Vxp-RSbNAjk51yP9NZH3R727VF0xJmI5VHg&oe=69D7C5AC",
+    "experience": "12+ năm",
+    "bio": [
+      "Đạo diễn với hơn 12 năm kinh nghiệm trong lĩnh vực sản xuất TVC, MV ca nhạc, phim doanh nghiệp và nội dung số — từ concept sáng tạo đến hậu kỳ hoàn chỉnh.",
+      "Founder nền tảng mạng xã hội phim ảnh anhemphim.com.vn — cộng đồng kết nối những người yêu điện ảnh và sản xuất nội dung sáng tạo tại Việt Nam.",
+      "Với triết lý \"mỗi khung hình là một câu chuyện\", Hiếu đã dẫn dắt Bình An Media trở thành đối tác tin cậy của hàng trăm thương hiệu lớn nhỏ, từ TVC quốc gia đến campaign social triệu view."
+    ],
+    "linkUrl": "https://anhemphim.com.vn",
+    "linkLabel": "anhemphim.com.vn"
+  },
+  "customCatalogItems": [],
+  "customServices": [
+    {
+      "id": "tvc",
+      "label": "TVC",
+      "svgIcon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m22 8-6 4 6 4V8Z\"/><rect width=\"14\" height=\"12\" x=\"2\" y=\"6\" rx=\"2\" ry=\"2\"/></svg>",
+      "desc": "Quảng cáo thương mại, viral video",
+      "qualityRef": "4K RED/ARRI, ekip 8-12 người, color grade chuyên nghiệp",
+      "refVideoUrl": "https://youtu.be/jtj_nHxkGGY?si=3tx_plEvqI8yKprc"
+    },
+    {
+      "id": "mv",
+      "label": "MV Ca nhạc",
+      "svgIcon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M9 18V5l12-2v13\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/><circle cx=\"18\" cy=\"16\" r=\"3\"/></svg>",
+      "desc": "Music video, nghệ thuật",
+      "qualityRef": "4K cinematic, multi-location, stylist & art director",
+      "refVideoUrl": ""
+    },
+    {
+      "id": "corporate",
+      "label": "Phim doanh nghiệp",
+      "svgIcon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z\"/><path d=\"M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2\"/><path d=\"M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2\"/><path d=\"M10 6h4\"/><path d=\"M10 10h4\"/><path d=\"M10 14h4\"/><path d=\"M10 18h4\"/></svg>",
+      "desc": "Giới thiệu công ty, thương hiệu",
+      "qualityRef": "4K, kịch bản chuyên nghiệp, voice-over, motion graphics",
+      "refVideoUrl": ""
+    },
+    {
+      "id": "social",
+      "label": "Social Content",
+      "svgIcon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect width=\"14\" height=\"20\" x=\"5\" y=\"2\" rx=\"2\" ry=\"2\"/><path d=\"M12 18h.01\"/></svg>",
+      "desc": "Reels, TikTok, YouTube Shorts",
+      "qualityRef": "Cinema camera, full crew, concept sáng tạo",
+      "refVideoUrl": ""
+    },
+    {
+      "id": "event",
+      "label": "Event & Livestream",
+      "svgIcon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5.8 11.3 2 22l10.7-3.79\"/><path d=\"M4 3h.01\"/><path d=\"M22 8h.01\"/><path d=\"M15 2h.01\"/><path d=\"M22 20h.01\"/><path d=\"m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10\"/><path d=\"m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11-.11.7-.72 1.22-1.43 1.22H17\"/><path d=\"m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7\"/><path d=\"M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z\"/></svg>",
+      "desc": "Hội nghị, sự kiện, lễ ra mắt",
+      "qualityRef": "Multi-camera (4+), đạo diễn hình, livestream chuyên nghiệp",
+      "refVideoUrl": ""
+    },
+    {
+      "id": "svc_1773194352491",
+      "label": "Quảng cáo cơ bản",
+      "desc": "",
+      "svgIcon": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m22 8-6 4 6 4V8Z\"/><rect width=\"14\" height=\"12\" x=\"2\" y=\"6\" rx=\"2\" ry=\"2\"/></svg>",
+      "qualityRef": ""
+    }
+  ],
+  "password": "admin@2026"
+}

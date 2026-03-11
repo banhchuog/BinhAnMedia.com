@@ -1,65 +1,324 @@
 import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Play, Film, Music, Building2, Smartphone, Camera, Sparkles } from "lucide-react";
+import FeaturedWorks from "@/components/FeaturedWorks";
+import fs from "fs";
+import path from "path";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+function extractYtId(raw: string): string {
+  if (!raw) return "";
+  const m =
+    raw.match(/[?&]v=([^&]+)/) ||
+    raw.match(/youtu\.be\/([^?&]+)/) ||
+    raw.match(/shorts\/([^?&]+)/);
+  if (m) return m[1];
+  if (/^[A-Za-z0-9_-]{11}$/.test(raw)) return raw;
+  return raw;
+}
+
+function getHeroVideoId(): string {
+  try {
+    const data = JSON.parse(
+      fs.readFileSync(path.join(process.cwd(), "data/settings.json"), "utf-8")
+    );
+    return extractYtId(data.heroVideoId || "") || "jtj_nHxkGGY";
+  } catch {
+    return "jtj_nHxkGGY";
+  }
+}
+
+const stats = [
+  { value: "200+", label: "Dự án hoàn thành" },
+  { value: "12+",  label: "Năm kinh nghiệm" },
+];
+
+const services = [
+  { Icon: Film,        title: "TVC & Quảng cáo",    desc: "Từ script đến post-production — brand awareness, performance ads, viral campaigns cho mọi nền tảng." },
+  { Icon: Music,       title: "MV Ca nhạc",         desc: "Hình ảnh cinematic 4K, color grade điện ảnh, storytelling chạm đúng cảm xúc." },
+  { Icon: Building2,   title: "Phim doanh nghiệp",  desc: "Corporate film, recruitment video, investor pitch — chuẩn quốc tế, mỗi frame chuyên nghiệp." },
+  { Icon: Smartphone,  title: "Social Content",     desc: "Reels, TikTok, Shorts tối ưu thuật toán — hook mạnh, giữ người xem đến hết." },
+  { Icon: Camera,      title: "Event & Livestream", desc: "Multi-camera, same-day edit, highlight film giao ngay sau khi sự kiện kết thúc." },
+  { Icon: Sparkles,    title: "Motion & Animation", desc: "Logo animation, explainer, infographic — brand motion nhất quán, sắc nét trên mọi kênh." },
+];
+
+type TestimonialItem = { name: string; role: string; body: string };
+
+const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
+  { name: "Nguyễn Thị Hà",  role: "Marketing Director — Vinamilk",  body: "Bình An Media hiểu đúng insight thương hiệu. TVC Tết năm nay vượt 10M views chỉ sau 3 ngày đăng." },
+  { name: "Trần Minh Quân", role: "Ca sĩ độc lập",                   body: "MV được đầu tư hình ảnh đẹp không tưởng với ngân sách hợp lý. Team cực kỳ chuyên nghiệp, luôn đúng hẹn." },
+  { name: "Lê Thanh Sơn",   role: "CEO — FPT Software",              body: "Corporate film dùng để pitch đối tác quốc tế. Phản hồi rất tốt. Sẽ tiếp tục hợp tác dài hạn." },
+];
+
+type FounderData = {
+  name: string;
+  title: string;
+  photoUrl: string;
+  experience: string;
+  bio: string[];
+  linkUrl: string;
+  linkLabel: string;
+};
+
+const DEFAULT_FOUNDER: FounderData = {
+  name: "Đinh Công Hiếu",
+  title: "Founder & Đạo diễn",
+  photoUrl: "",
+  experience: "12+ năm",
+  bio: [
+    "Đạo diễn với hơn 12 năm kinh nghiệm trong lĩnh vực sản xuất TVC, MV ca nhạc, phim doanh nghiệp và nội dung số — từ concept sáng tạo đến hậu kỳ hoàn chỉnh.",
+    "Founder nền tảng mạng xã hội phim ảnh anhemphim.com.vn — cộng đồng kết nối những người yêu điện ảnh và sản xuất nội dung sáng tạo tại Việt Nam.",
+    'Với triết lý "mỗi khung hình là một câu chuyện", Hiếu đã dẫn dắt Bình An Media trở thành đối tác tin cậy của hàng trăm thương hiệu lớn nhỏ, từ TVC quốc gia đến campaign social triệu view.',
+  ],
+  linkUrl: "https://anhemphim.com.vn",
+  linkLabel: "anhemphim.com.vn",
+};
+
+function getPageSettings(): { clientLogos: string[]; founder: FounderData; testimonials: TestimonialItem[] } {
+  try {
+    const data = JSON.parse(
+      fs.readFileSync(path.join(process.cwd(), "data/settings.json"), "utf-8")
+    );
+    const founder: FounderData = data.founder
+      ? { ...DEFAULT_FOUNDER, ...data.founder, bio: Array.isArray(data.founder.bio) ? data.founder.bio : DEFAULT_FOUNDER.bio }
+      : DEFAULT_FOUNDER;
+    const testimonials: TestimonialItem[] = Array.isArray(data.testimonials) && data.testimonials.length > 0
+      ? data.testimonials
+      : DEFAULT_TESTIMONIALS;
+    return {
+      clientLogos: Array.isArray(data.clientLogos) ? data.clientLogos : [],
+      founder,
+      testimonials,
+    };
+  } catch {
+    return { clientLogos: [], founder: DEFAULT_FOUNDER, testimonials: DEFAULT_TESTIMONIALS };
+  }
+}
+
+export default function HomePage() {
+  const heroId = getHeroVideoId();
+  const { clientLogos, founder, testimonials } = getPageSettings();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+    <>
+      {/* HERO 16:9 */}
+      <section className="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden bg-black">
+        {/* Poster image — shows while video loads */}
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
+          src="/hero-bg.jpg"
+          alt="Cinema camera on location"
+          fill
           priority
+          className="object-cover object-[50%_55%]"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+        {/* YouTube autoplay muted background — thay VIDEO_ID bằng ID thực của bạn */}
+        <iframe
+          src={`https://www.youtube.com/embed/${heroId}?autoplay=1&mute=1&loop=1&playlist=${heroId}&controls=0&playsinline=1&modestbranding=1&rel=0`}
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] h-[115%] pointer-events-none"
+          allow="autoplay; encrypted-media"
+          frameBorder="0"
+          title="Hero background video"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
+        <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/60 to-transparent" />
+        <div className="absolute inset-x-0 bottom-[6%] flex justify-center px-4">
+          <div className="flex flex-col items-center gap-4">
+            <h1 className="text-white text-center font-black text-2xl sm:text-4xl md:text-5xl tracking-[-0.03em] leading-tight drop-shadow-lg max-w-2xl">
+              Sản xuất video<br className="hidden sm:block" /> chuyên nghiệp
+            </h1>
+            <p className="text-white/60 text-xs sm:text-sm text-center max-w-md">
+              TVC · MV · Phim doanh nghiệp · Social Content — Từ ý tưởng đến thành phẩm
+            </p>
+            <div className="flex flex-row gap-2.5 items-center">
+            <Link
+              href="/quote"
+              className="inline-flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold px-5 py-2.5 rounded-full text-[13px] hover:bg-[#B8841E] transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              Báo giá ngay <ArrowRight size={12} strokeWidth={2.5} />
+            </Link>
+            <Link
+              href="/showreel"
+              className="inline-flex items-center justify-center gap-2 border border-white/20 text-white px-5 py-2.5 rounded-full text-[13px] hover:border-white/45 transition-colors font-medium"
             >
-              Learning
-            </a>{" "}
-            center.
+              <Play size={10} fill="currentColor" className="flex-shrink-0" /> Xem showreel
+            </Link>
+          </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CLIENT LOGOS */}
+      {clientLogos.length > 0 && (
+        <section className="bg-[#0D0D0D] border-b border-white/5 py-8 sm:py-10 px-4 sm:px-6">
+          <div className="max-w-5xl mx-auto">
+            <p className="text-center text-white/20 text-[10px] tracking-[0.28em] uppercase mb-6 sm:mb-8">Một số khách hàng đã hợp tác</p>
+            <div className="flex flex-wrap items-center justify-center gap-x-8 sm:gap-x-12 gap-y-4 sm:gap-y-6">
+              {clientLogos.map((url, i) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={url}
+                  alt={`Khách hàng ${i + 1}`}
+                  className="h-6 sm:h-8 w-auto object-contain transition-opacity duration-300"
+                  style={{ filter: "grayscale(1) brightness(0.7)", opacity: 0.55 }}
+                />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* STATS */}
+      <section className="bg-[#111] border-b border-white/5">
+        <div className="max-w-5xl mx-auto flex items-center justify-center gap-6 sm:gap-16 py-4 sm:py-5 px-4">
+          {stats.map((s, i) => (
+            <div key={s.label} className="flex items-center gap-10 sm:gap-16">
+              {i > 0 && <div className="w-px h-5 bg-white/10 -ml-6 sm:-ml-16" />}
+              <div className="flex items-baseline gap-1.5 sm:gap-2">
+                <span className="font-black text-[#C9972A] text-lg sm:text-2xl tracking-tight">{s.value}</span>
+                <span className="text-white/35 text-[10px] sm:text-[11px] tracking-wide">{s.label}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* FEATURED WORKS */}
+      <FeaturedWorks />
+
+      {/* SERVICES */}
+      <section className="bg-[#0A0A0A] py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-10 sm:mb-14">
+            <p className="eyebrow mb-2">Dịch vụ</p>
+            <h2 className="text-[clamp(2rem,4vw,3rem)] font-black text-white tracking-[-0.03em] leading-tight">
+              Chúng tôi làm được gì
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {services.map((s) => (
+              <div
+                key={s.title}
+                className="group bg-[#161616] border border-white/6 rounded-2xl p-5 sm:p-7 hover:border-[#C9972A]/25 transition-all duration-300"
+              >
+                <div className="w-11 h-11 rounded-xl bg-[#C9972A]/10 flex items-center justify-center mb-5 group-hover:bg-[#C9972A]/15 transition-colors">
+                  <s.Icon size={20} className="text-[#C9972A]" />
+                </div>
+                <h3 className="font-bold text-white text-[15px] mb-2 tracking-[-0.01em]">
+                  {s.title}
+                </h3>
+                <p className="text-white/40 text-sm leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="bg-[#111] py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10 sm:mb-14">
+            <p className="eyebrow mb-2">Đánh giá</p>
+            <h2 className="text-[clamp(2rem,4vw,3rem)] font-black text-white tracking-[-0.03em] leading-tight">
+              Khách hàng nói gì
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {testimonials.map((t) => (
+              <div key={t.name} className="bg-[#1C1C1E] border border-white/8 rounded-2xl p-5 sm:p-7 flex flex-col">
+                <span className="text-5xl leading-none text-[#C9972A]/30 font-serif select-none mb-3">&ldquo;</span>
+                <p className="text-white/60 text-sm leading-relaxed flex-1 tracking-[-0.005em]">{t.body}</p>
+                <div className="mt-6 pt-5 border-t border-white/8">
+                  <div className="font-semibold text-white text-sm tracking-[-0.01em]">{t.name}</div>
+                  <div className="text-white/35 text-xs mt-0.5">{t.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FOUNDER */}
+      <section className="bg-[#0A0A0A] py-16 sm:py-24 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-8 md:gap-14 items-center">
+            {/* Avatar */}
+            <div className="flex justify-center md:justify-start">
+              <div className="relative w-48 sm:w-64 h-60 sm:h-80 rounded-2xl overflow-hidden border border-white/8">
+                {founder.photoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={founder.photoUrl} alt={founder.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#C9972A]/20 via-[#1C1C1E] to-[#111] flex items-center justify-center">
+                    <span className="text-7xl font-black text-white/8 select-none">{founder.name.split(" ").map(w => w[0]).join("")}</span>
+                  </div>
+                )}
+                <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent" />
+              </div>
+            </div>
+            {/* Bio */}
+            <div>
+              <p className="eyebrow mb-3">{founder.title}</p>
+              <h2 className="text-[clamp(1.8rem,4vw,2.8rem)] font-black text-white tracking-[-0.03em] leading-tight mb-2">
+                {founder.name}
+              </h2>
+              <div className="flex items-center gap-2 mb-6">
+                <span className="text-[#C9972A] font-bold text-sm">{founder.experience}</span>
+                <span className="text-white/25 text-sm">trong ngành sản xuất phim</span>
+              </div>
+              <div className="space-y-4 text-white/50 text-sm leading-relaxed">
+                {founder.bio.map((p, i) => (
+                  <p key={i}>{p}</p>
+                ))}
+              </div>
+              {founder.linkUrl && (
+                <div className="flex flex-wrap gap-3 mt-7">
+                  <a href={founder.linkUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 border border-white/10 text-white/60 px-5 py-2.5 rounded-full text-[13px] hover:border-[#C9972A]/40 hover:text-[#C9972A] transition-colors font-medium"
+                  >
+                    {founder.linkLabel || founder.linkUrl} <ArrowRight size={11} strokeWidth={2.5} />
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="bg-[#060606] py-20 sm:py-28 px-4 sm:px-6">
+        <div className="max-w-2xl mx-auto text-center">
+          <p className="eyebrow mb-4">Bắt đầu ngay</p>
+          <h2 className="text-[clamp(2.2rem,5vw,3.8rem)] font-black text-white tracking-[-0.03em] leading-tight mb-5">
+            Sẵn sàng cho<br />dự án tiếp theo?
+          </h2>
+          <p className="text-white/40 mb-10 leading-relaxed text-base font-light">
+            Báo giá chi tiết đến từng hạng mục — minh bạch, không ràng buộc, phản hồi trong 2 giờ.
           </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href="/quote"
+              className="inline-flex items-center justify-center gap-2 bg-[#C9972A] text-white font-semibold px-8 py-3.5 rounded-full hover:bg-[#DBA93A] transition-colors text-sm tracking-[-0.01em]"
+            >
+              Tạo báo giá miễn phí <ArrowRight size={14} strokeWidth={2.5} />
+            </Link>
+            <Link
+              href="/showreel"
+              className="inline-flex items-center justify-center border border-white/10 text-white/80 px-8 py-3.5 rounded-full hover:border-white/25 hover:text-white transition-colors text-sm font-medium"
+            >
+              Xem portfolio
+            </Link>
+          </div>
+          <div className="flex items-center justify-center gap-6 mt-10 flex-wrap">
+            {["Phản hồi trong 2 giờ", "Báo giá chi tiết 100%", "Ký hợp đồng rõ ràng"].map((t) => (
+              <span key={t} className="flex items-center gap-1.5 text-xs text-white/35">
+                <span className="w-1 h-1 rounded-full bg-[#C9972A]" />
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 }

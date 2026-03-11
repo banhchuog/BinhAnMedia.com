@@ -1,0 +1,182 @@
+[
+  {
+    "id": "1773162432648",
+    "name": "Lan",
+    "phone": "09123459",
+    "note": "vi du vay di",
+    "service": "social",
+    "total": 69542000,
+    "items": [
+      {
+        "id": "scr_concept",
+        "name": "Phát triển ý tưởng & Concept",
+        "qty": 1,
+        "unitPrice": 5000000
+      },
+      {
+        "id": "scr_social",
+        "name": "Script content social (5 ý tưởng)",
+        "qty": 1,
+        "unitPrice": 3000000
+      },
+      {
+        "id": "scr_shotlist",
+        "name": "Shot list & Floor plan chi tiết",
+        "qty": 1,
+        "unitPrice": 1500000
+      },
+      {
+        "id": "scr_callsheet",
+        "name": "Call sheet & Lịch quay chi tiết",
+        "qty": 1,
+        "unitPrice": 800000
+      },
+      {
+        "id": "dir",
+        "name": "Đạo diễn (Director)",
+        "qty": 1,
+        "unitPrice": 8000000
+      },
+      {
+        "id": "cam_op1",
+        "name": "Camera Operator chính",
+        "qty": 1,
+        "unitPrice": 3500000
+      },
+      {
+        "id": "gaffer",
+        "name": "Gaffer (Trưởng ánh sáng)",
+        "qty": 1,
+        "unitPrice": 3000000
+      },
+      {
+        "id": "makeup",
+        "name": "Makeup Artist",
+        "qty": 1,
+        "unitPrice": 2000000
+      },
+      {
+        "id": "eq_fx3",
+        "name": "Sony FX3",
+        "qty": 1,
+        "unitPrice": 2000000
+      },
+      {
+        "id": "eq_prime3",
+        "name": "Bộ lens prime (3 ống)",
+        "qty": 1,
+        "unitPrice": 3000000
+      },
+      {
+        "id": "eq_gimbal_rs3",
+        "name": "DJI RS3 Pro Gimbal",
+        "qty": 1,
+        "unitPrice": 1000000
+      },
+      {
+        "id": "eq_tripod",
+        "name": "Tripod chuyên nghiệp (Sachtler)",
+        "qty": 1,
+        "unitPrice": 800000
+      },
+      {
+        "id": "eq_ledpanel",
+        "name": "LED Panel set (4 đèn)",
+        "qty": 1,
+        "unitPrice": 1500000
+      },
+      {
+        "id": "eq_softbox",
+        "name": "Softbox + Diffusion set",
+        "qty": 1,
+        "unitPrice": 800000
+      },
+      {
+        "id": "eq_reflector",
+        "name": "Reflector set 5-in-1",
+        "qty": 1,
+        "unitPrice": 200000
+      },
+      {
+        "id": "eq_expendables",
+        "name": "Expendables (gaffer tape, gel…)",
+        "qty": 1,
+        "unitPrice": 300000
+      },
+      {
+        "id": "eq_lav",
+        "name": "Wireless Lav Mic (bộ 2 cái)",
+        "qty": 1,
+        "unitPrice": 1000000
+      },
+      {
+        "id": "loc_studio",
+        "name": "Studio phim trường (cyclorama)",
+        "qty": 1,
+        "unitPrice": 8000000
+      },
+      {
+        "id": "food_main",
+        "name": "Suất ăn chính (cơm hộp)",
+        "qty": 6,
+        "unitPrice": 80000
+      },
+      {
+        "id": "food_teabreak",
+        "name": "Tea break (sáng + chiều)",
+        "qty": 6,
+        "unitPrice": 80000
+      },
+      {
+        "id": "food_water",
+        "name": "Nước uống bình 20L",
+        "qty": 1,
+        "unitPrice": 60000
+      },
+      {
+        "id": "trans_7",
+        "name": "Xe 7 chỗ có tài xế",
+        "qty": 1,
+        "unitPrice": 1500000
+      },
+      {
+        "id": "post_edit",
+        "name": "Lead Editor",
+        "qty": 2,
+        "unitPrice": 3500000
+      },
+      {
+        "id": "post_color_basic",
+        "name": "Color grading cơ bản",
+        "qty": 1,
+        "unitPrice": 3000000
+      },
+      {
+        "id": "post_sound_mix",
+        "name": "Mix âm thanh cơ bản",
+        "qty": 1,
+        "unitPrice": 3000000
+      },
+      {
+        "id": "post_music_lib",
+        "name": "Nhạc nền thư viện có bản quyền",
+        "qty": 1,
+        "unitPrice": 1000000
+      },
+      {
+        "id": "del_export",
+        "name": "Export nhiều định dạng (5+ files)",
+        "qty": 1,
+        "unitPrice": 1000000
+      },
+      {
+        "id": "del_cloud",
+        "name": "Cloud storage 3 tháng",
+        "qty": 1,
+        "unitPrice": 300000
+      }
+    ],
+    "date": "2026-03-10T17:07:12.648Z",
+    "contacted": false
+  }
+]
