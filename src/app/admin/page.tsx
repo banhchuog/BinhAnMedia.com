@@ -30,6 +30,8 @@ type CustomService = {
   svgIcon: string;
   qualityRef: string;
   refVideoUrl?: string;
+  unitCount?: number;
+  unitLabel?: string;
 };
 type TestimonialItem = {
   name: string;
@@ -63,7 +65,7 @@ const DEFAULT_SERVICES_SEED: CustomService[] = [
   { id: "event", label: "Event & Livestream", svgIcon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.8 11.3 2 22l10.7-3.79"/><path d="M4 3h.01"/><path d="M22 8h.01"/><path d="M15 2h.01"/><path d="M22 20h.01"/><path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10"/><path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11-.11.7-.72 1.22-1.43 1.22H17"/><path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7"/><path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z"/></svg>`, desc: "Hội nghị, sự kiện, lễ ra mắt", qualityRef: "Multi-camera (4+), đạo diễn hình, livestream chuyên nghiệp", refVideoUrl: "" },
   { id: "event_recap", label: "Recap sự kiện", svgIcon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect width="15" height="14" x="1" y="5" rx="2" ry="2"/><circle cx="8.5" cy="12" r="2.5"/></svg>`, desc: "Highlight 2-3 phút, giá tốt", qualityRef: "2 cameraman, quay + dựng gọn 2-3 ngày", refVideoUrl: "" },
   { id: "small_ad", label: "Video quảng cáo nhỏ", svgIcon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>`, desc: "Quảng cáo 15-30s, sản phẩm, F&B", qualityRef: "1 ngày quay, ekip gọn 4-5 người, studio nhỏ", refVideoUrl: "" },
-  { id: "social_bulk", label: "Gói Social 10+ video", svgIcon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>`, desc: "Combo 10+ video Reels/TikTok, tiết kiệm 30%", qualityRef: "2 ngày quay liên tục, 10+ bản cắt, giá combo tiết kiệm", refVideoUrl: "" },
+  { id: "social_bulk", label: "Gói Social 10+ video", svgIcon: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>`, desc: "Combo 10+ video Reels/TikTok, tiết kiệm 30%", qualityRef: "2 ngày quay liên tục, 10+ bản cắt, giá combo tiết kiệm", refVideoUrl: "", unitCount: 10, unitLabel: "clip" },
 ];
 
 const svgSize = (svg: string, size: number) => {
@@ -971,7 +973,7 @@ function ServicesTab({
 
   const remove = (id: string) => setList((prev) => prev.filter((s) => s.id !== id));
 
-  const update = (id: string, field: keyof CustomService, val: string) => {
+  const update = (id: string, field: keyof CustomService, val: string | number | undefined) => {
     setList((prev) => prev.map((s) => (s.id === id ? { ...s, [field]: val } : s)));
   };
 
@@ -1067,6 +1069,26 @@ function ServicesTab({
                     value={s.qualityRef}
                     onChange={(e) => update(s.id, "qualityRef", e.target.value)}
                     placeholder="4K RED/ARRI, ekip 8-12 người, 2-3 ngày quay, color grade chuyên nghiệp"
+                    className="w-full bg-[#F2F2F7] border border-black/10 rounded-xl px-4 py-2.5 text-sm text-[#1C1C1E] placeholder:text-[#C7C7CC] focus:border-[#C9972A] focus:outline-none transition"
+                  />
+                </div>
+                {/* Per-unit pricing (for combo packages) */}
+                <div>
+                  <label className="text-xs text-[#8E8E93] mb-1 block">Số lượng / gói <span className="text-[#C7C7CC]">(combo)</span></label>
+                  <input
+                    type="number" min="0"
+                    value={s.unitCount ?? ""}
+                    onChange={(e) => update(s.id, "unitCount", e.target.value === "" ? undefined : parseInt(e.target.value) || 0)}
+                    placeholder="VD: 10 (cho gói 10 clip)"
+                    className="w-full bg-[#F2F2F7] border border-black/10 rounded-xl px-4 py-2.5 text-sm text-[#1C1C1E] placeholder:text-[#C7C7CC] focus:border-[#C9972A] focus:outline-none transition"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs text-[#8E8E93] mb-1 block">Tên đơn vị <span className="text-[#C7C7CC]">(combo)</span></label>
+                  <input
+                    value={s.unitLabel ?? ""}
+                    onChange={(e) => update(s.id, "unitLabel", e.target.value)}
+                    placeholder="VD: clip, video, bưới"
                     className="w-full bg-[#F2F2F7] border border-black/10 rounded-xl px-4 py-2.5 text-sm text-[#1C1C1E] placeholder:text-[#C7C7CC] focus:border-[#C9972A] focus:outline-none transition"
                   />
                 </div>
