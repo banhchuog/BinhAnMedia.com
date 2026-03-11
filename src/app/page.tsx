@@ -91,7 +91,7 @@ export default async function HomePage() {
   return (
     <>
       {/* HERO 16:9 */}
-      <section className="relative w-full aspect-[4/3] sm:aspect-video overflow-hidden bg-black">
+      <section className="relative w-full aspect-video overflow-hidden bg-black">
         {/* Poster image — shows while video loads */}
         <Image
           src="/hero-bg.jpg"
@@ -103,33 +103,33 @@ export default async function HomePage() {
         {/* YouTube autoplay muted background — thay VIDEO_ID bằng ID thực của bạn */}
         <iframe
           src={`https://www.youtube.com/embed/${heroId}?autoplay=1&mute=1&loop=1&playlist=${heroId}&controls=0&playsinline=1&modestbranding=1&rel=0`}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[115%] h-[115%] pointer-events-none"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.8%] h-full min-w-full pointer-events-none"
           allow="autoplay; encrypted-media"
           frameBorder="0"
           title="Hero background video"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
         <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/60 to-transparent" />
-        <div className="absolute inset-x-0 bottom-[6%] flex justify-center px-4">
-          <div className="flex flex-col items-center gap-4">
-            <h1 className="text-white text-center font-black text-2xl sm:text-4xl md:text-5xl tracking-[-0.03em] leading-tight drop-shadow-lg max-w-2xl">
+        <div className="absolute inset-x-0 bottom-[5%] flex justify-center px-3 sm:px-4">
+          <div className="flex flex-col items-center gap-2 sm:gap-4">
+            <h1 className="text-white text-center font-black text-base sm:text-4xl md:text-5xl tracking-[-0.03em] leading-tight drop-shadow-lg max-w-2xl">
               Sản xuất video<br className="hidden sm:block" /> chuyên nghiệp
             </h1>
-            <p className="text-white/60 text-xs sm:text-sm text-center max-w-md">
+            <p className="text-white/60 text-[10px] sm:text-sm text-center max-w-md hidden sm:block">
               TVC · MV · Phim doanh nghiệp · Social Content — Từ ý tưởng đến thành phẩm
             </p>
-            <div className="flex flex-row gap-2.5 items-center">
+            <div className="flex flex-row gap-2 items-center">
             <Link
               href="/quote"
-              className="inline-flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold px-5 py-2.5 rounded-full text-[13px] hover:bg-[#B8841E] transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 bg-[#C9972A] text-black font-bold px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-[11px] sm:text-[13px] hover:bg-[#B8841E] transition-colors"
             >
-              Báo giá ngay <ArrowRight size={12} strokeWidth={2.5} />
+              Báo giá ngay <ArrowRight size={10} strokeWidth={2.5} className="sm:hidden" /><ArrowRight size={12} strokeWidth={2.5} className="hidden sm:block" />
             </Link>
             <Link
               href="/showreel"
-              className="inline-flex items-center justify-center gap-2 border border-white/20 text-white px-5 py-2.5 rounded-full text-[13px] hover:border-white/45 transition-colors font-medium"
+              className="inline-flex items-center justify-center gap-1.5 border border-white/20 text-white px-4 py-2 sm:px-5 sm:py-2.5 rounded-full text-[11px] sm:text-[13px] hover:border-white/45 transition-colors font-medium"
             >
-              <Play size={10} fill="currentColor" className="flex-shrink-0" /> Xem showreel
+              <Play size={8} fill="currentColor" className="flex-shrink-0" /> Xem showreel
             </Link>
           </div>
           </div>
