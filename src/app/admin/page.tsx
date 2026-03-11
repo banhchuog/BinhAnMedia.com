@@ -85,6 +85,7 @@ export default function AdminPage() {
   const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {} });
   const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "leads" | "settings">("leads");
   const [toastMsg, setToastMsg] = useState("");
+  const [dbError, setDbError] = useState("");
 
   const toast = (msg: string) => {
     setToastMsg(msg);
@@ -113,6 +114,7 @@ export default function AdminPage() {
 
   const reloadSettings = useCallback(async () => {
     const data = await fetch("/api/admin/settings").then((r) => r.json());
+    setDbError(data.dbError || "");
     setSettings({
       priceOverrides: data.priceOverrides || {},
       presets: data.presets || {},
@@ -140,7 +142,10 @@ export default function AdminPage() {
         toast("Đã lưu thành công!");
         if (partial.newPassword) setSessionPw(partial.newPassword);
       } else {
-        toast("Lỗi khi lưu, thử lại.");
+        const err = await res.json().catch(() => ({}));
+        const msg = err?.error || "Lỗi khi lưu";
+        toast(`❌ ${msg}`);
+        setDbError(msg);
       }
     },
     [sessionPw, settings],
@@ -195,6 +200,14 @@ export default function AdminPage() {
           <LogOut size={13} /> Đăng xuất
         </button>
       </header>
+
+      {/* DB error banner */}
+      {dbError && (
+        <div className="bg-red-500 text-white text-xs px-4 py-2.5 flex items-center justify-between gap-3">
+          <span>⚠️ <strong>Database chưa kết nối:</strong> {dbError} — Dữ liệu sẽ không được lưu!</span>
+          <button onClick={() => setDbError("")} className="text-white/70 hover:text-white flex-shrink-0"><X size={13} /></button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="bg-white border-b border-black/8 px-3 sm:px-6">

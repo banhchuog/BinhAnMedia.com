@@ -12,10 +12,12 @@ const EMPTY_RESPONSE = {
   customServices: [],
   testimonials: [],
   catalogEdits: {},
+  dbConnected: false,
+  dbError: "",
 };
 
 export async function GET() {
-  if (!prisma) return NextResponse.json(EMPTY_RESPONSE);
+  if (!prisma) return NextResponse.json({ ...EMPTY_RESPONSE, dbError: "DATABASE_URL chưa được cấu hình" });
 
   try {
   const settings = await prisma.settings.findUnique({ where: { id: 1 } });
@@ -52,6 +54,8 @@ export async function GET() {
     customServices: settings.customServices,
     testimonials: settings.testimonials,
     catalogEdits: settings.catalogEdits,
+    dbConnected: true,
+    dbError: "",
     videos: videos.map((v) => ({
       id: v.id, title: v.title, cat: v.cat, client: v.client,
       year: v.year, views: v.views, duration: v.duration, ytId: v.ytId,
@@ -60,6 +64,7 @@ export async function GET() {
   });
   } catch (e) {
     console.error("[settings] DB error:", e);
-    return NextResponse.json(EMPTY_RESPONSE);
+    const msg = e instanceof Error ? e.message : String(e);
+    return NextResponse.json({ ...EMPTY_RESPONSE, dbError: msg });
   }
 }
