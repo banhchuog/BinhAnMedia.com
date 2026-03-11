@@ -754,9 +754,9 @@ function QuoteBuilder() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => submitToApi()}
-                className="w-full flex items-center justify-center gap-2.5 bg-[#0068FF] text-white font-bold py-4 rounded-2xl hover:bg-[#0057D9] active:bg-[#0057D9] transition-all text-sm"
+                className="w-full flex items-center justify-center gap-2.5 bg-white/8 border border-white/12 text-white font-bold py-4 rounded-2xl hover:bg-white/12 active:bg-white/15 transition-all text-sm"
               >
-                <svg viewBox="0 0 48 48" className="w-5 h-5 flex-shrink-0" fill="none"><circle cx="24" cy="24" r="24" fill="white"/><path d="M24 8C15.163 8 8 14.716 8 23c0 4.682 2.26 8.87 5.818 11.668L12.5 39l5.19-2.595A17.1 17.1 0 0 0 24 38c8.837 0 16-6.716 16-15S32.837 8 24 8Z" fill="#0068FF"/><path d="M18.5 20.5h-2v5h2v-5ZM25.75 20.5h-2v3l-2-3h-1.5v5h1.5v-3l2 3h2v-5ZM31.5 22h-2v-1.5h-2v5h2V24h2v-2Z" fill="white"/></svg>
+                <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z"/></svg>
                 Nhắn ngay qua Zalo
               </a>
               <button onClick={downloadQuote}
