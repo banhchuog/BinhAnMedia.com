@@ -83,13 +83,33 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [sessionPw, setSessionPw] = useState("");
   const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {} });
-  const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "leads" | "settings">("homepage");
+  const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "leads" | "settings">("leads");
   const [toastMsg, setToastMsg] = useState("");
 
   const toast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(""), 3000);
   };
+
+  // Auto-restore login from localStorage
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("admin_pw") : null;
+    if (!saved || authed) return;
+    fetch("/api/admin/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password: saved }),
+    }).then(async (r) => {
+      if (r.ok) {
+        setSessionPw(saved);
+        await reloadSettings();
+        setAuthed(true);
+      } else {
+        localStorage.removeItem("admin_pw");
+      }
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const reloadSettings = useCallback(async () => {
     const data = await fetch("/api/admin/settings").then((r) => r.json());
@@ -138,6 +158,7 @@ export default function AdminPage() {
           if (res.ok) {
             setSessionPw(pw);
             await reloadSettings();
+            localStorage.setItem("admin_pw", pw);
             setAuthed(true);
             return true;
           }
@@ -148,12 +169,12 @@ export default function AdminPage() {
   }
 
   const TABS = [
+    { id: "leads" as const,    label: "Khách hàng",       Icon: Users },
     { id: "homepage" as const, label: "Trang chủ",       Icon: Home },
     { id: "prices" as const,   label: "Giá cả",          Icon: DollarSign },
     { id: "presets" as const,  label: "Gói mặc định",     Icon: Package },
     { id: "services" as const, label: "Dịch vụ",         Icon: Sparkles },
     { id: "videos" as const,   label: "Video Showreel",   Icon: Video },
-    { id: "leads" as const,    label: "Khách hàng",       Icon: Users },
     { id: "settings" as const, label: "Cài đặt",          Icon: Settings },
   ];
 
@@ -168,7 +189,7 @@ export default function AdminPage() {
           <span className="font-black text-[#1C1C1E] text-xs sm:text-sm truncate">Admin — Bình An Media</span>
         </div>
         <button
-          onClick={() => { setAuthed(false); setSessionPw(""); }}
+          onClick={() => { setAuthed(false); setSessionPw(""); localStorage.removeItem("admin_pw"); }}
           className="flex items-center gap-1.5 text-xs text-[#8E8E93] hover:text-[#1C1C1E] transition"
         >
           <LogOut size={13} /> Đăng xuất
