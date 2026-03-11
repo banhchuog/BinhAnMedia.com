@@ -721,15 +721,15 @@ function QuoteBuilder() {
             </div>
 
             <div>
-              <label className="text-[11px] sm:text-xs text-white/40 mb-1.5 block">Họ và tên *</label>
+              <label className="text-[13px] sm:text-sm text-white/60 mb-2 block font-medium">Tên của anh/chị?</label>
               <input required value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })}
-                placeholder="Nguyễn Văn A"
+                placeholder="Ví dụ: Anh Minh, Chị Lan…"
                 className="w-full bg-[#1C1C1E] border border-white/10 rounded-xl px-4 py-3.5 sm:py-3 text-white text-[15px] sm:text-sm placeholder:text-white/20 focus:border-[#C9972A] focus:outline-none transition"
               />
             </div>
 
             <div>
-              <label className="text-[11px] sm:text-xs text-white/40 mb-1.5 block">Số điện thoại *</label>
+              <label className="text-[13px] sm:text-sm text-white/60 mb-2 block font-medium">Số Zalo / điện thoại liên hệ?</label>
               <input required value={contact.phone} onChange={(e) => setContact({ ...contact, phone: e.target.value })}
                 placeholder="0901 234 567" inputMode="tel"
                 className="w-full bg-[#1C1C1E] border border-white/10 rounded-xl px-4 py-3.5 sm:py-3 text-white text-[15px] sm:text-sm placeholder:text-white/20 focus:border-[#C9972A] focus:outline-none transition"
@@ -737,9 +737,9 @@ function QuoteBuilder() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="text-[11px] sm:text-xs text-white/40 mb-1.5 block">Ghi chú thêm về dự án</label>
+              <label className="text-[13px] sm:text-sm text-white/60 mb-2 block font-medium">Anh/chị có lưu ý gì thêm không?</label>
               <textarea value={contact.note} onChange={(e) => setContact({ ...contact, note: e.target.value })}
-                rows={3} placeholder="Mô tả thêm ý tưởng, timeline, yêu cầu đặc biệt…"
+                rows={3} placeholder="Timeline, ý tưởng, yêu cầu đặc biệt… (không bắt buộc)"
                 className="w-full bg-[#1C1C1E] border border-white/10 rounded-xl px-4 py-3.5 sm:py-3 text-white text-[15px] sm:text-sm placeholder:text-white/20 focus:border-[#C9972A] focus:outline-none transition resize-none"
               />
             </div>
