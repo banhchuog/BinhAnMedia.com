@@ -90,9 +90,54 @@ export default async function HomePage() {
   const { heroId, clientLogos, founder, testimonials } = await getPageData();
   return (
     <>
-      {/* HERO 16:9 */}
-      <section className="relative w-full aspect-video overflow-hidden bg-black">
-        {/* Poster image — shows while video loads */}
+      {/* HERO */}
+      {/* Mobile: video trên, chữ dưới — Desktop: overlay */}
+      <div className="sm:hidden">
+        {/* Mobile video — full width 16:9 */}
+        <div className="relative w-full aspect-video overflow-hidden bg-black">
+          <Image
+            src="/hero-bg.jpg"
+            alt="Cinema camera on location"
+            fill
+            priority
+            className="object-cover object-[50%_55%]"
+          />
+          <iframe
+            src={`https://www.youtube.com/embed/${heroId}?autoplay=1&mute=1&loop=1&playlist=${heroId}&controls=0&playsinline=1&modestbranding=1&rel=0`}
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.8%] h-full min-w-full pointer-events-none"
+            allow="autoplay; encrypted-media"
+            frameBorder="0"
+            title="Hero background video"
+          />
+          <div className="absolute inset-0 bg-black/20" />
+        </div>
+        {/* Mobile text + CTA — bên dưới video */}
+        <div className="bg-[#080808] px-5 pt-6 pb-7 flex flex-col items-center gap-4">
+          <h1 className="text-white text-center font-black text-[28px] leading-[1.12] tracking-tight">
+            Sản xuất video chuyên nghiệp
+          </h1>
+          <p className="text-white/55 text-[13px] font-medium text-center leading-relaxed tracking-wide">
+            TVC · MV · Phim doanh nghiệp
+          </p>
+          <div className="flex flex-row gap-3 w-full mt-1">
+            <Link
+              href="/quote"
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold px-4 py-3.5 rounded-full text-[14px] active:scale-95 transition-transform shadow-lg shadow-black/30"
+            >
+              Báo giá ngay <ArrowRight size={15} strokeWidth={2.5} />
+            </Link>
+            <Link
+              href="/showreel"
+              className="flex-1 inline-flex items-center justify-center gap-2 border border-white/15 bg-white/5 text-white px-4 py-3.5 rounded-full text-[14px] font-medium active:scale-95 transition-transform"
+            >
+              <Play size={13} fill="currentColor" className="text-[#C9972A]" /> Xem portfolio
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop overlay hero */}
+      <section className="relative w-full aspect-video overflow-hidden bg-black hidden sm:block">
         <Image
           src="/hero-bg.jpg"
           alt="Cinema camera on location"
@@ -100,7 +145,6 @@ export default async function HomePage() {
           priority
           className="object-cover object-[50%_55%]"
         />
-        {/* YouTube autoplay muted background — thay VIDEO_ID bằng ID thực của bạn */}
         <iframe
           src={`https://www.youtube.com/embed/${heroId}?autoplay=1&mute=1&loop=1&playlist=${heroId}&controls=0&playsinline=1&modestbranding=1&rel=0`}
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.8%] h-full min-w-full pointer-events-none"
@@ -110,28 +154,28 @@ export default async function HomePage() {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
         <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/60 to-transparent" />
-        <div className="absolute inset-x-0 bottom-[8%] sm:bottom-[10%] flex justify-center px-4 sm:px-6">
-          <div className="flex flex-col items-center gap-3 sm:gap-6 pb-2 sm:pb-8 w-full max-w-4xl mx-auto">
-            <h1 className="text-white text-center font-black text-[27px] leading-[1.12] sm:text-5xl md:text-6xl tracking-tight sm:leading-[1.1] drop-shadow-xl">
-              Sản xuất video<br className="hidden sm:block" /> chuyên nghiệp
+        <div className="absolute inset-x-0 bottom-[10%] flex justify-center px-6">
+          <div className="flex flex-col items-center gap-6 pb-8 w-full max-w-4xl mx-auto">
+            <h1 className="text-white text-center font-black text-5xl md:text-6xl tracking-tight leading-[1.1] drop-shadow-xl">
+              Sản xuất video<br /> chuyên nghiệp
             </h1>
-            <p className="text-white/80 text-[14px] sm:text-[17px] font-medium text-center max-w-[300px] sm:max-w-xl mx-auto leading-relaxed tracking-wide drop-shadow-md mb-1 sm:mb-2">
-              TVC · MV · Phim doanh nghiệp<span className="hidden sm:inline"> · Social Content — Từ ý tưởng đến thành phẩm</span>
+            <p className="text-white/80 text-[17px] font-medium text-center max-w-xl mx-auto leading-relaxed tracking-wide drop-shadow-md">
+              TVC · MV · Phim doanh nghiệp · Social Content — Từ ý tưởng đến thành phẩm
             </p>
-            <div className="flex flex-row gap-3 items-center w-full justify-center px-2 sm:px-0 max-w-[340px] sm:max-w-none mx-auto">
-            <Link
-              href="/quote"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold px-5 py-3.5 sm:px-9 sm:py-4 rounded-full text-[14px] sm:text-base hover:bg-[#DBA93A] transition-all shadow-xl shadow-black/40 active:scale-95"
-            >
-              Báo giá ngay <ArrowRight size={16} strokeWidth={2.5} />
-            </Link>
-            <Link
-              href="/showreel"
-              className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 border border-white/20 bg-black/40 backdrop-blur-md text-white px-5 py-3.5 sm:px-9 sm:py-4 rounded-full text-[14px] sm:text-base hover:bg-white/10 transition-all font-medium active:scale-95"
-            >
-              <Play size={13} fill="currentColor" className="text-[#C9972A]" /> Xem portfolio
-            </Link>
-          </div>
+            <div className="flex flex-row gap-4 items-center">
+              <Link
+                href="/quote"
+                className="inline-flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold px-9 py-4 rounded-full text-base hover:bg-[#DBA93A] transition-all shadow-xl shadow-black/40"
+              >
+                Báo giá ngay <ArrowRight size={16} strokeWidth={2.5} />
+              </Link>
+              <Link
+                href="/showreel"
+                className="inline-flex items-center justify-center gap-2 border border-white/20 bg-black/40 backdrop-blur-md text-white px-9 py-4 rounded-full text-base hover:bg-white/10 transition-all font-medium"
+              >
+                <Play size={14} fill="currentColor" className="text-[#C9972A]" /> Xem portfolio
+              </Link>
+            </div>
           </div>
         </div>
       </section>
