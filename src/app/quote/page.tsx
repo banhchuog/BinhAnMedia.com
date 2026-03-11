@@ -3,7 +3,7 @@
 import { useState, useMemo, Suspense, useEffect } from "react";
 import {
   Plus, Minus, Trash2, ChevronDown, ChevronUp,
-  Send, Loader2, Check, X, Download,
+  Send, Loader2, Check, X, Download, MessageCircleMore,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -754,9 +754,9 @@ function QuoteBuilder() {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => submitToApi()}
-                className="w-full flex items-center justify-center gap-2.5 bg-white/8 border border-white/12 text-white font-bold py-4 rounded-2xl hover:bg-white/12 active:bg-white/15 transition-all text-sm"
+                className="w-full flex items-center justify-center gap-2.5 bg-sky-500/15 border border-sky-400/25 text-sky-300 font-bold py-4 rounded-2xl hover:bg-sky-500/25 hover:border-sky-400/40 active:bg-sky-500/30 transition-all text-sm"
               >
-                <svg viewBox="0 0 24 24" className="w-5 h-5 flex-shrink-0" fill="currentColor"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2Z"/></svg>
+                <MessageCircleMore size={18} />
                 Nhắn ngay qua Zalo
               </a>
               <button onClick={downloadQuote}
