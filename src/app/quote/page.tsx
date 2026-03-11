@@ -350,10 +350,14 @@ function QuoteBuilder() {
   return (
     <div className="pt-20 min-h-screen bg-[#0A0A0A]">
       {/* Header */}
-      <div className="border-b border-white/6 py-5 sm:py-10 px-4 sm:px-6 text-center">
-        <p className="text-[#C9972A] text-[10px] sm:text-xs font-semibold tracking-widest uppercase mb-1 sm:mb-2">Báo giá</p>
-        <h1 className="text-2xl sm:text-4xl font-black text-white mb-1 sm:mb-2">Tạo báo giá chi tiết</h1>
-        <p className="text-white/40 text-[11px] sm:text-sm leading-relaxed">Chọn dự án → xem hạng mục → tuỳ chỉnh theo nhu cầu</p>
+      <div className="border-b border-white/6 py-3 sm:py-10 px-4 sm:px-6 text-center">
+        <p className="text-[#C9972A] text-[10px] sm:text-xs font-semibold tracking-widest uppercase mb-0.5 sm:mb-2">Báo giá</p>
+        <h1 className="text-xl sm:text-4xl font-black text-white mb-0 sm:mb-2">
+          {step === "items" && service
+            ? <>{allServices.find((s) => s.id === service)?.label || "Báo giá"}<span className="hidden sm:inline text-white/30 font-normal"> — chi tiết hạng mục</span></>
+            : "Tạo báo giá chi tiết"}
+        </h1>
+        <p className="hidden sm:block text-white/40 text-[11px] sm:text-sm leading-relaxed mt-1">Chọn dự án → xem hạng mục → tuỳ chỉnh theo nhu cầu</p>
       </div>
 
       {/* Step indicator */}
@@ -402,52 +406,26 @@ function QuoteBuilder() {
               <button
                 key={s.id}
                 onClick={() => loadPreset(s.id)}
-                className={`group w-full p-4 sm:p-5 rounded-2xl border transition-all text-left flex items-start gap-3 sm:gap-4 ${
+                className={`group w-full aspect-square rounded-2xl border transition-all text-left flex flex-col p-4 ${
                   isBudget
-                    ? "bg-[#0F1A12] border-emerald-500/15 hover:border-emerald-400/50 hover:bg-emerald-500/8"
-                    : "bg-[#161616] border-white/8 hover:border-[#C9972A]/50 hover:bg-[#C9972A]/8"
+                    ? "bg-[#0F1A12] border-emerald-500/15 active:border-emerald-400/50 active:bg-emerald-500/8 hover:border-emerald-400/50 hover:bg-emerald-500/8"
+                    : "bg-[#161616] border-white/8 active:border-[#C9972A]/50 active:bg-[#C9972A]/8 hover:border-[#C9972A]/50 hover:bg-[#C9972A]/8"
                 }`}
               >
-                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition mt-0.5 [&>svg]:w-[18px] [&>svg]:h-[18px] ${
+                {/* Icon */}
+                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center flex-shrink-0 transition [&>svg]:w-[20px] [&>svg]:h-[20px] ${
                   isBudget
                     ? "bg-emerald-500/10 border-emerald-500/20 group-hover:bg-emerald-500/20 text-emerald-400"
                     : "bg-[#C9972A]/10 border-[#C9972A]/20 group-hover:bg-[#C9972A]/20 text-[#C9972A]"
                 }`} dangerouslySetInnerHTML={{ __html: s.svgIcon }} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-white font-bold text-sm sm:text-base">{s.label}</span>
-                    {s.est > 0 && (() => {
-                      const isCombo = s.unitCount && s.unitCount > 1;
-                      const perUnit = isCombo ? s.est / s.unitCount! : null;
-                      return (
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
-                          isBudget
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-[#C9972A]/15 text-[#C9972A]"
-                        }`}>
-                          {isCombo
-                            ? `~${(perUnit! / 1_000_000).toFixed(1).replace(/\.0$/, "")}tr/${s.unitLabel || "unit"}`
-                            : `~${(s.est / 1_000_000).toFixed(0)}tr`}
-                        </span>
-                      );
-                    })()}
-                  </div>
-                  {/* Combo secondary line */}
-                  {s.est > 0 && s.unitCount && s.unitCount > 1 && (
-                    <div className={`text-[10px] font-medium mt-0.5 ${isBudget ? "text-emerald-400/60" : "text-[#C9972A]/60"}` }>
-                      = {(s.est / 1_000_000).toFixed(0)}tr / gói {s.unitCount} {s.unitLabel || "unit"}
-                    </div>
-                  )}
-                  <div className="text-white/40 text-xs mt-0.5">{s.desc}</div>
-                  {s.qualityRef && (
-                    <div className={`text-[10px] mt-2 leading-relaxed border-t pt-2 ${
-                      isBudget
-                        ? "text-emerald-400/50 border-emerald-500/10"
-                        : "text-[#C9972A]/60 border-white/6"
-                    }`}>
-                      ⚡ {s.qualityRef}
-                    </div>
-                  )}
+
+                {/* Spacer */}
+                <div className="flex-1" />
+
+                {/* Name + desc */}
+                <div>
+                  <div className="text-white font-bold text-[15px] leading-snug mb-1">{s.label}</div>
+                  <div className="text-white/40 text-[12px] leading-relaxed">{s.desc}</div>
                 </div>
               </button>
             );
@@ -469,7 +447,7 @@ function QuoteBuilder() {
                   <span className="text-[10px] text-emerald-400/50">dưới 60 triệu</span>
                   <div className="flex-1 h-px bg-emerald-500/10" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                <div className="grid grid-cols-2 gap-3 mb-6">
                   {budget.map((s) => renderCard(s, "budget"))}
                 </div>
               </>
@@ -484,7 +462,7 @@ function QuoteBuilder() {
                   <span className="text-[10px] text-[#C9972A]/50">từ 60 triệu</span>
                   <div className="flex-1 h-px bg-[#C9972A]/15" />
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {premium.map((s) => renderCard(s, "premium"))}
                 </div>
               </>
@@ -504,7 +482,7 @@ function QuoteBuilder() {
               <div className="mb-4 bg-[#161616] border border-white/8 rounded-2xl overflow-hidden">
                 <div className="aspect-video w-full">
                   <iframe
-                    src={`https://www.youtube.com/embed/${svcVid}?rel=0`}
+                    src={`https://www.youtube.com/embed/${svcVid}?rel=0&autoplay=1&mute=1&playsinline=1`}
                     className="w-full h-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
