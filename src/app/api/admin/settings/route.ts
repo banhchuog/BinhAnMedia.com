@@ -45,7 +45,7 @@ export async function GET() {
   }
 
   // IDs permanently removed from DEFAULT_SERVICE_OPTIONS — strip them from DB response
-  const REMOVED_SERVICE_IDS = new Set(["social", "event"]);
+  const REMOVED_SERVICE_IDS = new Set(["social", "event", "mini_tvc", "micro_tvc", "small_ad"]);
   const cleanedServices = Array.isArray(settings.customServices)
     ? (settings.customServices as { id: string }[]).filter((s) => !REMOVED_SERVICE_IDS.has(s.id))
     : settings.customServices;
