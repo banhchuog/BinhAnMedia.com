@@ -525,10 +525,10 @@ function QuoteBuilder() {
                           {Math.round(subtotal / selectedSvc.unitCount).toLocaleString("vi-VN")}
                           <span className="text-sm sm:text-lg font-bold text-[#C9972A]/60 ml-0.5">đ/{selectedSvc.unitLabel || "unit"}</span>
                         </p>
-                        <p className="text-[10px] sm:text-xs text-white/40 mt-1">
-                          = <span className="text-white/60 font-semibold">{subtotal.toLocaleString("vi-VN")}đ</span> / cả gói {selectedSvc.unitCount} {selectedSvc.unitLabel || "unit"}
+                        <p className="text-xs sm:text-sm text-white/55 mt-1 font-medium">
+                          = <span className="text-white/80 font-bold">{subtotal.toLocaleString("vi-VN")}đ</span> / cả gói {selectedSvc.unitCount} {selectedSvc.unitLabel || "unit"}
                         </p>
-                        <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5">{items.length} hạng mục · chưa bao gồm VAT 8%</p>
+                        <p className="text-[11px] sm:text-sm text-white/45 mt-0.5">{items.length} hạng mục · chưa bao gồm VAT 8%</p>
                       </>
                     ) : (
                       <>
@@ -537,7 +537,7 @@ function QuoteBuilder() {
                           {subtotal.toLocaleString("vi-VN")}
                           <span className="text-sm sm:text-lg font-bold text-[#C9972A]/60 ml-0.5">đ</span>
                         </p>
-                        <p className="text-[9px] sm:text-[11px] text-white/25 mt-0.5 sm:mt-1.5">{items.length} hạng mục · chưa bao gồm VAT 8%</p>
+                        <p className="text-[11px] sm:text-sm text-white/45 mt-0.5 sm:mt-1.5">{items.length} hạng mục · chưa bao gồm VAT 8%</p>
                       </>
                     )}
                   </div>
