@@ -92,7 +92,7 @@ export default async function HomePage() {
     <>
       {/* HERO */}
       {/* Mobile: video trên, chữ dưới — Desktop: overlay */}
-      <div className="w-full max-w-5xl mx-auto">
+      <div className="w-full max-w-7xl mx-auto">
       <div className="sm:hidden">
         {/* Mobile video — full width 16:9 */}
         <div className="relative w-full aspect-video overflow-hidden bg-black">

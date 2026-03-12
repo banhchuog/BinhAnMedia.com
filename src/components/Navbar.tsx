@@ -29,7 +29,7 @@ export default function Navbar() {
           : "bg-transparent"
       }`}
     >
-      <nav className="max-w-5xl mx-auto px-6 flex items-center justify-between h-[56px]">
+      <nav className="max-w-7xl mx-auto px-6 flex items-center justify-between h-[56px]">
         {/* Logo */}
         <Link href="/" className="group flex items-baseline gap-0.5 select-none">
           <span className="font-black text-[15px] tracking-[-0.03em] transition-colors text-white">BinhAn</span><span className="font-black text-[15px] tracking-[-0.03em] text-[#C9972A]">Media</span><span className="font-semibold text-[11px] text-[#C9972A]/70 tracking-[-0.01em]">.com</span>
