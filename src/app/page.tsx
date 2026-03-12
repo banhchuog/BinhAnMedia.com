@@ -247,30 +247,6 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="bg-[#111] py-16 sm:py-24 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10 sm:mb-14">
-            <p className="eyebrow mb-2">Đánh giá</p>
-            <h2 className="text-[clamp(2rem,4vw,3rem)] font-black text-white tracking-[-0.03em] leading-tight">
-              Khách hàng nói gì
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {testimonials.map((t) => (
-              <div key={t.name} className="bg-[#1C1C1E] border border-white/8 rounded-2xl p-5 sm:p-7 flex flex-col">
-                <span className="text-5xl leading-none text-[#C9972A]/30 font-serif select-none mb-3">&ldquo;</span>
-                <p className="text-white/60 text-sm leading-relaxed flex-1 tracking-[-0.005em]">{t.body}</p>
-                <div className="mt-6 pt-5 border-t border-white/8">
-                  <div className="font-semibold text-white text-sm tracking-[-0.01em]">{t.name}</div>
-                  <div className="text-white/35 text-xs mt-0.5">{t.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* FOUNDER */}
       <section className="bg-[#0A0A0A] py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
