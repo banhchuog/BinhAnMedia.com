@@ -44,6 +44,12 @@ export async function GET() {
     });
   }
 
+  // IDs permanently removed from DEFAULT_SERVICE_OPTIONS — strip them from DB response
+  const REMOVED_SERVICE_IDS = new Set(["social", "event"]);
+  const cleanedServices = Array.isArray(settings.customServices)
+    ? (settings.customServices as { id: string }[]).filter((s) => !REMOVED_SERVICE_IDS.has(s.id))
+    : settings.customServices;
+
   return NextResponse.json({
     priceOverrides: settings.priceOverrides,
     presets: settings.presets,
@@ -51,7 +57,7 @@ export async function GET() {
     clientLogos: settings.clientLogos,
     founder: settings.founder,
     customCatalogItems: settings.customCatalogItems,
-    customServices: settings.customServices,
+    customServices: cleanedServices,
     testimonials: settings.testimonials,
     catalogEdits: settings.catalogEdits,
     dbConnected: true,

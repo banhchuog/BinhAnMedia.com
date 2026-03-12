@@ -55,7 +55,7 @@ export async function POST(req: Request) {
         ...(clientLogos !== undefined ? { clientLogos } : {}),
         ...(founder !== undefined ? { founder } : {}),
         ...(customCatalogItems !== undefined ? { customCatalogItems } : {}),
-        ...(customServices !== undefined ? { customServices } : {}),
+        ...(customServices !== undefined ? { customServices: (customServices as { id: string }[]).filter((s) => !["social", "event"].includes(s.id)) } : {}),
         ...(testimonials !== undefined ? { testimonials } : {}),
         ...(catalogEdits !== undefined ? { catalogEdits } : {}),
       },
