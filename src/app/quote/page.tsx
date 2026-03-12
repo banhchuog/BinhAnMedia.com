@@ -71,6 +71,7 @@ function QuoteBuilder() {
   const [contact, setContact] = useState({ name: "", phone: "", note: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [step, setStep] = useState<"service" | "items" | "contact">("service");
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [customPresets, setCustomPresets] = useState<Record<string, PresetItem[]>>({});
@@ -88,7 +89,8 @@ function QuoteBuilder() {
         if (Array.isArray(data.customServices)) setCustomServices(data.customServices);
         if (data.catalogEdits) setCatalogEdits(data.catalogEdits);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setSettingsLoaded(true));
   }, []);
 
   // IDs permanently removed from defaults — never show these even if still in DB.
@@ -314,6 +316,17 @@ function QuoteBuilder() {
       w.onload = () => { setTimeout(() => w.print(), 400); };
     }
   };
+
+  if (!settingsLoaded) {
+    return (
+      <div className="pt-20 min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-2 border-[#C9972A]/30 border-t-[#C9972A] rounded-full animate-spin" />
+          <p className="text-white/30 text-sm">Đang tải...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (submitted) {
     return (
