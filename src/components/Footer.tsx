@@ -40,9 +40,14 @@ export default function Footer() {
             <div>
               <h4 className="font-semibold text-white/60 mb-4 text-sm">Liên hệ</h4>
               <ul className="space-y-2.5 text-sm text-white/40">
-                <li className="flex gap-2 items-center"><Phone size={13} className="text-[#C9972A] flex-shrink-0" /><span>0901 234 567</span></li>
-                <li className="flex gap-2 items-center"><Mail size={13} className="text-[#C9972A] flex-shrink-0" /><span>hello@binhanmedia.com</span></li>
-                <li className="flex gap-2 items-start"><MapPin size={13} className="text-[#C9972A] flex-shrink-0 mt-0.5" /><span>123 Nguyễn Huệ, Q.1, TP.HCM</span></li>
+                <li className="flex gap-2 items-center"><Phone size={13} className="text-[#C9972A] flex-shrink-0" /><a href="tel:0969427639" className="hover:text-[#C9972A] transition-colors">0969 427 639</a></li>
+                <li className="flex gap-2 items-center"><Mail size={13} className="text-[#C9972A] flex-shrink-0" /><a href="mailto:Dinhconghieufilm@gmail.com" className="hover:text-[#C9972A] transition-colors">Dinhconghieufilm@gmail.com</a></li>
+                <li className="flex gap-2 items-start"><MapPin size={13} className="text-[#C9972A] flex-shrink-0 mt-0.5" />
+                  <span>Trụ sở: Số 63 Đường Tôn Đức Thắng, Ấp Vĩnh An 1, Xã Trị An, Đồng Nai</span>
+                </li>
+                <li className="flex gap-2 items-start"><MapPin size={13} className="text-[#C9972A]/60 flex-shrink-0 mt-0.5" />
+                  <span>Chi nhánh: S3.05 Vinhomes Grand Park, TP.HCM</span>
+                </li>
               </ul>
             </div>
           </div>
