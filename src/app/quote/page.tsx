@@ -93,23 +93,30 @@ function QuoteBuilder() {
       .catch(() => {});
   }, []);
 
+  // All IDs that were ever default services (including removed ones).
+  // Used to distinguish "stale removed defaults" from "admin-added custom services".
+  const KNOWN_DEFAULT_IDS = new Set(["tvc", "mv", "corporate", "social", "event", "event_recap", "mini_tvc", "micro_tvc", "small_ad", "social_bulk"]);
+
   // Always show defaults; if admin saved a full list (containing all default IDs), use that instead.
   // Any extras from admin (IDs not in defaults) are appended.
   const allServices: ServiceDef[] = useMemo(() => {
     if (customServices.length === 0) return DEFAULT_SERVICE_OPTIONS;
+    const defaultIds = new Set(DEFAULT_SERVICE_OPTIONS.map((d) => d.id));
     const defaultMap = new Map(DEFAULT_SERVICE_OPTIONS.map((d) => [d.id, d]));
     const savedIds = new Set(customServices.map((s) => s.id));
     const hasAllDefaults = DEFAULT_SERVICE_OPTIONS.every((d) => savedIds.has(d.id));
     if (hasAllDefaults) {
-      // Admin saved the full list — use it, but fill in any missing fields from defaults
-      return customServices.map((s) => {
-        const def = defaultMap.get(s.id);
-        return {
-          ...s,
-          unitCount: (s as ServiceDef & { unitCount?: number }).unitCount ?? def?.unitCount,
-          unitLabel: (s as ServiceDef & { unitLabel?: string }).unitLabel ?? def?.unitLabel,
-        };
-      });
+      // Admin saved the full list — filter out stale removed defaults, fill in missing fields
+      return customServices
+        .filter((s) => defaultIds.has(s.id) || !KNOWN_DEFAULT_IDS.has(s.id))
+        .map((s) => {
+          const def = defaultMap.get(s.id);
+          return {
+            ...s,
+            unitCount: (s as ServiceDef & { unitCount?: number }).unitCount ?? def?.unitCount,
+            unitLabel: (s as ServiceDef & { unitLabel?: string }).unitLabel ?? def?.unitLabel,
+          };
+        });
     }
     // Partial save: keep defaults + append extras
     const extras = customServices.filter((s) => !defaultMap.has(s.id));
