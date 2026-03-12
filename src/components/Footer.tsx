@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, Youtube, Instagram } from "lucide-react";
+import { Phone, Mail, MapPin, Youtube, Instagram, Facebook } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -15,8 +15,13 @@ export default function Footer() {
               Đơn vị sản xuất video chuyên nghiệp. Mỗi khung hình là một câu chuyện.
             </p>
             <div className="flex gap-2">
-              {([{ Icon: Youtube, label: "YouTube" }, { Icon: Instagram, label: "Instagram" }]).map(({ Icon, label }) => (
-                <a key={label} href="#" aria-label={label}
+              {([
+                { Icon: Youtube, label: "YouTube", href: "#" },
+                { Icon: Instagram, label: "Instagram", href: "#" },
+                { Icon: Facebook, label: "Facebook Bình An Media", href: "https://www.facebook.com/doublecfilm" },
+                { Icon: Facebook, label: "Facebook Founder", href: "https://www.facebook.com/dinhconghieu.film/" },
+              ]).map(({ Icon, label, href }) => (
+                <a key={label} href={href} aria-label={label} target="_blank" rel="noopener noreferrer"
                   className="w-9 h-9 rounded-xl border border-white/10 flex items-center justify-center text-white/40 hover:border-[#C9972A] hover:text-[#C9972A] transition-all"
                 >
                   <Icon size={16} />
