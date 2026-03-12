@@ -157,8 +157,8 @@ export default async function HomePage() {
       </section>
       {/* Desktop text + CTA — bên dưới video */}
       <div className="bg-[#080808] hidden sm:flex flex-col items-center gap-5 px-8 pt-10 pb-10">
-        <h1 className="text-white text-center font-black text-5xl md:text-6xl tracking-tight leading-[1.1]">
-          Sản xuất video<br /> chuyên nghiệp
+        <h1 className="text-white text-center font-black text-5xl md:text-6xl tracking-tight leading-[1.1] whitespace-nowrap">
+          Sản xuất video chuyên nghiệp
         </h1>
         <p className="text-white/60 text-[17px] font-medium text-center max-w-xl mx-auto leading-relaxed tracking-wide">
           TVC · MV · Phim doanh nghiệp · Social Content — Từ ý tưởng đến thành phẩm
