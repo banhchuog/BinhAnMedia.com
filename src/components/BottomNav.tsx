@@ -13,21 +13,22 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sm:hidden fixed bottom-0 inset-x-0 z-50 bg-[#0A0A0A]/95 backdrop-blur-xl border-t border-white/10 safe-area-pb">
-      <div className="flex items-stretch h-[60px]">
-        {tabs.map(({ href, label, Icon }) => {
+    <nav className="sm:hidden fixed bottom-5 inset-x-0 z-50 flex justify-center pointer-events-none">
+      <div className="pointer-events-auto flex items-stretch bg-[#141414]/95 backdrop-blur-xl border border-white/12 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden h-[58px]">
+        {tabs.map(({ href, label, Icon }, idx) => {
           const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors
-                ${active ? "text-[#C9972A]" : "text-white/40 active:text-white/80"}`}
+              className={`relative flex flex-col items-center justify-center gap-0.5 px-7 transition-colors
+                ${active ? "text-[#C9972A]" : "text-white/40 active:text-white/70"}
+                ${idx > 0 ? "border-l border-white/8" : ""}`}
             >
               <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
               <span className="text-[10px] font-medium tracking-wide">{label}</span>
               {active && (
-                <span className="absolute bottom-0 w-8 h-0.5 bg-[#C9972A] rounded-full" />
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[#C9972A] rounded-full" />
               )}
             </Link>
           );

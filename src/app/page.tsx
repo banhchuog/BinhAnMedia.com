@@ -352,15 +352,6 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-      <div className="fixed bottom-5 left-4 z-[90] sm:hidden">
-        <Link
-          href="/quote"
-          className="flex items-center gap-2 bg-[#C9972A] text-black px-4 py-3 rounded-full shadow-2xl shadow-[#C9972A]/20 border border-white/20 font-bold text-[13px] active:scale-95 transition-transform"
-        >
-          <Calculator size={16} strokeWidth={2.5} />
-          Báo giá
-        </Link>
-      </div>
     </>
   );
 }
