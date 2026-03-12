@@ -114,11 +114,11 @@ export default async function HomePage() {
         </div>
         {/* Mobile text + CTA — bên dưới video */}
         <div className="bg-[#080808] px-5 pt-6 pb-7 flex flex-col items-center gap-4">
-          <h1 className="text-white text-center font-black text-[28px] leading-[1.12] tracking-tight">
+          <h1 className="text-white text-center font-black text-[22px] leading-[1.15] tracking-tight whitespace-nowrap">
             Sản xuất video chuyên nghiệp
           </h1>
           <p className="text-white/55 text-[13px] font-medium text-center leading-relaxed tracking-wide">
-            TVC · MV · Phim doanh nghiệp
+            TVC · MV · Phim doanh nghiệp · Recap · Phóng sự
           </p>
           <div className="flex flex-row gap-3 w-full mt-1">
             <Link
