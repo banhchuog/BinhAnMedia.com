@@ -92,6 +92,7 @@ export default async function HomePage() {
     <>
       {/* HERO */}
       {/* Mobile: video trên, chữ dưới — Desktop: overlay */}
+      <div className="w-full max-w-5xl mx-auto">
       <div className="sm:hidden">
         {/* Mobile video — full width 16:9 */}
         <div className="relative w-full aspect-video overflow-hidden bg-black">
@@ -137,7 +138,7 @@ export default async function HomePage() {
       </div>
 
       {/* Desktop overlay hero */}
-      <section className="relative w-full aspect-video overflow-hidden bg-black hidden sm:block">
+      <section className="relative w-full aspect-video overflow-hidden bg-black hidden sm:block rounded-b-xl">
         <Image
           src="/hero-bg.jpg"
           alt="Cinema camera on location"
@@ -179,6 +180,7 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+      </div>{/* end max-w-5xl hero wrapper */}
 
       {/* CLIENT LOGOS */}
       {clientLogos.length > 0 && (
