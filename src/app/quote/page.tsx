@@ -380,13 +380,24 @@ function QuoteBuilder() {
             const labels = ["Chọn dịch vụ", "Tuỳ chỉnh hạng mục", "Thông tin & Liên hệ"];
             const done = (step === "items" && i === 0) || (step === "contact" && i <= 1);
             const active = step === s;
+            // Can navigate back freely; can go forward only if that step is reachable
+            const canClick =
+              (s === "service") ||
+              (s === "items" && (step === "contact" || (step === "items" && !!service))) ||
+              (s === "contact" && step === "contact");
             return (
               <div key={s} className="flex items-center gap-1">
-                <div className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-medium transition-all whitespace-nowrap ${active ? "bg-[#C9972A] text-white" : done ? "bg-[#C9972A]/20 text-[#C9972A]" : "bg-white/6 text-white/40"}`}>
+                <button
+                  onClick={() => canClick ? setStep(s) : undefined}
+                  disabled={!canClick}
+                  className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-xs font-medium transition-all whitespace-nowrap
+                    ${active ? "bg-[#C9972A] text-white" : done ? "bg-[#C9972A]/20 text-[#C9972A] hover:bg-[#C9972A]/35 cursor-pointer" : "bg-white/6 text-white/40"}
+                    ${canClick && !active ? "cursor-pointer active:scale-95" : "cursor-default"}`}
+                >
                   {done ? <Check size={10} /> : <span>{i + 1}</span>}
                   <span className="hidden xs:inline sm:inline">{labels[i]}</span>
                   <span className="xs:hidden">{["Dịch vụ", "Hạng mục", "Liên hệ"][i]}</span>
-                </div>
+                </button>
                 {i < 2 && <div className="w-4 sm:w-6 h-px bg-white/8" />}
               </div>
             );
