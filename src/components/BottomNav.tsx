@@ -13,23 +13,22 @@ export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sm:hidden fixed bottom-5 inset-x-0 z-50 flex justify-center pointer-events-none">
-      <div className="pointer-events-auto flex items-stretch bg-[#141414]/95 backdrop-blur-xl border border-white/12 rounded-2xl shadow-2xl shadow-black/60 overflow-hidden h-[58px]">
-        {tabs.map(({ href, label, Icon }, idx) => {
+    <nav className="sm:hidden fixed bottom-6 inset-x-0 z-50 flex justify-center pointer-events-none">
+      <div className="pointer-events-auto flex items-center gap-1 bg-[#161616]/96 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl shadow-black/70 px-2 py-2">
+        {tabs.map(({ href, label, Icon }) => {
           const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className={`relative flex flex-col items-center justify-center gap-0.5 px-7 transition-colors
-                ${active ? "text-[#C9972A]" : "text-white/40 active:text-white/70"}
-                ${idx > 0 ? "border-l border-white/8" : ""}`}
+              className={`relative flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-full transition-all
+                ${active
+                  ? "bg-[#C9972A]/15 text-[#C9972A]"
+                  : "text-white/40 active:bg-white/8 active:text-white/70"
+                }`}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-              <span className="text-[10px] font-medium tracking-wide">{label}</span>
-              {active && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-0.5 bg-[#C9972A] rounded-full" />
-              )}
+              <Icon size={19} strokeWidth={active ? 2.5 : 1.8} />
+              <span className={`text-[10px] font-semibold tracking-wide leading-none ${active ? "text-[#C9972A]" : "text-white/35"}`}>{label}</span>
             </Link>
           );
         })}
