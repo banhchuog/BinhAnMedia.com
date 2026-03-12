@@ -933,26 +933,25 @@ function ServicesTab({
   videos: VideoItem[];
   onSave: (services: CustomService[]) => Promise<void>;
 }) {
-  // Always start with defaults, then merge in any saved customizations
+  // IDs permanently removed from defaults — never show these even if still in DB.
+  const REMOVED_SERVICE_IDS = new Set(["social", "event", "small_ad", "mini_tvc", "micro_tvc"]);
+
+  // Robust merge — deploy-safe:
+  // 1. Always start from current DEFAULT_SERVICES_SEED (new defaults always appear after deploy)
+  // 2. Overlay saved DB values on top (admin edits persist across deploys)
+  // 3. Append admin-created custom services (not in defaults, not removed)
   const mergeWithDefaults = useCallback((saved: CustomService[]) => {
-    if (saved.length === 0) return DEFAULT_SERVICES_SEED.map((s) => ({ ...s }));
     const defaultMap = new Map(DEFAULT_SERVICES_SEED.map((s) => [s.id, s]));
-    const savedIds = new Set(saved.map((s) => s.id));
-    const hasDefaults = DEFAULT_SERVICES_SEED.every((d) => savedIds.has(d.id));
-    if (hasDefaults) {
-      // Merge: saved values win, but fill in any missing fields (unitCount, unitLabel…) from seed defaults
-      return saved.map((s) => {
-        const def = defaultMap.get(s.id);
-        return def ? {
-          ...s,
-          unitCount: s.unitCount ?? def.unitCount,
-          unitLabel: s.unitLabel ?? def.unitLabel,
-        } : s;
-      });
-    }
-    // Partial save: defaults + any extras not in defaults
-    const extras = saved.filter((s) => !defaultMap.has(s.id));
-    return [...DEFAULT_SERVICES_SEED.map((s) => ({ ...s })), ...extras];
+    const savedMap = new Map(saved.map((s) => [s.id, s]));
+    // Step 1+2: every current default, overlaid with saved customisation
+    const merged = DEFAULT_SERVICES_SEED.map((def) => {
+      const sv = savedMap.get(def.id);
+      if (!sv) return { ...def };
+      return { ...def, ...sv, unitCount: sv.unitCount ?? def.unitCount, unitLabel: sv.unitLabel ?? def.unitLabel };
+    });
+    // Step 3: purely admin-created services (not a default, not removed)
+    const extras = saved.filter((s) => !defaultMap.has(s.id) && !REMOVED_SERVICE_IDS.has(s.id));
+    return [...merged, ...extras];
   }, []);
 
   const [list, setList] = useState<CustomService[]>(() => mergeWithDefaults(customServices));

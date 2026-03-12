@@ -91,34 +91,33 @@ function QuoteBuilder() {
       .catch(() => {});
   }, []);
 
-  // All IDs that were ever default services (including removed ones).
-  // Used to distinguish "stale removed defaults" from "admin-added custom services".
-  const KNOWN_DEFAULT_IDS = new Set(["tvc", "mv", "corporate", "social", "event", "event_recap", "mini_tvc", "micro_tvc", "small_ad", "social_bulk"]);
+  // IDs permanently removed from defaults — never show these even if still in DB.
+  const REMOVED_SERVICE_IDS = new Set(["social", "event", "small_ad", "mini_tvc", "micro_tvc"]);
 
-  // Always show defaults; if admin saved a full list (containing all default IDs), use that instead.
-  // Any extras from admin (IDs not in defaults) are appended.
+  // Robust merge:
+  // 1. Start with ALL current defaults (so new defaults added in code always appear)
+  // 2. Overlay saved DB customisations on top (admin edits win)
+  // 3. Append admin-created custom services (not in defaults)
+  // 4. Strip permanently-removed IDs
   const allServices: ServiceDef[] = useMemo(() => {
-    if (customServices.length === 0) return DEFAULT_SERVICE_OPTIONS;
-    const defaultIds = new Set(DEFAULT_SERVICE_OPTIONS.map((d) => d.id));
     const defaultMap = new Map(DEFAULT_SERVICE_OPTIONS.map((d) => [d.id, d]));
-    const savedIds = new Set(customServices.map((s) => s.id));
-    const hasAllDefaults = DEFAULT_SERVICE_OPTIONS.every((d) => savedIds.has(d.id));
-    if (hasAllDefaults) {
-      // Admin saved the full list — filter out stale removed defaults, fill in missing fields
-      return customServices
-        .filter((s) => defaultIds.has(s.id) || !KNOWN_DEFAULT_IDS.has(s.id))
-        .map((s) => {
-          const def = defaultMap.get(s.id);
-          return {
-            ...s,
-            unitCount: (s as ServiceDef & { unitCount?: number }).unitCount ?? def?.unitCount,
-            unitLabel: (s as ServiceDef & { unitLabel?: string }).unitLabel ?? def?.unitLabel,
-          };
-        });
-    }
-    // Partial save: keep defaults + append extras
-    const extras = customServices.filter((s) => !defaultMap.has(s.id));
-    return [...DEFAULT_SERVICE_OPTIONS, ...extras];
+    const savedMap = new Map(customServices.map((s) => [s.id, s]));
+    // Step 1+2: defaults with saved overlay
+    const merged: ServiceDef[] = DEFAULT_SERVICE_OPTIONS.map((def) => {
+      const saved = savedMap.get(def.id);
+      if (!saved) return def;
+      return {
+        ...def,
+        ...saved,
+        unitCount: (saved as ServiceDef & { unitCount?: number }).unitCount ?? def.unitCount,
+        unitLabel: (saved as ServiceDef & { unitLabel?: string }).unitLabel ?? def.unitLabel,
+      };
+    });
+    // Step 3: admin-only custom services (not a known default, not removed)
+    const extras = customServices.filter(
+      (s) => !defaultMap.has(s.id) && !REMOVED_SERVICE_IDS.has(s.id)
+    );
+    return [...merged, ...extras];
   }, [customServices]);
 
   const allCatalog = useMemo(() => [...CATALOG, ...customCatalogItems], [customCatalogItems]);
