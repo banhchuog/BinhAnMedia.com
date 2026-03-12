@@ -138,7 +138,7 @@ export default async function HomePage() {
       </div>
 
       {/* Desktop overlay hero */}
-      <section className="relative w-full aspect-video overflow-hidden bg-black hidden sm:block rounded-b-xl">
+      <section className="relative w-full aspect-video overflow-hidden bg-black hidden sm:block">
         <Image
           src="/hero-bg.jpg"
           alt="Cinema camera on location"
@@ -153,34 +153,32 @@ export default async function HomePage() {
           frameBorder="0"
           title="Hero background video"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-transparent" />
-        <div className="absolute top-0 inset-x-0 h-28 bg-gradient-to-b from-black/60 to-transparent" />
-        <div className="absolute inset-x-0 bottom-[10%] flex justify-center px-6">
-          <div className="flex flex-col items-center gap-6 pb-8 w-full max-w-4xl mx-auto">
-            <h1 className="text-white text-center font-black text-5xl md:text-6xl tracking-tight leading-[1.1] drop-shadow-xl">
-              Sản xuất video<br /> chuyên nghiệp
-            </h1>
-            <p className="text-white/80 text-[17px] font-medium text-center max-w-xl mx-auto leading-relaxed tracking-wide drop-shadow-md">
-              TVC · MV · Phim doanh nghiệp · Social Content — Từ ý tưởng đến thành phẩm
-            </p>
-            <div className="flex flex-row gap-4 items-center">
-              <Link
-                href="/quote"
-                className="inline-flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold px-9 py-4 rounded-full text-base hover:bg-[#DBA93A] transition-all shadow-xl shadow-black/40"
-              >
-                Báo giá ngay <ArrowRight size={16} strokeWidth={2.5} />
-              </Link>
-              <Link
-                href="/showreel"
-                className="inline-flex items-center justify-center gap-2 border border-white/20 bg-black/40 backdrop-blur-md text-white px-9 py-4 rounded-full text-base hover:bg-white/10 transition-all font-medium"
-              >
-                <Play size={14} fill="currentColor" className="text-[#C9972A]" /> Xem portfolio
-              </Link>
-            </div>
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-black/20" />
       </section>
-      </div>{/* end max-w-5xl hero wrapper */}
+      {/* Desktop text + CTA — bên dưới video */}
+      <div className="bg-[#080808] hidden sm:flex flex-col items-center gap-5 px-8 pt-10 pb-10">
+        <h1 className="text-white text-center font-black text-5xl md:text-6xl tracking-tight leading-[1.1]">
+          Sản xuất video<br /> chuyên nghiệp
+        </h1>
+        <p className="text-white/60 text-[17px] font-medium text-center max-w-xl mx-auto leading-relaxed tracking-wide">
+          TVC · MV · Phim doanh nghiệp · Social Content — Từ ý tưởng đến thành phẩm
+        </p>
+        <div className="flex flex-row gap-4 items-center mt-1">
+          <Link
+            href="/quote"
+            className="inline-flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold px-9 py-4 rounded-full text-base hover:bg-[#DBA93A] transition-all shadow-xl shadow-black/40"
+          >
+            Báo giá ngay <ArrowRight size={16} strokeWidth={2.5} />
+          </Link>
+          <Link
+            href="/showreel"
+            className="inline-flex items-center justify-center gap-2 border border-white/20 bg-white/5 text-white px-9 py-4 rounded-full text-base hover:bg-white/10 transition-all font-medium"
+          >
+            <Play size={14} fill="currentColor" className="text-[#C9972A]" /> Xem portfolio
+          </Link>
+        </div>
+      </div>
+      </div>{/* end max-w-7xl hero wrapper */}
 
       {/* CLIENT LOGOS */}
       {clientLogos.length > 0 && (
