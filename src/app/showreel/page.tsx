@@ -195,11 +195,11 @@ export default function ShowreelPage() {
       {/* Preview Modal */}
       {preview && (
         <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+          className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
           onClick={() => setPreview(null)}
         >
           <div
-            className="bg-[#161616] border-t sm:border border-white/8 rounded-t-2xl sm:rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto"
+            className="bg-[#161616] border-t sm:border border-white/8 rounded-t-2xl sm:rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto mb-[84px] sm:mb-0"
             onClick={(e) => e.stopPropagation()}
           >
             {extractYtId(preview.ytId) ? (
