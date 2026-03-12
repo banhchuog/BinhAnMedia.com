@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import BottomNav from "@/components/BottomNav";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://binhanmedia.vn";
 const SITE_NAME = "Bình An Media";
@@ -128,6 +129,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-[#F2F2F7] text-[#1C1C1E] antialiased" suppressHydrationWarning>
+        <GoogleAnalytics />
         <Navbar />
         <main className="pb-[60px] sm:pb-0">{children}</main>
         <Footer />
