@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, Suspense, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Plus, Minus, Trash2, ChevronDown, ChevronUp,
   Send, Loader2, Check, X, Download, MessageCircleMore,
@@ -73,6 +74,7 @@ function QuoteBuilder() {
   const [loading, setLoading] = useState(false);
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [step, setStep] = useState<"service" | "items" | "contact">("service");
+  const router = useRouter();
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [customPresets, setCustomPresets] = useState<Record<string, PresetItem[]>>({});
   const [customCatalogItems, setCustomCatalogItems] = useState<CatalogItem[]>([]);
@@ -214,7 +216,7 @@ function QuoteBuilder() {
     setLoading(true);
     await submitToApi();
     setLoading(false);
-    setSubmitted(true);
+    router.push("/cam-on");
   };
 
   const downloadQuote = () => {
