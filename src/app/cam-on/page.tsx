@@ -1,12 +1,17 @@
+"use client";
 import Link from "next/link";
 import { CheckCircle, ArrowRight, Phone } from "lucide-react";
-
-export const metadata = {
-  title: "Cảm ơn bạn | Bình An Media",
-  description: "Chúng tôi đã nhận được yêu cầu của bạn và sẽ liên hệ trong thời gian sớm nhất.",
-};
+import { useEffect } from "react";
 
 export default function ThankYouPage() {
+  useEffect(() => {
+    if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+      (window as any).gtag("event", "conversion", {
+        send_to: "AW-18010717244/GBtoCLTCoIccELz4loxD",
+      });
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center px-5 pt-20 pb-32">
       <div className="max-w-md w-full text-center">
