@@ -6,9 +6,12 @@ import { useEffect } from "react";
 export default function ThankYouPage() {
   useEffect(() => {
     if (typeof window !== "undefined" && typeof (window as any).gtag === "function") {
+      // Google Ads conversion tag (page load)
       (window as any).gtag("event", "conversion", {
         send_to: "AW-18010717244/GBtoCLTCoIccELz4loxD",
       });
+      // GA4-linked conversion event
+      (window as any).gtag("event", "conversion_event_request_quote");
     }
   }, []);
 
