@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, Suspense, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Plus, Minus, Trash2, ChevronDown, ChevronUp,
   Send, Loader2, Check, X, Download, MessageCircleMore,
@@ -75,6 +75,7 @@ function QuoteBuilder() {
   const [settingsLoaded, setSettingsLoaded] = useState(false);
   const [step, setStep] = useState<"service" | "items" | "contact">("service");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [priceOverrides, setPriceOverrides] = useState<Record<string, number>>({});
   const [customPresets, setCustomPresets] = useState<Record<string, PresetItem[]>>({});
   const [customCatalogItems, setCustomCatalogItems] = useState<CatalogItem[]>([]);
@@ -92,7 +93,14 @@ function QuoteBuilder() {
         if (data.catalogEdits) setCatalogEdits(data.catalogEdits);
       })
       .catch(() => {})
-      .finally(() => setSettingsLoaded(true));
+      .finally(() => {
+        setSettingsLoaded(true);
+        const preselect = searchParams.get("service");
+        if (preselect) {
+          setService(preselect);
+          setStep("items");
+        }
+      });
   }, []);
 
   // IDs permanently removed from defaults — never show these even if still in DB.

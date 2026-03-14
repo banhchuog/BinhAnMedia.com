@@ -43,6 +43,22 @@ export default function Footer() {
               </ul>
             </div>
             <div>
+              <h4 className="font-semibold text-white/60 mb-4 text-sm">Dịch vụ</h4>
+              <ul className="space-y-2.5 text-sm text-white/40">
+                {[
+                  {href:"/dich-vu/quay-tvc",label:"Quay TVC"},
+                  {href:"/dich-vu/quay-mv",label:"Quay MV"},
+                  {href:"/dich-vu/phim-doanh-nghiep",label:"Phim doanh nghiệp"},
+                  {href:"/dich-vu/recap-su-kien",label:"Recap sự kiện"},
+                  {href:"/dich-vu/goi-social-video",label:"Gói Social 10+ video"},
+                ].map((l) => (
+                  <li key={l.href}>
+                    <Link href={l.href} className="hover:text-[#C9972A] transition-colors">{l.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
               <h4 className="font-semibold text-white/60 mb-4 text-sm">Liên hệ</h4>
               <ul className="space-y-2.5 text-sm text-white/40">
                 <li className="flex gap-2 items-center"><Phone size={13} className="text-[#C9972A] flex-shrink-0" /><a href="tel:0969427639" className="hover:text-[#C9972A] transition-colors">0969 427 639</a></li>
