@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, CheckCircle, Phone } from "lucide-react";
+import { prisma } from "@/lib/db";
 
 // ─── Service Data ─────────────────────────────────────────────────
 const SERVICES = [
@@ -107,9 +108,26 @@ const SERVICES = [
   },
 ];
 
-// ─── Static Params ─────────────────────────────────────────────────
-export function generateStaticParams() {
-  return SERVICES.map((s) => ({ slug: s.slug }));
+// Dynamic rendering to pick up admin refVideoUrl
+export const dynamic = "force-dynamic";
+
+// ─── Helper: get refVideoUrl from DB ────────────────────────────
+async function getRefVideoId(serviceId: string): Promise<string> {
+  try {
+    if (!prisma) return "";
+    const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+    if (!settings?.customServices) return "";
+    const services = settings.customServices as { id: string; refVideoUrl?: string }[];
+    const svc = services.find((s) => s.id === serviceId);
+    if (!svc?.refVideoUrl) return "";
+    const url = svc.refVideoUrl;
+    const m = url.match(/[?&]v=([^&]+)/) || url.match(/youtu\.be\/([^?&]+)/) || url.match(/shorts\/([^?&]+)/);
+    if (m) return m[1];
+    if (/^[A-Za-z0-9_-]{11}$/.test(url)) return url;
+    return "";
+  } catch {
+    return "";
+  }
 }
 
 // ─── Metadata ─────────────────────────────────────────────────────
@@ -142,6 +160,8 @@ export default async function ServicePage({
   const svc = SERVICES.find((s) => s.slug === slug);
   if (!svc) notFound();
 
+  const youtubeId = await getRefVideoId(svc.serviceId);
+
   return (
     <main className="min-h-screen bg-[#0A0A0A]">
       {/* Hero */}
@@ -166,12 +186,12 @@ export default async function ServicePage({
       </section>
 
       {/* Video Showreel */}
-      {svc.youtubeId && (
+      {youtubeId && (
         <section className="px-4 sm:px-6 pb-14">
           <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/8">
             <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
               <iframe
-                src={`https://www.youtube.com/embed/${svc.youtubeId}?autoplay=0&rel=0`}
+                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&rel=0`}
                 title={svc.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
