@@ -95,18 +95,13 @@ function QuoteBuilder() {
       .catch(() => {})
       .finally(() => {
         setSettingsLoaded(true);
+        const preselect = searchParams.get("service");
+        if (preselect) {
+          setService(preselect);
+          setStep("items");
+        }
       });
   }, []);
-
-  // Auto-select service from ?service= query param after settings loaded
-  useEffect(() => {
-    if (!settingsLoaded) return;
-    const preselect = searchParams.get("service");
-    if (preselect) {
-      setService(preselect);
-      setStep("items");
-    }
-  }, [settingsLoaded]);
 
   // IDs permanently removed from defaults — never show these even if still in DB.
   const REMOVED_SERVICE_IDS = new Set(["social", "event", "small_ad", "mini_tvc", "micro_tvc"]);
