@@ -5,7 +5,7 @@ import { CATALOG, GROUPS, DEFAULT_PRESETS } from "@/lib/catalog";
 import type { CatalogItem, PresetItem } from "@/lib/catalog";
 import {
   Lock, LogOut, DollarSign, Package, Video, Settings,
-  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download,
+  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download, Briefcase, Eye,
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────
@@ -82,7 +82,7 @@ export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [sessionPw, setSessionPw] = useState("");
   const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {} });
-  const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "leads" | "settings">("leads");
+  const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "leads" | "applicants" | "settings">("leads");
   const [toastMsg, setToastMsg] = useState("");
   const [dbError, setDbError] = useState("");
 
@@ -174,6 +174,7 @@ export default function AdminPage() {
 
   const TABS = [
     { id: "leads" as const,    label: "Khách hàng",       Icon: Users },
+    { id: "applicants" as const, label: "Ứng viên",       Icon: Briefcase },
     { id: "homepage" as const, label: "Trang chủ",       Icon: Home },
     { id: "prices" as const,   label: "Giá cả",          Icon: DollarSign },
     { id: "presets" as const,  label: "Gói mặc định",     Icon: Package },
@@ -272,6 +273,9 @@ export default function AdminPage() {
         )}
         {tab === "leads" && (
           <LeadsTab sessionPw={sessionPw} />
+        )}
+        {tab === "applicants" && (
+          <ApplicantsTab sessionPw={sessionPw} />
         )}
         {tab === "settings" && (
           <SettingsTab
@@ -1566,6 +1570,179 @@ function VideosTab({
 }
 
 // ─── Leads Tab ────────────────────────────────────────────────────
+// ─── Applicants Tab ───────────────────────────────────────────────
+type ApplicantData = {
+  id: string; name: string; phone: string; cvLink: string;
+  showreelLink: string; selectedSlots: string[]; note: string;
+  position: string; reviewed: boolean; date: string;
+};
+
+const POSITION_LABEL: Record<string, string> = {
+  video_editor: "Dựng phim (Video Editor)",
+};
+
+function ApplicantsTab({ sessionPw }: { sessionPw: string }) {
+  const [applicants, setApplicants] = useState<ApplicantData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expanded, setExpanded] = useState<string | null>(null);
+
+  const fetchApplicants = useCallback(async () => {
+    setLoading(true);
+    const res = await fetch(`/api/admin/applicants?password=${encodeURIComponent(sessionPw)}`);
+    if (res.ok) setApplicants(await res.json());
+    setLoading(false);
+  }, [sessionPw]);
+
+  useEffect(() => { fetchApplicants(); }, [fetchApplicants]);
+
+  const toggleReviewed = async (id: string, reviewed: boolean) => {
+    await fetch("/api/admin/applicants", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, reviewed, password: sessionPw }),
+    });
+    setApplicants((prev) => prev.map((a) => (a.id === id ? { ...a, reviewed } : a)));
+  };
+
+  const deleteApplicant = async (id: string) => {
+    if (!confirm("Xoá ứng viên này?")) return;
+    await fetch("/api/admin/applicants", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, action: "delete", password: sessionPw }),
+    });
+    setApplicants((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-40">
+        <div className="w-5 h-5 border-2 border-[#C9972A] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <div>
+          <h2 className="text-lg font-black text-[#1C1C1E]">Danh sách ứng viên</h2>
+          <p className="text-xs text-[#8E8E93] mt-0.5">{applicants.length} hồ sơ ứng tuyển</p>
+        </div>
+        <button onClick={fetchApplicants} className="flex items-center gap-1.5 text-xs text-[#8E8E93] border border-black/10 px-3 py-2 rounded-xl hover:text-[#1C1C1E] transition">
+          <RotateCcw size={12} /> Làm mới
+        </button>
+      </div>
+
+      {applicants.length === 0 ? (
+        <div className="text-center py-16 bg-white rounded-2xl border border-black/8">
+          <Briefcase size={32} className="text-[#C7C7CC] mx-auto mb-3" />
+          <p className="text-[#8E8E93] text-sm">Chưa có ứng viên nào.</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {applicants.map((app) => (
+            <div key={app.id} className={`bg-white rounded-2xl border overflow-hidden transition ${app.reviewed ? "border-green-200 bg-green-50/30" : "border-black/8"}`}>
+              <div
+                className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-black/2"
+                onClick={() => setExpanded(expanded === app.id ? null : app.id)}
+              >
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${app.reviewed ? "bg-green-100" : "bg-[#C9972A]/10"}`}>
+                  {app.reviewed
+                    ? <Check size={14} className="text-green-600" />
+                    : <Briefcase size={14} className="text-[#C9972A]" />
+                  }
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-sm text-[#1C1C1E]">{app.name}</span>
+                    <span className="text-xs text-[#C9972A] font-mono">{app.phone}</span>
+                    {app.reviewed && (
+                      <span className="text-[10px] text-green-600 bg-green-100 px-2 py-0.5 rounded-full font-medium">Đã xem</span>
+                    )}
+                  </div>
+                  <div className="text-xs text-[#8E8E93] mt-0.5">
+                    {POSITION_LABEL[app.position] || app.position}
+                    {" · "}
+                    {new Date(app.date).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    onClick={() => toggleReviewed(app.id, !app.reviewed)}
+                    className={`flex-shrink-0 text-xs px-2.5 py-1.5 rounded-xl border transition ${
+                      app.reviewed
+                        ? "border-green-200 text-green-600 hover:bg-green-50"
+                        : "border-[#C9972A]/30 text-[#C9972A] hover:bg-[#C9972A]/8"
+                    }`}
+                    title={app.reviewed ? "Bỏ đánh dấu" : "Đánh dấu đã xem"}
+                  >
+                    {app.reviewed ? <Check size={11} /> : <Eye size={11} />}
+                  </button>
+                  <button
+                    onClick={() => deleteApplicant(app.id)}
+                    className="text-[#C7C7CC] hover:text-red-500 transition p-1.5"
+                    title="Xoá"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
+                {expanded === app.id ? <ChevronUp size={14} className="text-[#8E8E93] flex-shrink-0" /> : <ChevronDown size={14} className="text-[#8E8E93] flex-shrink-0" />}
+              </div>
+              {expanded === app.id && (
+                <div className="border-t border-black/5 px-5 py-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="bg-[#F2F2F7] rounded-xl px-4 py-3">
+                      <p className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1">Số điện thoại (Zalo)</p>
+                      <a href={`tel:${app.phone}`} className="text-sm text-[#C9972A] font-medium hover:underline">{app.phone}</a>
+                    </div>
+                    <div className="bg-[#F2F2F7] rounded-xl px-4 py-3">
+                      <p className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1">Vị trí ứng tuyển</p>
+                      <p className="text-sm text-[#1C1C1E] font-medium">{POSITION_LABEL[app.position] || app.position}</p>
+                    </div>
+                  </div>
+                  {app.showreelLink && (
+                    <div className="bg-[#F2F2F7] rounded-xl px-4 py-3">
+                      <p className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1">Showreel / Portfolio</p>
+                      <a href={app.showreelLink} target="_blank" rel="noopener noreferrer" className="text-sm text-[#C9972A] font-medium hover:underline flex items-center gap-1">
+                        {app.showreelLink} <ExternalLink size={11} />
+                      </a>
+                    </div>
+                  )}
+                  {app.cvLink && (
+                    <div className="bg-[#F2F2F7] rounded-xl px-4 py-3">
+                      <p className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1">CV</p>
+                      <a href={app.cvLink} target="_blank" rel="noopener noreferrer" className="text-sm text-[#C9972A] font-medium hover:underline flex items-center gap-1">
+                        {app.cvLink} <ExternalLink size={11} />
+                      </a>
+                    </div>
+                  )}
+                  {Array.isArray(app.selectedSlots) && app.selectedSlots.length > 0 && (
+                    <div className="bg-[#F2F2F7] rounded-xl px-4 py-3">
+                      <p className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1">Khung giờ phỏng vấn</p>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {app.selectedSlots.map((slot, i) => (
+                          <span key={i} className="text-xs bg-[#C9972A]/10 text-[#C9972A] px-2.5 py-1 rounded-lg font-medium">{slot}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {app.note && (
+                    <div className="bg-[#F2F2F7] rounded-xl px-4 py-3">
+                      <p className="text-[10px] text-[#8E8E93] uppercase tracking-wider mb-1">Ghi chú</p>
+                      <p className="text-sm text-[#3C3C43]">{app.note}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 type LeadItem = { id: string; name: string; unit?: string; qty: number; unitPrice: number };
 type Lead = {
   id: string; name: string; phone: string; note?: string;
