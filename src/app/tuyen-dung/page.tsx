@@ -103,6 +103,7 @@ export default function RecruitmentPage() {
               </h2>
               <ul className="space-y-3 text-white/60 text-sm leading-relaxed">
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Dựng phim hoàn chỉnh từ footage thô: TVC, MV, phim doanh nghiệp, recap sự kiện</li>
+                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Dựng phim dài tập (phim truyện, series) và phim ngắn social (Reels, TikTok, YouTube Shorts)</li>
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Chỉnh màu (color grading) theo phong cách từng dự án</li>
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Thêm hiệu ứng, motion graphics, text animation khi cần</li>
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Làm việc trực tiếp với đạo diễn để đảm bảo vision sản phẩm</li>
@@ -132,10 +133,11 @@ export default function RecruitmentPage() {
                 <Monitor size={18} className="text-[#C9972A]" /> Quyền lợi
               </h2>
               <ul className="space-y-3 text-white/60 text-sm leading-relaxed">
-                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Lương thoả thuận theo năng lực, review định kỳ</li>
-                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Được tham gia các dự án TVC, MV lớn, có tên trong credit</li>
+                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Lương tính theo khối lượng công việc hoàn thành — hoàn toàn theo sự chăm chỉ, <strong className="text-white/80">không có lương trần</strong></li>
+                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Sau 3 tháng thử việc, review tốt sẽ vào <strong className="text-white/80">biên chế chính thức</strong> — đóng bảo hiểm xã hội, bảo hiểm y tế đầy đủ</li>
+                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Được tham gia các dự án TVC, MV lớn, phim dài tập — có tên trong credit</li>
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Môi trường trẻ, sáng tạo, không gò bó</li>
-                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Làm việc tại căn hộ studio Vinhomes Grand Park — tiện ích đầy đủ</li>
+                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Làm việc tại shophouse Vinhomes Grand Park — không gian rộng, tiện ích đầy đủ</li>
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Cơ hội học hỏi từ đạo diễn & quay phim chuyên nghiệp</li>
               </ul>
             </div>
@@ -146,7 +148,7 @@ export default function RecruitmentPage() {
                 <MapPin size={18} className="text-[#C9972A]" /> Địa điểm làm việc
               </h2>
               <p className="text-white/60 text-sm mb-4">
-                <strong className="text-white/80">S3.03 Vinhomes Grand Park</strong>, Nguyễn Xiển, Long Thạnh Mỹ, TP. Thủ Đức, TP.HCM
+                <strong className="text-white/80">Shophouse S3.03 Vinhomes Grand Park</strong>, Nguyễn Xiển, Long Thạnh Mỹ, TP. Thủ Đức, TP.HCM
               </p>
               <a
                 href="https://maps.app.goo.gl/v6iyXPa1RedXixZZA"
