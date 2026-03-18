@@ -66,7 +66,7 @@ export default function RecruitmentPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, selectedSlots: slotLabels }),
       });
-      router.push("/cam-on");
+      router.push("/cam-on-ung-tuyen");
     } catch {
       alert("Có lỗi xảy ra, vui lòng thử lại.");
     } finally {
