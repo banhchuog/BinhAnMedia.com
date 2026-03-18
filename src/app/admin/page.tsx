@@ -1570,11 +1570,11 @@ function VideosTab({
 }
 
 // ─── Leads Tab ────────────────────────────────────────────────────
-// ─── Applicants Tab ───────────────────────────────────────────────
+// ─── Applicants Tab (reuses Lead table, service="recruitment") ────
 type ApplicantData = {
   id: string; name: string; phone: string; cvLink: string;
   showreelLink: string; selectedSlots: string[]; note: string;
-  position: string; reviewed: boolean; date: string;
+  position: string; contacted: boolean; date: string;
 };
 
 const POSITION_LABEL: Record<string, string> = {
@@ -1588,25 +1588,46 @@ function ApplicantsTab({ sessionPw }: { sessionPw: string }) {
 
   const fetchApplicants = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/admin/applicants?password=${encodeURIComponent(sessionPw)}`);
-    if (res.ok) setApplicants(await res.json());
+    const res = await fetch(`/api/admin/leads?password=${encodeURIComponent(sessionPw)}`);
+    if (res.ok) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const all: any[] = await res.json();
+      const recruitment = all
+        .filter((l) => l.service === "recruitment")
+        .map((l) => {
+          const extra = (typeof l.items === "object" && !Array.isArray(l.items)) ? l.items : {};
+          return {
+            id: l.id,
+            name: l.name,
+            phone: l.phone,
+            note: l.note || "",
+            cvLink: extra.cvLink || "",
+            showreelLink: extra.showreelLink || "",
+            selectedSlots: extra.selectedSlots || [],
+            position: extra.position || "video_editor",
+            contacted: l.contacted,
+            date: l.date,
+          };
+        });
+      setApplicants(recruitment);
+    }
     setLoading(false);
   }, [sessionPw]);
 
   useEffect(() => { fetchApplicants(); }, [fetchApplicants]);
 
-  const toggleReviewed = async (id: string, reviewed: boolean) => {
-    await fetch("/api/admin/applicants", {
+  const toggleReviewed = async (id: string, contacted: boolean) => {
+    await fetch("/api/admin/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, reviewed, password: sessionPw }),
+      body: JSON.stringify({ id, contacted, password: sessionPw }),
     });
-    setApplicants((prev) => prev.map((a) => (a.id === id ? { ...a, reviewed } : a)));
+    setApplicants((prev) => prev.map((a) => (a.id === id ? { ...a, contacted } : a)));
   };
 
   const deleteApplicant = async (id: string) => {
     if (!confirm("Xoá ứng viên này?")) return;
-    await fetch("/api/admin/applicants", {
+    await fetch("/api/admin/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, action: "delete", password: sessionPw }),
@@ -1642,13 +1663,13 @@ function ApplicantsTab({ sessionPw }: { sessionPw: string }) {
       ) : (
         <div className="space-y-2">
           {applicants.map((app) => (
-            <div key={app.id} className={`bg-white rounded-2xl border overflow-hidden transition ${app.reviewed ? "border-green-200 bg-green-50/30" : "border-black/8"}`}>
+            <div key={app.id} className={`bg-white rounded-2xl border overflow-hidden transition ${app.contacted ? "border-green-200 bg-green-50/30" : "border-black/8"}`}>
               <div
                 className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-black/2"
                 onClick={() => setExpanded(expanded === app.id ? null : app.id)}
               >
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${app.reviewed ? "bg-green-100" : "bg-[#C9972A]/10"}`}>
-                  {app.reviewed
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${app.contacted ? "bg-green-100" : "bg-[#C9972A]/10"}`}>
+                  {app.contacted
                     ? <Check size={14} className="text-green-600" />
                     : <Briefcase size={14} className="text-[#C9972A]" />
                   }
@@ -1657,7 +1678,7 @@ function ApplicantsTab({ sessionPw }: { sessionPw: string }) {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-bold text-sm text-[#1C1C1E]">{app.name}</span>
                     <span className="text-xs text-[#C9972A] font-mono">{app.phone}</span>
-                    {app.reviewed && (
+                    {app.contacted && (
                       <span className="text-[10px] text-green-600 bg-green-100 px-2 py-0.5 rounded-full font-medium">Đã xem</span>
                     )}
                   </div>
@@ -1669,15 +1690,15 @@ function ApplicantsTab({ sessionPw }: { sessionPw: string }) {
                 </div>
                 <div className="flex items-center gap-1.5 flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                   <button
-                    onClick={() => toggleReviewed(app.id, !app.reviewed)}
+                    onClick={() => toggleReviewed(app.id, !app.contacted)}
                     className={`flex-shrink-0 text-xs px-2.5 py-1.5 rounded-xl border transition ${
-                      app.reviewed
+                      app.contacted
                         ? "border-green-200 text-green-600 hover:bg-green-50"
                         : "border-[#C9972A]/30 text-[#C9972A] hover:bg-[#C9972A]/8"
                     }`}
-                    title={app.reviewed ? "Bỏ đánh dấu" : "Đánh dấu đã xem"}
+                    title={app.contacted ? "Bỏ đánh dấu" : "Đánh dấu đã xem"}
                   >
-                    {app.reviewed ? <Check size={11} /> : <Eye size={11} />}
+                    {app.contacted ? <Check size={11} /> : <Eye size={11} />}
                   </button>
                   <button
                     onClick={() => deleteApplicant(app.id)}
@@ -1837,7 +1858,10 @@ function LeadsTab({ sessionPw }: { sessionPw: string }) {
   const fetchLeads = useCallback(async () => {
     setLoading(true);
     const res = await fetch(`/api/admin/leads?password=${encodeURIComponent(sessionPw)}`);
-    if (res.ok) setLeads(await res.json());
+    if (res.ok) {
+      const all: Lead[] = await res.json();
+      setLeads(all.filter((l) => l.service !== "recruitment"));
+    }
     setLoading(false);
   }, [sessionPw]);
 

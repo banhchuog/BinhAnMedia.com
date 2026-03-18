@@ -54,16 +54,4 @@ model Lead {
   createdAt DateTime @default(now())
 }
 
-// ─── Job applicants ──────────────────────────────────────────────
-model Applicant {
-  id            String   @id @default(cuid())
-  name          String
-  phone         String
-  cvLink        String   @default("")
-  showreelLink  String   @default("")
-  selectedSlots Json     @default("[]")
-  note          String   @default("")
-  position      String   @default("video_editor")
-  reviewed      Boolean  @default(false)
-  createdAt     DateTime @default(now())
-}
+
