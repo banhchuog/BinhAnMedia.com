@@ -1902,32 +1902,68 @@ function LeadsTab({ sessionPw }: { sessionPw: string }) {
     const subtotal = Math.round(lead.total / 1.1);
     const vat = lead.total - subtotal;
 
-    const header = [
+    // Build catalog lookup: id → group
+    const catalogMap = new Map<string, string>();
+    CATALOG.forEach((c) => catalogMap.set(c.id, c.group));
+
+    // Group items by catalog group
+    const grouped = new Map<string, LeadItem[]>();
+    lead.items.forEach((item) => {
+      const group = catalogMap.get(item.id) || "Khác";
+      if (!grouped.has(group)) grouped.set(group, []);
+      grouped.get(group)!.push(item);
+    });
+
+    const header: (string | number)[][] = [
       ["BÌNH AN MEDIA — BÁO GIÁ"],
-      [`Mã báo giá: ${quoteId}`, "", "", `Ngày: ${today.toLocaleDateString("vi-VN")}`],
-      [`Khách hàng: ${lead.name}`, "", "", `SĐT: ${lead.phone}`],
+      [`Mã báo giá: ${quoteId}`, "", "", "", `Ngày: ${today.toLocaleDateString("vi-VN")}`],
+      [`Khách hàng: ${lead.name}`, "", "", "", `SĐT: ${lead.phone}`],
       [`Dịch vụ: ${svcLabel}`],
       ...(lead.note ? [[`Ghi chú: ${lead.note}`]] : []),
       [],
     ];
+
     const tableHeader = ["STT", "Hạng mục", "Đơn vị", "SL", "Đơn giá (đ)", "Thành tiền (đ)"];
-    const tableRows = lead.items.map((item, i) => [
-      i + 1, item.name, item.unit || "ngày", item.qty, item.unitPrice, item.unitPrice * item.qty,
-    ]);
-    const footer = [
+    const merges: XLSX.Range[] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
+
+    // Build rows with group headers
+    const dataRows: (string | number)[][] = [];
+    let stt = 1;
+    const headerRowStart = header.length; // row index where table starts
+
+    grouped.forEach((items, groupName) => {
+      // Group header row — merge across all 6 columns
+      const groupRowIdx = headerRowStart + 1 + dataRows.length; // +1 for tableHeader
+      dataRows.push([`▸ ${groupName}`, "", "", "", "", ""]);
+      merges.push({ s: { r: groupRowIdx, c: 0 }, e: { r: groupRowIdx, c: 5 } });
+
+      // Items in this group
+      items.forEach((item) => {
+        dataRows.push([
+          stt++,
+          item.name,
+          item.unit || "ngày",
+          item.qty,
+          item.unitPrice,
+          item.unitPrice * item.qty,
+        ]);
+      });
+    });
+
+    const footer: (string | number)[][] = [
       [],
       ["", "", "", "", "Tạm tính:", subtotal],
       ["", "", "", "", "VAT (10%):", vat],
       ["", "", "", "", "TỔNG CỘNG:", lead.total],
     ];
 
-    const ws = XLSX.utils.aoa_to_sheet([...header, tableHeader, ...tableRows, ...footer]);
-    ws["!cols"] = [{wch:5},{wch:35},{wch:10},{wch:6},{wch:15},{wch:18}];
-    // Merge title row
-    ws["!merges"] = [{ s:{r:0,c:0}, e:{r:0,c:5} }];
+    const allRows = [...header, tableHeader, ...dataRows, ...footer];
+    const ws = XLSX.utils.aoa_to_sheet(allRows);
+    ws["!cols"] = [{ wch: 5 }, { wch: 40 }, { wch: 12 }, { wch: 6 }, { wch: 15 }, { wch: 18 }];
+    ws["!merges"] = merges;
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Báo giá");
-    XLSX.writeFile(wb, `BaoGia_${lead.name.replace(/\s+/g,"_")}_${quoteId}.xlsx`);
+    XLSX.writeFile(wb, `BaoGia_${lead.name.replace(/\s+/g, "_")}_${quoteId}.xlsx`);
   };
 
   const saveEdit = async () => {
