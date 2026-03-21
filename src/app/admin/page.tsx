@@ -5,8 +5,9 @@ import { CATALOG, GROUPS, DEFAULT_PRESETS } from "@/lib/catalog";
 import type { CatalogItem, PresetItem } from "@/lib/catalog";
 import {
   Lock, LogOut, DollarSign, Package, Video, Settings,
-  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download, Briefcase, Eye,
+  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download, Briefcase, Eye, FileSpreadsheet, FileText,
 } from "lucide-react";
+import * as XLSX from "xlsx";
 
 // ─── Types ────────────────────────────────────────────────────────
 type VideoItem = {
@@ -1894,6 +1895,41 @@ function LeadsTab({ sessionPw }: { sessionPw: string }) {
     if (w) w.onload = () => setTimeout(() => w.print(), 400);
   };
 
+  const downloadLeadXLSX = (lead: Lead) => {
+    const today = new Date();
+    const quoteId = `BA-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,"0")}${String(today.getDate()).padStart(2,"0")}-${String(Math.floor(Math.random()*9000)+1000)}`;
+    const svcLabel = SERVICE_LABEL_MAP[lead.service] || lead.service;
+    const subtotal = Math.round(lead.total / 1.1);
+    const vat = lead.total - subtotal;
+
+    const header = [
+      ["BÌNH AN MEDIA — BÁO GIÁ"],
+      [`Mã báo giá: ${quoteId}`, "", "", `Ngày: ${today.toLocaleDateString("vi-VN")}`],
+      [`Khách hàng: ${lead.name}`, "", "", `SĐT: ${lead.phone}`],
+      [`Dịch vụ: ${svcLabel}`],
+      ...(lead.note ? [[`Ghi chú: ${lead.note}`]] : []),
+      [],
+    ];
+    const tableHeader = ["STT", "Hạng mục", "Đơn vị", "SL", "Đơn giá (đ)", "Thành tiền (đ)"];
+    const tableRows = lead.items.map((item, i) => [
+      i + 1, item.name, item.unit || "ngày", item.qty, item.unitPrice, item.unitPrice * item.qty,
+    ]);
+    const footer = [
+      [],
+      ["", "", "", "", "Tạm tính:", subtotal],
+      ["", "", "", "", "VAT (10%):", vat],
+      ["", "", "", "", "TỔNG CỘNG:", lead.total],
+    ];
+
+    const ws = XLSX.utils.aoa_to_sheet([...header, tableHeader, ...tableRows, ...footer]);
+    ws["!cols"] = [{wch:5},{wch:35},{wch:10},{wch:6},{wch:15},{wch:18}];
+    // Merge title row
+    ws["!merges"] = [{ s:{r:0,c:0}, e:{r:0,c:5} }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Báo giá");
+    XLSX.writeFile(wb, `BaoGia_${lead.name.replace(/\s+/g,"_")}_${quoteId}.xlsx`);
+  };
+
   const saveEdit = async () => {
     if (!editingLead) return;
     setSavingEdit(true);
@@ -1953,8 +1989,16 @@ function LeadsTab({ sessionPw }: { sessionPw: string }) {
             <button
               onClick={() => downloadLead(editingLead)}
               className="flex items-center gap-1.5 text-xs text-[#8E8E93] border border-black/10 px-3 py-2 rounded-xl hover:text-[#1C1C1E] transition"
+              title="In / PDF"
             >
-              <Download size={12} /> Tải báo giá
+              <FileText size={12} /> PDF
+            </button>
+            <button
+              onClick={() => downloadLeadXLSX(editingLead)}
+              className="flex items-center gap-1.5 text-xs text-green-600 border border-green-200 px-3 py-2 rounded-xl hover:bg-green-50 transition"
+              title="Tải Excel"
+            >
+              <FileSpreadsheet size={12} /> Excel
             </button>
             <button
               onClick={saveEdit}
@@ -2106,9 +2150,16 @@ function LeadsTab({ sessionPw }: { sessionPw: string }) {
                   <button
                     onClick={() => downloadLead(lead)}
                     className="flex items-center gap-1 text-xs text-[#8E8E93] border border-black/10 px-2.5 py-1.5 rounded-xl hover:text-[#1C1C1E] hover:border-black/20 transition"
-                    title="Tải báo giá"
+                    title="In / PDF"
                   >
-                    <Download size={11} /> <span className="hidden sm:inline">Tải</span>
+                    <FileText size={11} /> <span className="hidden sm:inline">PDF</span>
+                  </button>
+                  <button
+                    onClick={() => downloadLeadXLSX(lead)}
+                    className="flex items-center gap-1 text-xs text-green-600 border border-green-200 px-2.5 py-1.5 rounded-xl hover:bg-green-50 transition"
+                    title="Tải Excel"
+                  >
+                    <FileSpreadsheet size={11} /> <span className="hidden sm:inline">Excel</span>
                   </button>
                   <button
                     onClick={() => { setEditingLead(lead); setExpanded(null); }}
