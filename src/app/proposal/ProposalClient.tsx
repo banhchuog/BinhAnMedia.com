@@ -66,7 +66,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         .set({
           margin: [0, 0, 0, 0],
           filename: `BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`,
-          html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: "#0a0a0a" },
+          html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff" },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
         })
         .from(docRef.current)
@@ -92,14 +92,14 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       <div className="no-print fixed top-5 right-5 z-50 flex items-center gap-2">
         <button
           onClick={() => setLang(l => l === "vi" ? "en" : "vi")}
-          className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold px-3 py-2 rounded-full hover:bg-white/20 transition"
+          className="flex items-center gap-1.5 bg-white border border-black/15 text-[#1a1a1a] text-xs font-bold px-3 py-2 rounded-full hover:border-[#C9972A] shadow-sm transition"
         >
           <Globe size={12} /> {vi ? "EN" : "VI"}
         </button>
         <button
           onClick={handleDownload}
           disabled={downloading}
-          className="flex items-center gap-1.5 bg-[#C9972A] text-black text-xs font-bold px-4 py-2 rounded-full hover:bg-[#dba830] transition disabled:opacity-60"
+          className="flex items-center gap-1.5 bg-[#C9972A] text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-[#b8841e] shadow transition disabled:opacity-60"
         >
           {downloading
             ? <><Loader2 size={12} className="animate-spin" /> {vi ? "Đang xuất..." : "Exporting..."}</>
@@ -108,10 +108,10 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       </div>
 
       {/* ══════════════════ DOCUMENT ═══════════════════════════ */}
-      <div ref={docRef} style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "#0a0a0a", color: "#fff" }}>
+      <div ref={docRef} style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "#ffffff", color: "#1a1a1a" }}>
 
         {/* ━━ COVER HEADER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div style={{ background: "linear-gradient(135deg,#0a0a0a,#130d02)", position: "relative", overflow: "hidden" }}>
+        <div style={{ background: "linear-gradient(135deg,#0f0f0f,#1a1005)", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#C9972A 40%,#C9972A 60%,transparent)" }} />
           <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 60%,rgba(201,151,42,0.07),transparent 65%)", pointerEvents: "none" }} />
           <div style={{ maxWidth: 900, margin: "0 auto", padding: "60px 40px 52px", textAlign: "center", position: "relative" }}>
@@ -180,9 +180,9 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                 { v: "50+",  l: vi ? "Thương hiệu" : "Brands" },
                 { v: "4K",   l: vi ? "Tiêu chuẩn" : "Standard" },
               ].map((s) => (
-                <div key={s.l} style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 16px", textAlign: "center" }}>
+                <div key={s.l} style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 14, padding: "20px 16px", textAlign: "center" }}>
                   <div style={{ fontSize: 26, fontWeight: 900, color: "#C9972A" }}>{s.v}</div>
-                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>{s.l}</div>
+                  <div style={{ fontSize: 11, color: "#9a8f82", marginTop: 4 }}>{s.l}</div>
                 </div>
               ))}
             </div>
@@ -199,9 +199,9 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
                 {clientLogos.map((url, i) => (
-                  <div key={i} style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <div key={i} style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 12, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={url} alt="" style={{ height: 28, width: "auto", maxWidth: 100, objectFit: "contain", filter: "brightness(0.7) grayscale(0.3)" }} />
+                    <img src={url} alt="" style={{ height: 28, width: "auto", maxWidth: 100, objectFit: "contain" }} />
                   </div>
                 ))}
               </div>
@@ -222,15 +222,15 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               ].map((svc) => {
                 const Icon = IconMap[svc.icon];
                 return (
-                  <div key={svc.vi} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "#111", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "16px 18px" }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(201,151,42,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
+                  <div key={svc.vi} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 14, padding: "16px 18px" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(201,151,42,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
                       {Icon && <Icon size={16} className="text-[#C9972A]" />}
                     </div>
                     <div>
-                      <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: "0 0 8px" }}>{vi ? svc.vi : svc.en}</p>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a", margin: "0 0 8px" }}>{vi ? svc.vi : svc.en}</p>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                         {svc.tags.map(t => (
-                          <span key={t} style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 999, padding: "2px 9px" }}>{t}</span>
+                          <span key={t} style={{ fontSize: 10, color: "#8a7d6e", background: "#fff", border: "1px solid #e2dbd0", borderRadius: 999, padding: "2px 9px" }}>{t}</span>
                         ))}
                       </div>
                     </div>
@@ -259,19 +259,17 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                 { n: "05", vi: ["Bàn giao",         "Chỉnh sửa theo phản hồi, xuất file chất lượng cao, bàn giao file gốc."],                 en: ["Delivery",        "Revisions, high-quality export, source files handed over."] },
               ].map((step, i) => (
                 <div key={step.n} style={{ position: "relative" }}>
-                  {/* Connector line */}
                   {i < 4 && (
                     <div style={{ position: "absolute", top: 18, left: "60%", right: "-40%", height: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.4),rgba(201,151,42,0.05))", zIndex: 0 }} />
                   )}
-                  <div style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "18px 14px", position: "relative", zIndex: 1 }}>
-                    {/* Number badge */}
-                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(201,151,42,0.12)", border: "1px solid rgba(201,151,42,0.3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                  <div style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 14, padding: "18px 14px", position: "relative", zIndex: 1 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(201,151,42,0.15)", border: "1px solid rgba(201,151,42,0.35)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
                       <span style={{ fontSize: 10, fontWeight: 900, color: "#C9972A" }}>{step.n}</span>
                     </div>
-                    <h4 style={{ fontSize: 11, fontWeight: 800, color: "#fff", margin: "0 0 6px", whiteSpace: "pre-line", lineHeight: 1.4 }}>
+                    <h4 style={{ fontSize: 11, fontWeight: 800, color: "#1a1a1a", margin: "0 0 6px", whiteSpace: "pre-line", lineHeight: 1.4 }}>
                       {vi ? step.vi[0] : step.en[0]}
                     </h4>
-                    <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", lineHeight: 1.65, margin: 0 }}>
+                    <p style={{ fontSize: 10, color: "#8a7d6e", lineHeight: 1.65, margin: 0 }}>
                       {vi ? step.vi[1] : step.en[1]}
                     </p>
                   </div>
@@ -280,18 +278,16 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             </div>
 
             {/* Storyboard visual */}
-            <div style={{ background: "#111", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, overflow: "hidden" }}>
-              {/* Header */}
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#0d0d0d" }}>
+            <div style={{ background: "#fff", border: "1px solid #e2dbd0", borderRadius: 18, overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid #ede8df", background: "#faf8f4" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ display: "flex", gap: 5 }}>
                     {["#ff5f57","#febc2e","#28c840"].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />)}
                   </div>
-                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontFamily: "monospace" }}>storyboard_v2.pdf</span>
+                  <span style={{ fontSize: 10, color: "#b0a898", fontFamily: "monospace" }}>storyboard_v2.pdf</span>
                 </div>
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)" }}>{vi ? "Ví dụ minh hoạ" : "Illustration example"}</span>
+                <span style={{ fontSize: 9, color: "#c4bbad" }}>{vi ? "Ví dụ minh hoạ" : "Illustration example"}</span>
               </div>
-              {/* Storyboard grid */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 0 }}>
                 {[
                   { shot: "01", angle: vi ? "Cảnh mở đầu" : "Opening shot",    note: vi ? "Wide — thiết lập không gian" : "Wide — establish space",     bars: [0.7, 0.4, 0.9] },
@@ -303,43 +299,33 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                   { shot: "07", angle: vi ? "Branding" : "Branding",            note: vi ? "Close-up — logo reveal" : "Close-up — logo reveal",           bars: [0.3, 0.6, 0.9] },
                   { shot: "08", angle: vi ? "Kết thúc" : "End card",            note: vi ? "Fade — CTA & tagline" : "Fade — CTA & tagline",               bars: [0.9, 0.8, 0.7] },
                 ].map((frame, idx) => (
-                  <div key={frame.shot} style={{ padding: "14px 14px 12px", borderRight: idx % 4 !== 3 ? "1px solid rgba(255,255,255,0.05)" : "none", borderBottom: idx < 4 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
-                    {/* Sketch area */}
-                    <div style={{ background: "#1a1a1a", borderRadius: 8, aspectRatio: "16/10", marginBottom: 10, position: "relative", overflow: "hidden" }}>
-                      {/* Simulated sketch lines */}
+                  <div key={frame.shot} style={{ padding: "14px 14px 12px", borderRight: idx % 4 !== 3 ? "1px solid #ede8df" : "none", borderBottom: idx < 4 ? "1px solid #ede8df" : "none", background: "#fff" }}>
+                    <div style={{ background: "#f0ece5", borderRadius: 8, aspectRatio: "16/10", marginBottom: 10, position: "relative", overflow: "hidden" }}>
                       <svg width="100%" height="100%" viewBox="0 0 160 100" preserveAspectRatio="none" style={{ position: "absolute", inset: 0 }}>
-                        {/* Sky/bg block */}
-                        <rect x="0" y="0" width="160" height={100 * frame.bars[0] * 0.45} fill="rgba(201,151,42,0.06)" rx="0"/>
-                        {/* Ground/mid block */}
-                        <rect x="0" y={100 * frame.bars[0] * 0.45} width="160" height={100 * frame.bars[1] * 0.3} fill="rgba(255,255,255,0.03)" rx="0"/>
-                        {/* Subject silhouette */}
-                        <ellipse cx={70 + frame.bars[2] * 20} cy={100 * frame.bars[0] * 0.45 - 8} rx={18 * frame.bars[2]} ry={22 * frame.bars[1]} fill="rgba(255,255,255,0.07)"/>
-                        {/* Rule-of-thirds lines */}
-                        <line x1="53" y1="0" x2="53" y2="100" stroke="rgba(201,151,42,0.12)" strokeWidth="0.5" strokeDasharray="3,3"/>
-                        <line x1="107" y1="0" x2="107" y2="100" stroke="rgba(201,151,42,0.12)" strokeWidth="0.5" strokeDasharray="3,3"/>
-                        <line x1="0" y1="33" x2="160" y2="33" stroke="rgba(201,151,42,0.12)" strokeWidth="0.5" strokeDasharray="3,3"/>
-                        <line x1="0" y1="67" x2="160" y2="67" stroke="rgba(201,151,42,0.12)" strokeWidth="0.5" strokeDasharray="3,3"/>
-                        {/* Frame border */}
-                        <rect x="1" y="1" width="158" height="98" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1"/>
-                        {/* Shot number */}
-                        <text x="6" y="13" fontSize="8" fill="rgba(201,151,42,0.6)" fontWeight="bold" fontFamily="monospace">{frame.shot}</text>
+                        <rect x="0" y="0" width="160" height={100 * frame.bars[0] * 0.45} fill="rgba(201,151,42,0.10)" rx="0"/>
+                        <rect x="0" y={100 * frame.bars[0] * 0.45} width="160" height={100 * frame.bars[1] * 0.3} fill="rgba(0,0,0,0.04)" rx="0"/>
+                        <ellipse cx={70 + frame.bars[2] * 20} cy={100 * frame.bars[0] * 0.45 - 8} rx={18 * frame.bars[2]} ry={22 * frame.bars[1]} fill="rgba(0,0,0,0.08)"/>
+                        <line x1="53" y1="0" x2="53" y2="100" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                        <line x1="107" y1="0" x2="107" y2="100" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                        <line x1="0" y1="33" x2="160" y2="33" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                        <line x1="0" y1="67" x2="160" y2="67" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                        <rect x="1" y="1" width="158" height="98" fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>
+                        <text x="6" y="13" fontSize="8" fill="rgba(201,151,42,0.7)" fontWeight="bold" fontFamily="monospace">{frame.shot}</text>
                       </svg>
-                      {/* Camera angle label */}
-                      <div style={{ position: "absolute", bottom: 5, right: 6, fontSize: 8, color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+                      <div style={{ position: "absolute", bottom: 5, right: 6, fontSize: 8, color: "rgba(0,0,0,0.25)", fontFamily: "monospace" }}>
                         {idx % 3 === 0 ? "WIDE" : idx % 3 === 1 ? "CU" : "MS"}
                       </div>
                     </div>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.7)", margin: "0 0 2px" }}>{frame.angle}</p>
-                    <p style={{ fontSize: 9, color: "rgba(255,255,255,0.28)", margin: 0, lineHeight: 1.5 }}>{frame.note}</p>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: "#3a3530", margin: "0 0 2px" }}>{frame.angle}</p>
+                    <p style={{ fontSize: 9, color: "#9a8f82", margin: 0, lineHeight: 1.5 }}>{frame.note}</p>
                   </div>
                 ))}
               </div>
-              {/* Footer note */}
-              <div style={{ padding: "10px 20px", background: "#0d0d0d", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)" }}>
+              <div style={{ padding: "10px 20px", background: "#faf8f4", borderTop: "1px solid #ede8df", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 9, color: "#b0a898" }}>
                   {vi ? "Storyboard được duyệt trước khi bắt đầu quay" : "Storyboard approved before filming begins"}
                 </span>
-                <span style={{ fontSize: 9, color: "rgba(201,151,42,0.5)" }}>Bình An Media © {new Date().getFullYear()}</span>
+                <span style={{ fontSize: 9, color: "#C9972A" }}>Bình An Media © {new Date().getFullYear()}</span>
               </div>
             </div>
           </Section>
@@ -354,10 +340,9 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                   <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.25em", margin: "0 0 14px" }}>
                     {vi ? "Frame đẹp" : "Stills"}
                   </p>
-                  {/* Masonry-style: columns, ảnh giữ tỉ lệ gốc */}
                   <div style={{ columns: 3, columnGap: 10 }}>
                     {framePhotos.map((photo) => (
-                      <div key={photo.id} style={{ breakInside: "avoid", marginBottom: 10, borderRadius: 10, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
+                      <div key={photo.id} style={{ breakInside: "avoid", marginBottom: 10, borderRadius: 10, overflow: "hidden", background: "#f5f5f5", border: "1px solid #e8e4de" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={photo.url} alt={photo.caption} style={{ width: "100%", display: "block" }} />
                       </div>
@@ -368,13 +353,12 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
 
               {btsPhotos.length > 0 && (
                 <div>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.25em", margin: "0 0 14px" }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "#9a8f82", textTransform: "uppercase", letterSpacing: "0.25em", margin: "0 0 14px" }}>
                     {vi ? "Hậu trường" : "Behind the Scenes"}
                   </p>
-                  {/* Masonry-style: columns, ảnh giữ tỉ lệ gốc */}
                   <div style={{ columns: 3, columnGap: 10 }}>
                     {btsPhotos.map((photo) => (
-                      <div key={photo.id} style={{ breakInside: "avoid", marginBottom: 10, borderRadius: 10, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
+                      <div key={photo.id} style={{ breakInside: "avoid", marginBottom: 10, borderRadius: 10, overflow: "hidden", background: "#f5f5f5", border: "1px solid #e8e4de" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={photo.url} alt={photo.caption} style={{ width: "100%", display: "block" }} />
                       </div>
@@ -398,8 +382,8 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                   {/* Category heading */}
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                     <span style={{ fontSize: 10, fontWeight: 900, background: accent, color: "#000", padding: "3px 10px", borderRadius: 999 }}>{cat}</span>
-                    <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
-                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{catVideos.length} {vi ? "video" : "videos"}</span>
+                    <div style={{ flex: 1, height: 1, background: "rgba(0,0,0,0.08)" }} />
+                    <span style={{ fontSize: 10, color: "#b0a898" }}>{catVideos.length} {vi ? "video" : "videos"}</span>
                   </div>
                   {/* Video cards */}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
@@ -408,7 +392,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                       const thumb = v.thumbnail || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "");
                       const ytUrl = ytId ? `https://www.youtube.com/watch?v=${ytId}` : undefined;
                       return (
-                        <div key={v.id} style={{ background: "#111", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        <div key={v.id} style={{ background: "#faf8f4", borderRadius: 14, overflow: "hidden", border: "1px solid #ede8df" }}>
                           {/* Thumbnail — clickable on screen */}
                           <a
                             href={ytUrl}
@@ -441,9 +425,9 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                           </div>
                           {/* Info */}
                           <div style={{ padding: "12px 14px 14px" }}>
-                            <p style={{ fontSize: 12, fontWeight: 700, color: "#fff", margin: "0 0 4px", lineHeight: 1.3 }}>{v.title}</p>
-                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", margin: 0 }}>{v.client}{v.year ? ` · ${v.year}` : ""}</p>
-                            {v.views && <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", margin: "3px 0 0" }}>{v.views}</p>}
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "#1a1a1a", margin: "0 0 4px", lineHeight: 1.3 }}>{v.title}</p>
+                            <p style={{ fontSize: 10, color: "#8a7d6e", margin: 0 }}>{v.client}{v.year ? ` · ${v.year}` : ""}</p>
+                            {v.views && <p style={{ fontSize: 10, color: "#b0a898", margin: "3px 0 0" }}>{v.views}</p>}
                           </div>
                         </div>
                       );
@@ -457,13 +441,13 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           {/* ── FOUNDER ───────────────────────────────────────── */}
           <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 2 : 1)}`} label={vi ? "Người sáng lập" : "Founder"}>
             <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 40, alignItems: "start" }}>
-              <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "#111", aspectRatio: "3/4" }}>
+              <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid #e2dbd0", background: "#f0ece5", aspectRatio: "3/4" }}>
                 {founder.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={founder.photoUrl} alt={founder.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,rgba(201,151,42,0.15),#111)" }}>
-                    <span style={{ fontSize: 52, fontWeight: 900, color: "rgba(255,255,255,0.08)" }}>
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,rgba(201,151,42,0.12),#f0ece5)" }}>
+                    <span style={{ fontSize: 52, fontWeight: 900, color: "rgba(201,151,42,0.25)" }}>
                       {founder.name.split(" ").map((w: string) => w[0]).join("")}
                     </span>
                   </div>
@@ -471,13 +455,13 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               </div>
               <div>
                 <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.3em", margin: "0 0 10px" }}>{founder.title}</p>
-                <h2 style={{ fontSize: 28, fontWeight: 900, color: "#fff", margin: "0 0 6px" }}>{founder.name}</h2>
+                <h2 style={{ fontSize: 28, fontWeight: 900, color: "#1a1a1a", margin: "0 0 6px" }}>{founder.name}</h2>
                 <p style={{ fontSize: 13, color: "#C9972A", fontWeight: 700, margin: "0 0 20px" }}>
                   {founder.experience} {vi ? "trong ngành sản xuất phim" : "in film production"}
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {founder.bio.map((p: string, i: number) => (
-                    <p key={i} style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.75, margin: 0 }}>{p}</p>
+                    <p key={i} style={{ fontSize: 13, color: "#6b6259", lineHeight: 1.75, margin: 0 }}>{p}</p>
                   ))}
                 </div>
               </div>
@@ -490,13 +474,13 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               <h2 style={headingStyle}>{vi ? "Đánh giá từ khách hàng" : "What Clients Say"}</h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
                 {testimonials.map((t, i) => (
-                  <div key={i} style={{ background: "#111", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, padding: "22px 20px" }}>
+                  <div key={i} style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 18, padding: "22px 20px" }}>
                     <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>
                       {[...Array(5)].map((_, j) => <Star key={j} size={11} fill="#C9972A" className="text-[#C9972A]" />)}
                     </div>
-                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontStyle: "italic", lineHeight: 1.7, margin: "0 0 16px" }}>&ldquo;{t.body}&rdquo;</p>
-                    <p style={{ fontSize: 12, fontWeight: 700, color: "#fff", margin: "0 0 2px" }}>{t.name}</p>
-                    <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", margin: 0 }}>{t.role}</p>
+                    <p style={{ fontSize: 12, color: "#6b6259", fontStyle: "italic", lineHeight: 1.7, margin: "0 0 16px" }}>&ldquo;{t.body}&rdquo;</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#1a1a1a", margin: "0 0 2px" }}>{t.name}</p>
+                    <p style={{ fontSize: 10, color: "#9a8f82", margin: 0 }}>{t.role}</p>
                   </div>
                 ))}
               </div>
@@ -517,12 +501,12 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               ].map((r) => {
                 const Icon = IconMap[r.icon];
                 return (
-                  <div key={r.vi[0]} style={{ background: "#111", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "20px 18px" }}>
+                  <div key={r.vi[0]} style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 16, padding: "20px 18px" }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(201,151,42,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
                       {Icon && <Icon size={15} className="text-[#C9972A]" />}
                     </div>
-                    <h3 style={{ fontSize: 12, fontWeight: 700, color: "#fff", margin: "0 0 6px" }}>{vi ? r.vi[0] : r.en[0]}</h3>
-                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", lineHeight: 1.65, margin: 0 }}>{vi ? r.vi[1] : r.en[1]}</p>
+                    <h3 style={{ fontSize: 12, fontWeight: 700, color: "#1a1a1a", margin: "0 0 6px" }}>{vi ? r.vi[0] : r.en[0]}</h3>
+                    <p style={{ fontSize: 11, color: "#6b6259", lineHeight: 1.65, margin: 0 }}>{vi ? r.vi[1] : r.en[1]}</p>
                   </div>
                 );
               })}
@@ -530,31 +514,30 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           </Section>
 
           {/* ── CTA ───────────────────────────────────────────── */}
-          <div style={{ borderRadius: 24, padding: "52px 48px", textAlign: "center", background: "linear-gradient(135deg,#0d0d0d,#1a1208)", border: "1px solid rgba(201,151,42,0.2)", position: "relative", overflow: "hidden", marginBottom: 60 }}>
-            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 0%,rgba(201,151,42,0.1),transparent 60%)", pointerEvents: "none" }} />
+          <div style={{ borderRadius: 24, padding: "52px 48px", textAlign: "center", background: "linear-gradient(135deg,#faf8f4,#f0ece5)", border: "1px solid #e2dbd0", position: "relative", overflow: "hidden", marginBottom: 60 }}>
             <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.4em", margin: "0 0 16px", position: "relative" }}>
               {vi ? "Sẵn sàng hợp tác?" : "Ready to collaborate?"}
             </p>
-            <h2 style={{ fontSize: 34, fontWeight: 900, color: "#fff", margin: "0 0 14px", position: "relative" }}>
+            <h2 style={{ fontSize: 34, fontWeight: 900, color: "#1a1a1a", margin: "0 0 14px", position: "relative" }}>
               {vi ? "Bắt đầu dự án của bạn" : "Start Your Project"}
             </h2>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", maxWidth: 400, margin: "0 auto 28px", position: "relative" }}>
+            <p style={{ fontSize: 13, color: "#6b6259", maxWidth: 400, margin: "0 auto 28px", position: "relative" }}>
               {vi ? "Liên hệ để nhận tư vấn miễn phí và báo giá chi tiết." : "Contact us for a free consultation and detailed quote."}
             </p>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#C9972A", color: "#000", fontWeight: 700, fontSize: 13, padding: "12px 28px", borderRadius: 999, position: "relative" }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#C9972A", color: "#fff", fontWeight: 700, fontSize: 13, padding: "12px 28px", borderRadius: 999, position: "relative" }}>
               {vi ? "Nhận báo giá miễn phí" : "Get a Free Quote"} <ArrowRight size={14} />
             </div>
-            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 20, position: "relative" }}>
+            <p style={{ fontSize: 11, color: "#9a8f82", marginTop: 20, position: "relative" }}>
               binhanmedia.com · 0969 427 639 · Dinhconghieufilm@gmail.com
             </p>
           </div>
 
           {/* ── FOOTER ────────────────────────────────────────── */}
-          <footer style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 28 }}>
+          <footer style={{ borderTop: "1px solid #e2dbd0", paddingTop: 28 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 32 }}>
               <div>
                 <div style={{ marginBottom: 14 }}>
-                  <span style={{ fontWeight: 900, fontSize: 18, color: "#fff" }}>BinhAn</span>
+                  <span style={{ fontWeight: 900, fontSize: 18, color: "#1a1a1a" }}>BinhAn</span>
                   <span style={{ fontWeight: 900, fontSize: 18, color: "#C9972A" }}>Media</span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 32px" }}>
@@ -564,13 +547,13 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     { Icon: Globe2, v: "binhanmedia.com" },
                     { Icon: MapPin, v: vi ? "TP. Hồ Chí Minh, Việt Nam" : "Ho Chi Minh City, Vietnam" },
                   ].map(({ Icon, v }) => (
-                    <div key={v} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "rgba(255,255,255,0.4)" }}>
+                    <div key={v} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "#6b6259" }}>
                       <Icon size={11} className="text-[#C9972A]" style={{ flexShrink: 0, color: "#C9972A" }} />{v}
                     </div>
                   ))}
                 </div>
               </div>
-              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.18)", maxWidth: 260, lineHeight: 1.7, textAlign: "right" }}>
+              <p style={{ fontSize: 10, color: "#b0a898", maxWidth: 260, lineHeight: 1.7, textAlign: "right" }}>
                 {vi
                   ? "Tài liệu này được tạo bởi hệ thống Bình An Media. Mọi thông tin mang tính tham khảo và có hiệu lực trong 15 ngày."
                   : "This document was generated by Bình An Media system. All information is for reference and valid for 15 days."}
@@ -584,7 +567,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          body { margin: 0; background: #0a0a0a; }
+          body { margin: 0; background: #ffffff; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
       `}</style>
@@ -594,19 +577,19 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
 
 // ─── Helpers ──────────────────────────────────────────────────────
 const headingStyle: React.CSSProperties = {
-  fontSize: 26, fontWeight: 900, color: "#fff", margin: 0,
+  fontSize: 26, fontWeight: 900, color: "#1a1a1a", margin: 0,
 };
 const bodyStyle: React.CSSProperties = {
-  fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.8, margin: 0,
+  fontSize: 13, color: "#6b6259", lineHeight: 1.8, margin: 0,
 };
 
 function Section({ num, label, children }: { num: string; label: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 72 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
-        <span style={{ fontSize: 10, fontWeight: 900, color: "rgba(201,151,42,0.5)", letterSpacing: "0.3em", textTransform: "uppercase" }}>{num}</span>
-        <div style={{ height: 1, flex: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.25),transparent)" }} />
-        <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.25em" }}>{label}</span>
+        <span style={{ fontSize: 10, fontWeight: 900, color: "#C9972A", letterSpacing: "0.3em", textTransform: "uppercase" }}>{num}</span>
+        <div style={{ height: 1, flex: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.3),transparent)" }} />
+        <span style={{ fontSize: 10, fontWeight: 700, color: "#b0a898", textTransform: "uppercase", letterSpacing: "0.25em" }}>{label}</span>
       </div>
       {children}
     </div>
