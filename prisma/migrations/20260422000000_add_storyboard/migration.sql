@@ -1,1 +1,0 @@
-ALTER TABLE "Settings" ADD COLUMN IF NOT EXISTS "storyboardPhotos" JSONB NOT NULL DEFAULT '[]';
