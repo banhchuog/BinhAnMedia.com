@@ -37,6 +37,8 @@ const DEFAULT_SERVICES: ServiceItem[] = [
   { iconName: "Sparkles",   title: "Motion & Animation", titleEn: "Motion & Animation",  desc: "Logo animation, explainer video, infographic động — brand motion nhất quán.",         descEn: "Logo animation, explainer videos, animated infographics — consistent brand motion." },
 ];
 
+export const dynamic = "force-dynamic";
+
 export default async function ProposalPage() {
   let heroId = "dQw4w9WgXcQ";
   let clientLogos: string[] = [];
@@ -45,66 +47,72 @@ export default async function ProposalPage() {
   let videos = DEFAULT_VIDEOS;
   let services = DEFAULT_SERVICES;
 
-  try {
-    const settings = await prisma!.settings.findUnique({ where: { id: 1 } });
-    if (settings) {
-      if (settings.heroVideoId) heroId = settings.heroVideoId;
-      if (Array.isArray(settings.clientLogos)) clientLogos = settings.clientLogos as string[];
-
-      const f = settings.founder as Record<string, unknown> | null;
-      if (f && typeof f === "object") {
-        founder = {
-          name: (f.name as string) || DEFAULT_FOUNDER.name,
-          title: (f.title as string) || DEFAULT_FOUNDER.title,
-          experience: (f.experience as string) || DEFAULT_FOUNDER.experience,
-          photoUrl: (f.photoUrl as string) || "",
-          bio: Array.isArray(f.bio) ? (f.bio as string[]) : DEFAULT_FOUNDER.bio,
-          linkUrl: (f.linkUrl as string) || undefined,
-          linkLabel: (f.linkLabel as string) || undefined,
-        };
-      }
-
-      if (Array.isArray(settings.testimonials) && settings.testimonials.length > 0) {
-        testimonials = (settings.testimonials as Record<string, string>[]).map((t) => ({
-          name: t.name || "", role: t.role || "", body: t.body || "",
+  // ── Fetch videos (independent – must not be blocked by settings error) ──
+  if (prisma) {
+    try {
+      const dbVideos = await prisma.video.findMany({ orderBy: { sortOrder: "asc" } });
+      if (dbVideos.length > 0) {
+        videos = dbVideos.map((v) => ({
+          id: String(v.id),
+          ytId: v.ytId,
+          title: v.title,
+          client: v.client || "",
+          year: v.year ? String(v.year) : "",
+          cat: v.cat || "TVC",
+          desc: v.desc || undefined,
+          views: v.views || undefined,
+          duration: v.duration || undefined,
+          thumbnail: v.thumbnail || undefined,
         }));
       }
+    } catch { /* keep DEFAULT_VIDEOS */ }
+  }
 
-      if (Array.isArray(settings.customCatalogItems) && settings.customCatalogItems.length > 0) {
-        const svcMap: Record<string, ServiceItem> = {
-          Film:       { iconName: "Film",       title: "TVC & Quảng cáo",   titleEn: "TVC & Advertising",  desc: "", descEn: "" },
-          Music:      { iconName: "Music",      title: "MV Ca nhạc",         titleEn: "Music Video",         desc: "", descEn: "" },
-          Building2:  { iconName: "Building2",  title: "Phim doanh nghiệp",  titleEn: "Corporate Film",      desc: "", descEn: "" },
-          Smartphone: { iconName: "Smartphone", title: "Social Content",     titleEn: "Social Content",      desc: "", descEn: "" },
-          Camera:     { iconName: "Camera",     title: "Event & Livestream", titleEn: "Event & Livestream",  desc: "", descEn: "" },
-          Sparkles:   { iconName: "Sparkles",   title: "Motion & Animation", titleEn: "Motion & Animation",  desc: "", descEn: "" },
-        };
-        const custom = settings.customCatalogItems as Record<string, string>[];
-        const mapped = custom.map((c) => {
-          const base = svcMap[c.icon || "Film"] || DEFAULT_SERVICES[0];
-          return { ...base, title: c.title || base.title, titleEn: c.titleEn || base.titleEn, desc: c.desc || base.desc, descEn: c.descEn || base.descEn };
-        });
-        if (mapped.length > 0) services = mapped;
+  // ── Fetch settings (independent) ────────────────────────────────────────
+  if (prisma) {
+    try {
+      const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+      if (settings) {
+        if (settings.heroVideoId) heroId = settings.heroVideoId;
+        if (Array.isArray(settings.clientLogos)) clientLogos = settings.clientLogos as string[];
+
+        const f = settings.founder as Record<string, unknown> | null;
+        if (f && typeof f === "object") {
+          founder = {
+            name: (f.name as string) || DEFAULT_FOUNDER.name,
+            title: (f.title as string) || DEFAULT_FOUNDER.title,
+            experience: (f.experience as string) || DEFAULT_FOUNDER.experience,
+            photoUrl: (f.photoUrl as string) || "",
+            bio: Array.isArray(f.bio) ? (f.bio as string[]) : DEFAULT_FOUNDER.bio,
+            linkUrl: (f.linkUrl as string) || undefined,
+            linkLabel: (f.linkLabel as string) || undefined,
+          };
+        }
+
+        if (Array.isArray(settings.testimonials) && settings.testimonials.length > 0) {
+          testimonials = (settings.testimonials as Record<string, string>[]).map((t) => ({
+            name: t.name || "", role: t.role || "", body: t.body || "",
+          }));
+        }
+
+        if (Array.isArray(settings.customCatalogItems) && settings.customCatalogItems.length > 0) {
+          const svcMap: Record<string, ServiceItem> = {
+            Film:       { iconName: "Film",       title: "TVC & Quảng cáo",   titleEn: "TVC & Advertising",  desc: "", descEn: "" },
+            Music:      { iconName: "Music",      title: "MV Ca nhạc",         titleEn: "Music Video",         desc: "", descEn: "" },
+            Building2:  { iconName: "Building2",  title: "Phim doanh nghiệp",  titleEn: "Corporate Film",      desc: "", descEn: "" },
+            Smartphone: { iconName: "Smartphone", title: "Social Content",     titleEn: "Social Content",      desc: "", descEn: "" },
+            Camera:     { iconName: "Camera",     title: "Event & Livestream", titleEn: "Event & Livestream",  desc: "", descEn: "" },
+            Sparkles:   { iconName: "Sparkles",   title: "Motion & Animation", titleEn: "Motion & Animation",  desc: "", descEn: "" },
+          };
+          const custom = settings.customCatalogItems as Record<string, string>[];
+          const mapped = custom.map((c) => {
+            const base = svcMap[c.icon || "Film"] || DEFAULT_SERVICES[0];
+            return { ...base, title: c.title || base.title, titleEn: c.titleEn || base.titleEn, desc: c.desc || base.desc, descEn: c.descEn || base.descEn };
+          });
+          if (mapped.length > 0) services = mapped;
+        }
       }
-    }
-
-    const dbVideos = await prisma!.video.findMany({ orderBy: { sortOrder: "asc" } });
-    if (dbVideos.length > 0) {
-      videos = dbVideos.map((v) => ({
-        id: String(v.id),
-        ytId: v.ytId,
-        title: v.title,
-        client: v.client || "",
-        year: v.year ? String(v.year) : "",
-        cat: v.cat || "TVC",
-        desc: v.desc || undefined,
-        views: v.views || undefined,
-        duration: v.duration || undefined,
-        thumbnail: v.thumbnail || undefined,
-      }));
-    }
-  } catch {
-    // use defaults
+    } catch { /* keep defaults */ }
   }
 
   return (
