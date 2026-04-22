@@ -66,13 +66,25 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     setDownloading(true);
     try {
       const html2pdf = (await import("html2pdf.js")).default;
+
+      // Pre-measure full content height to build a single-page PDF (no page breaks)
+      const el = docRef.current;
+      const A4_WIDTH_MM = 210;
+      const MARGIN_MM = 10;
+      const contentWidthMM = A4_WIDTH_MM - MARGIN_MM * 2;
+      const scale = 2;
+      // Pixel width of the rendered element
+      const elWidthPx = el.scrollWidth;
+      const mmPerPx = contentWidthMM / elWidthPx;
+      const totalHeightMM = el.scrollHeight * mmPerPx + MARGIN_MM * 2;
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (html2pdf() as any)
         .set({
-          margin: [10, 10, 10, 10],
+          margin: [MARGIN_MM, MARGIN_MM, MARGIN_MM, MARGIN_MM],
           filename: `BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`,
           html2canvas: {
-            scale: 2,
+            scale,
             useCORS: true,
             logging: false,
             backgroundColor: "#ffffff",
@@ -80,27 +92,17 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             allowTaint: true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             onclone: (clonedDoc: Document) => {
-              // Hide floating controls & screen-only elements
               clonedDoc.querySelectorAll<HTMLElement>(".no-print").forEach(el => { el.style.display = "none"; });
-              // Show PDF-only static elements (e.g. static thumbnail)
               clonedDoc.querySelectorAll<HTMLElement>(".pdf-only").forEach(el => { el.style.display = "block"; });
-              // Stop marquee animation to avoid blank strip
               clonedDoc.querySelectorAll<HTMLElement>(".marquee-track").forEach(el => { el.style.animation = "none"; el.style.transform = "translateX(0)"; });
-              // Remove any iframes (YouTube embeds won't render)
               clonedDoc.querySelectorAll<HTMLElement>("iframe").forEach(el => { el.remove(); });
-              // Ensure background colors print
-              clonedDoc.querySelectorAll<HTMLElement>("[style]").forEach(el => {
-                if (el.style.background || el.style.backgroundColor) {
-                  el.style.setProperty("-webkit-print-color-adjust", "exact");
-                  el.style.setProperty("print-color-adjust", "exact");
-                }
-              });
             },
           },
-          jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["css", "legacy"], avoid: ".pdf-no-break" },
+          // Custom page size = exact content height → 1 tall page, zero page breaks
+          jsPDF: { unit: "mm", format: [A4_WIDTH_MM, Math.ceil(totalHeightMM)], orientation: "portrait" },
+          pagebreak: { mode: [] },
         })
-        .from(docRef.current)
+        .from(el)
         .save();
     } catch (e) { console.error(e); }
     finally { setDownloading(false); }
