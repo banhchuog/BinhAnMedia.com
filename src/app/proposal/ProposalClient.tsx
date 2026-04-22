@@ -26,6 +26,136 @@ const CAT_COLORS: Record<string, string> = {
   Social: "#4ade80", Event: "#fbbf24", Motion: "#f472b6",
 };
 
+async function waitForImages(container: HTMLElement) {
+  const images = Array.from(container.querySelectorAll("img"));
+  await Promise.all(
+    images.map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          if (img.complete) {
+            resolve();
+            return;
+          }
+          const done = () => resolve();
+          img.addEventListener("load", done, { once: true });
+          img.addEventListener("error", done, { once: true });
+          setTimeout(done, 4000);
+        }),
+    ),
+  );
+}
+
+function prepareCloneForPdf(container: HTMLElement) {
+  container.querySelectorAll<HTMLElement>(".no-print").forEach((el) => { el.style.display = "none"; });
+  container.querySelectorAll<HTMLElement>(".pdf-only").forEach((el) => { el.style.display = "block"; });
+  container.querySelectorAll<HTMLElement>(".marquee-track").forEach((el) => {
+    el.style.animation = "none";
+    el.style.transform = "translateX(0)";
+  });
+  container.querySelectorAll<HTMLElement>("iframe").forEach((el) => { el.remove(); });
+  container.querySelectorAll<HTMLElement>("[data-pdf-section='true']").forEach((el) => {
+    el.style.breakInside = "avoid";
+    el.style.pageBreakInside = "avoid";
+  });
+}
+
+async function renderSectionCanvas(
+  node: HTMLElement,
+  html2canvas: (element: HTMLElement, options?: object) => Promise<HTMLCanvasElement>,
+) {
+  const rect = node.getBoundingClientRect();
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "fixed";
+  wrapper.style.left = "-100000px";
+  wrapper.style.top = "0";
+  wrapper.style.width = `${Math.ceil(rect.width || node.offsetWidth || 900)}px`;
+  wrapper.style.background = "#ffffff";
+  wrapper.style.zIndex = "-1";
+  wrapper.style.padding = "0";
+  wrapper.style.margin = "0";
+
+  const clone = node.cloneNode(true) as HTMLElement;
+  clone.style.margin = "0";
+  clone.style.transform = "none";
+  clone.style.width = "100%";
+  clone.style.height = "auto";
+  clone.style.overflow = "visible";
+
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  try {
+    prepareCloneForPdf(wrapper);
+    await waitForImages(wrapper);
+    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
+
+    return await html2canvas(clone, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      imageTimeout: 30000,
+      scrollX: 0,
+      scrollY: 0,
+      windowWidth: clone.scrollWidth || clone.offsetWidth,
+      windowHeight: clone.scrollHeight || clone.offsetHeight,
+    });
+  } finally {
+    wrapper.remove();
+  }
+}
+
+function appendCanvasToPdf(
+  pdf: InstanceType<NonNullable<(Awaited<typeof import("jspdf")>)['jsPDF']>>,
+  canvas: HTMLCanvasElement,
+  marginMm: number,
+  startOnNewPage: boolean,
+) {
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const contentWidth = pageWidth - marginMm * 2;
+  const contentHeight = pageHeight - marginMm * 2;
+  const mmPerPx = contentWidth / canvas.width;
+  const maxSliceHeightPx = Math.max(1, Math.floor(contentHeight / mmPerPx));
+
+  let offsetY = 0;
+  let firstSlice = true;
+
+  while (offsetY < canvas.height) {
+    if (startOnNewPage || !firstSlice) pdf.addPage();
+
+    const sliceHeightPx = Math.min(maxSliceHeightPx, canvas.height - offsetY);
+    const sliceCanvas = document.createElement("canvas");
+    sliceCanvas.width = canvas.width;
+    sliceCanvas.height = sliceHeightPx;
+
+    const ctx = sliceCanvas.getContext("2d");
+    if (!ctx) break;
+
+    ctx.drawImage(
+      canvas,
+      0,
+      offsetY,
+      canvas.width,
+      sliceHeightPx,
+      0,
+      0,
+      canvas.width,
+      sliceHeightPx,
+    );
+
+    const renderedHeightMm = sliceHeightPx * mmPerPx;
+    pdf.addImage(sliceCanvas.toDataURL("image/jpeg", 0.96), "JPEG", marginMm, marginMm, contentWidth, renderedHeightMm, undefined, "FAST");
+
+    offsetY += sliceHeightPx;
+    startOnNewPage = true;
+    firstSlice = false;
+  }
+
+  return true;
+}
+
 function extractYtId(raw: string): string {
   if (!raw) return "";
   const m = raw.match(/[?&]v=([^&]+)/) || raw.match(/youtu\.be\/([^?&]+)/) || raw.match(/shorts\/([^?&]+)/);
@@ -69,58 +199,18 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     if (!docRef.current || downloading) return;
     setDownloading(true);
     try {
-      const el = docRef.current;
       const { default: html2canvas } = await import("html2canvas");
       const jsPDFModule = await import("jspdf");
       const jsPDF = jsPDFModule.jsPDF ?? jsPDFModule.default;
+      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
+      const sections = Array.from(docRef.current.querySelectorAll<HTMLElement>("[data-pdf-section='true']"));
+      let startOnNewPage = false;
 
-      // Scroll to top and wait 2 frames + extra time for fonts/images to settle
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-      await new Promise(r => setTimeout(r, 400));
+      for (const section of sections) {
+        const canvas = await renderSectionCanvas(section, html2canvas);
+        startOnNewPage = appendCanvasToPdf(pdf, canvas, 10, startOnNewPage);
+      }
 
-      // After scroll, rect.top is the element's offset from the top of viewport
-      const rect = el.getBoundingClientRect();
-
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        imageTimeout: 30000,
-        // Explicitly set full element dimensions — fixes cutoff at gallery
-        width: el.offsetWidth,
-        height: el.scrollHeight,
-        // Anchor capture to element top-left — fixes text/vector misalignment
-        x: rect.left,
-        y: rect.top,
-        scrollX: 0,
-        scrollY: 0,
-        windowWidth: el.offsetWidth,
-        windowHeight: el.scrollHeight,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onclone: (clonedDoc: Document) => {
-          const clonedEl = clonedDoc.getElementById(el.id) ?? clonedDoc.body;
-          // Hide floating controls
-          clonedDoc.querySelectorAll<HTMLElement>(".no-print").forEach(e => { e.style.display = "none"; });
-          // Show PDF-only static thumbnails
-          clonedDoc.querySelectorAll<HTMLElement>(".pdf-only").forEach(e => { e.style.display = "block"; });
-          // Freeze marquee
-          clonedDoc.querySelectorAll<HTMLElement>(".marquee-track").forEach(e => { e.style.animation = "none"; e.style.transform = "translateX(0)"; });
-          // Remove iframes (YouTube won't render)
-          clonedDoc.querySelectorAll<HTMLElement>("iframe").forEach(e => { e.remove(); });
-          // Force full height on cloned element so nothing clips
-          clonedEl.style.height = "auto";
-          clonedEl.style.overflow = "visible";
-        },
-      });
-
-      // Build 1 tall page sized exactly to canvas — no page breaks, no clipping
-      const imgW = canvas.width;
-      const imgH = canvas.height;
-      const pdf = new jsPDF({ unit: "px", format: [imgW, imgH], orientation: "portrait", compress: true });
-      pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, imgW, imgH);
       pdf.save(`BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`);
     } catch (e) { console.error(e); }
     finally { setDownloading(false); }
@@ -162,7 +252,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       <div id="proposal-doc" ref={docRef} style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "#ffffff", color: "#1a1a1a" }}>
 
         {/* ━━ COVER HEADER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div style={{ background: "#ffffff", borderBottom: "1px solid #ede8df", position: "relative", overflow: "hidden" }}>
+        <div data-pdf-section="true" style={{ background: "#ffffff", borderBottom: "1px solid #ede8df", position: "relative", overflow: "hidden" }}>
 
           {/* Top accent line */}
           <div style={{ height: 3, background: "linear-gradient(90deg,#C9972A 0%,#e8b84b 50%,#C9972A 100%)" }} />
@@ -601,7 +691,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           </Section>
 
           {/* ── CTA ───────────────────────────────────────────── */}
-          <div style={{ borderRadius: 24, padding: "52px 48px", textAlign: "center", background: "linear-gradient(135deg,#faf8f4,#f0ece5)", border: "1px solid #e2dbd0", position: "relative", overflow: "hidden", marginBottom: 60 }}>
+          <div data-pdf-section="true" style={{ borderRadius: 24, padding: "52px 48px", textAlign: "center", background: "linear-gradient(135deg,#faf8f4,#f0ece5)", border: "1px solid #e2dbd0", position: "relative", overflow: "hidden", marginBottom: 60 }}>
             <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.4em", margin: "0 0 16px", position: "relative" }}>
               {vi ? "Sẵn sàng hợp tác?" : "Ready to collaborate?"}
             </p>
@@ -625,7 +715,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           </div>
 
           {/* ── FOOTER ────────────────────────────────────────── */}
-          <footer style={{ borderTop: "1px solid #e2dbd0", paddingTop: 28 }}>
+          <footer data-pdf-section="true" style={{ borderTop: "1px solid #e2dbd0", paddingTop: 28 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 32 }}>
               <div>
                 <div style={{ marginBottom: 14 }}>
@@ -685,7 +775,7 @@ const bodyStyle: React.CSSProperties = {
 
 function Section({ num, label, children }: { num: string; label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 56 }}>
+    <div data-pdf-section="true" style={{ marginBottom: 56 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
         <span style={{ fontSize: 10, fontWeight: 900, color: "#C9972A", letterSpacing: "0.3em", textTransform: "uppercase" }}>{num}</span>
         <div style={{ height: 1, flex: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.3),transparent)" }} />
