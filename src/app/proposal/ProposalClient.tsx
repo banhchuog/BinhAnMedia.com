@@ -48,6 +48,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
   const [downloading, setDownloading] = useState(false);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
   const [storyboardPhotos, setStoryboardPhotos] = useState<GalleryPhoto[]>([]);
+  const [ready, setReady] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
   const vi = lang === "vi";
 
@@ -58,8 +59,19 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         if (Array.isArray(d.galleryPhotos)) setGalleryPhotos(d.galleryPhotos);
         if (Array.isArray(d.storyboardPhotos)) setStoryboardPhotos(d.storyboardPhotos);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setReady(true));
   }, []);
+
+  if (!ready) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#faf8f4", gap: 16 }}>
+        <div style={{ width: 40, height: 40, border: "3px solid #ede8df", borderTop: "3px solid #C9972A", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+        <p style={{ fontSize: 13, color: "#9a8f82", fontFamily: "'Inter','Segoe UI',sans-serif" }}>Đang tải tài liệu...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
+  }
 
   const handleDownload = useCallback(async () => {
     if (!docRef.current || downloading) return;
