@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import {
-  Globe, Download, Loader2, ArrowRight,
+  Globe, Printer, ArrowRight,
   Film, Music, Building2, Smartphone, Camera, Sparkles,
   Phone, Mail, MapPin, Globe2, Award, Clock, Shield, Layers, Zap, Star,
 } from "lucide-react";
@@ -45,128 +45,6 @@ async function waitForImages(container: HTMLElement) {
   );
 }
 
-async function waitForFonts() {
-  if (typeof document !== "undefined" && "fonts" in document) {
-    try {
-      await (document as Document & { fonts: FontFaceSet }).fonts.ready;
-    } catch {}
-  }
-}
-
-function prepareCloneForPdf(container: HTMLElement) {
-  container.querySelectorAll<HTMLElement>(".no-print").forEach((el) => { el.style.display = "none"; });
-  container.querySelectorAll<HTMLElement>(".pdf-only").forEach((el) => { el.style.display = "block"; });
-  container.querySelectorAll<HTMLElement>(".marquee-track").forEach((el) => {
-    el.style.animation = "none";
-    el.style.transform = "translateX(0)";
-  });
-  container.querySelectorAll<HTMLElement>("iframe").forEach((el) => { el.remove(); });
-  container.querySelectorAll<HTMLElement>("[data-pdf-section='true']").forEach((el) => {
-    el.style.breakInside = "avoid";
-    el.style.pageBreakInside = "avoid";
-  });
-}
-
-async function renderSectionCanvas(
-  node: HTMLElement,
-  html2canvas: (element: HTMLElement, options?: object) => Promise<HTMLCanvasElement>,
-) {
-  const rect = node.getBoundingClientRect();
-  const wrapper = document.createElement("div");
-  wrapper.style.position = "fixed";
-  wrapper.style.left = "-100000px";
-  wrapper.style.top = "0";
-  wrapper.style.width = `${Math.ceil(rect.width || node.offsetWidth || 900)}px`;
-  wrapper.style.background = "#ffffff";
-  wrapper.style.zIndex = "-1";
-  wrapper.style.padding = "0";
-  wrapper.style.margin = "0";
-
-  const clone = node.cloneNode(true) as HTMLElement;
-  clone.style.margin = "0";
-  clone.style.transform = "none";
-  clone.style.width = "100%";
-  clone.style.height = "auto";
-  clone.style.overflow = "visible";
-  clone.style.background = "#ffffff";
-  clone.style.color = "#1a1a1a";
-
-  wrapper.appendChild(clone);
-  document.body.appendChild(wrapper);
-
-  try {
-    prepareCloneForPdf(wrapper);
-    await waitForFonts();
-    await waitForImages(wrapper);
-    await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
-
-    return await html2canvas(clone, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: false,
-      logging: false,
-      backgroundColor: "#ffffff",
-      imageTimeout: 30000,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: clone.scrollWidth || clone.offsetWidth,
-      windowHeight: clone.scrollHeight || clone.offsetHeight,
-    });
-  } finally {
-    wrapper.remove();
-  }
-}
-
-function appendCanvasToPdf(
-  pdf: InstanceType<NonNullable<(Awaited<typeof import("jspdf")>)['jsPDF']>>,
-  canvas: HTMLCanvasElement,
-  marginMm: number,
-  startOnNewPage: boolean,
-) {
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const contentWidth = pageWidth - marginMm * 2;
-  const contentHeight = pageHeight - marginMm * 2;
-  const mmPerPx = contentWidth / canvas.width;
-  const maxSliceHeightPx = Math.max(1, Math.floor(contentHeight / mmPerPx));
-
-  let offsetY = 0;
-  let firstSlice = true;
-
-  while (offsetY < canvas.height) {
-    if (startOnNewPage || !firstSlice) pdf.addPage();
-
-    const sliceHeightPx = Math.min(maxSliceHeightPx, canvas.height - offsetY);
-    const sliceCanvas = document.createElement("canvas");
-    sliceCanvas.width = canvas.width;
-    sliceCanvas.height = sliceHeightPx;
-
-    const ctx = sliceCanvas.getContext("2d");
-    if (!ctx) break;
-
-    ctx.drawImage(
-      canvas,
-      0,
-      offsetY,
-      canvas.width,
-      sliceHeightPx,
-      0,
-      0,
-      canvas.width,
-      sliceHeightPx,
-    );
-
-    const renderedHeightMm = sliceHeightPx * mmPerPx;
-    pdf.addImage(sliceCanvas.toDataURL("image/png"), "PNG", marginMm, marginMm, contentWidth, renderedHeightMm, undefined, "FAST");
-
-    offsetY += sliceHeightPx;
-    startOnNewPage = true;
-    firstSlice = false;
-  }
-
-  return true;
-}
-
 function extractYtId(raw: string): string {
   if (!raw) return "";
   const m = raw.match(/[?&]v=([^&]+)/) || raw.match(/youtu\.be\/([^?&]+)/) || raw.match(/shorts\/([^?&]+)/);
@@ -188,7 +66,6 @@ interface Props {
 
 export default function ProposalClient({ heroId, clientLogos, founder, testimonials, videos, services, galleryPhotos, storyboardPhotos }: Props) {
   const [lang, setLang] = useState<Lang>("vi");
-  const [downloading, setDownloading] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
   const vi = lang === "vi";
 
@@ -207,25 +84,10 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
   const safeStoryboardPhotos = Array.isArray(storyboardPhotos) ? storyboardPhotos.filter((item): item is GalleryPhoto => Boolean(item) && typeof item === "object" && typeof item.url === "string" && item.url.length > 0) : [];
 
   const handleDownload = useCallback(async () => {
-    if (!docRef.current || downloading) return;
-    setDownloading(true);
-    try {
-      const { default: html2canvas } = await import("html2canvas");
-      const jsPDFModule = await import("jspdf");
-      const jsPDF = jsPDFModule.jsPDF ?? jsPDFModule.default;
-      const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait", compress: true });
-      const sections = Array.from(docRef.current.querySelectorAll<HTMLElement>("[data-pdf-section='true']"));
-      let startOnNewPage = false;
-
-      for (const section of sections) {
-        const canvas = await renderSectionCanvas(section, html2canvas);
-        startOnNewPage = appendCanvasToPdf(pdf, canvas, 10, startOnNewPage);
-      }
-
-      pdf.save(`BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`);
-    } catch (e) { console.error(e); }
-    finally { setDownloading(false); }
-  }, [lang, downloading]);
+    if (!docRef.current) return;
+    await waitForImages(docRef.current);
+    window.print();
+  }, []);
 
   const dateStr = new Date().toLocaleDateString(vi ? "vi-VN" : "en-GB", { day: "2-digit", month: "long", year: "numeric" });
 
@@ -250,12 +112,9 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         </button>
         <button
           onClick={handleDownload}
-          disabled={downloading}
           className="flex items-center gap-1.5 bg-[#C9972A] text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-[#b8841e] shadow transition disabled:opacity-60"
         >
-          {downloading
-            ? <><Loader2 size={12} className="animate-spin" /> {vi ? "Đang xuất..." : "Exporting..."}</>
-            : <><Download size={12} /> {vi ? "Tải PDF" : "Download PDF"}</>}
+          <><Printer size={12} /> {vi ? "In / Lưu PDF" : "Print / Save PDF"}</>
         </button>
       </div>
 
@@ -764,6 +623,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
         @media print {
+          @page { size: A4; margin: 10mm; }
           .no-print { display: none !important; }
           .pdf-only { display: block !important; }
           body { margin: 0; background: #ffffff; }
