@@ -244,8 +244,112 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             </div>
           </Section>
 
+          {/* ── PRODUCTION PROCESS ───────────────────────────── */}
+          <Section num="03" label={vi ? "Quy trình sản xuất" : "Production Process"}>
+            <h2 style={headingStyle}>{vi ? "Chúng tôi làm việc như thế nào" : "How We Work"}</h2>
+            <p style={{ ...bodyStyle, marginTop: 10, marginBottom: 36 }}>
+              {vi
+                ? "Mỗi dự án được thực hiện theo quy trình 5 bước chuẩn hoá — minh bạch, đúng hẹn và luôn có sự phê duyệt của khách hàng trước khi chuyển giai đoạn."
+                : "Every project follows a standardised 5-step process — transparent, on-schedule, and with client approval at every stage before moving forward."}
+            </p>
+
+            {/* Steps */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10, marginBottom: 40 }}>
+              {[
+                { n: "01", vi: ["Khởi động",       "Brief, mục tiêu, ngân sách. Ký hợp đồng & thanh toán đợt 1."],                          en: ["Kickoff",         "Brief, goals, budget. Contract signing & first payment."] },
+                { n: "02", vi: ["Ý tưởng &\nKịch bản", "Concept, script, storyboard chi tiết. Duyệt với khách hàng."],                       en: ["Concept &\nScript", "Concept, script, detailed storyboard. Client approval."] },
+                { n: "03", vi: ["Sản xuất",         "Quay phim theo call sheet. Khách hàng có thể theo dõi trực tiếp."],                      en: ["Production",      "Shoot per call sheet. Client can observe on-set."] },
+                { n: "04", vi: ["Hậu kỳ",           "Dựng, color grade, âm thanh, motion. Gửi bản nháp để góp ý."],                          en: ["Post-Production", "Edit, color grade, sound, motion. Draft sent for feedback."] },
+                { n: "05", vi: ["Bàn giao",         "Chỉnh sửa theo phản hồi, xuất file chất lượng cao, bàn giao file gốc."],                 en: ["Delivery",        "Revisions, high-quality export, source files handed over."] },
+              ].map((step, i) => (
+                <div key={step.n} style={{ position: "relative" }}>
+                  {/* Connector line */}
+                  {i < 4 && (
+                    <div style={{ position: "absolute", top: 18, left: "60%", right: "-40%", height: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.4),rgba(201,151,42,0.05))", zIndex: 0 }} />
+                  )}
+                  <div style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "18px 14px", position: "relative", zIndex: 1 }}>
+                    {/* Number badge */}
+                    <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(201,151,42,0.12)", border: "1px solid rgba(201,151,42,0.3)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                      <span style={{ fontSize: 10, fontWeight: 900, color: "#C9972A" }}>{step.n}</span>
+                    </div>
+                    <h4 style={{ fontSize: 11, fontWeight: 800, color: "#fff", margin: "0 0 6px", whiteSpace: "pre-line", lineHeight: 1.4 }}>
+                      {vi ? step.vi[0] : step.en[0]}
+                    </h4>
+                    <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", lineHeight: 1.65, margin: 0 }}>
+                      {vi ? step.vi[1] : step.en[1]}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Storyboard visual */}
+            <div style={{ background: "#111", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, overflow: "hidden" }}>
+              {/* Header */}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", background: "#0d0d0d" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ display: "flex", gap: 5 }}>
+                    {["#ff5f57","#febc2e","#28c840"].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />)}
+                  </div>
+                  <span style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", fontFamily: "monospace" }}>storyboard_v2.pdf</span>
+                </div>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)" }}>{vi ? "Ví dụ minh hoạ" : "Illustration example"}</span>
+              </div>
+              {/* Storyboard grid */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 0 }}>
+                {[
+                  { shot: "01", angle: vi ? "Cảnh mở đầu" : "Opening shot",    note: vi ? "Wide — thiết lập không gian" : "Wide — establish space",     bars: [0.7, 0.4, 0.9] },
+                  { shot: "02", angle: vi ? "Giới thiệu SP" : "Product intro",  note: vi ? "Close-up — sản phẩm hero" : "Close-up — hero product",        bars: [0.5, 0.8, 0.6] },
+                  { shot: "03", angle: vi ? "Nhân vật" : "Character",           note: vi ? "Medium — cảm xúc chân thực" : "Medium — authentic emotion",   bars: [0.9, 0.3, 0.7] },
+                  { shot: "04", angle: vi ? "Hành động" : "Action",             note: vi ? "Tracking — theo chuyển động" : "Tracking — follow movement",  bars: [0.6, 0.7, 0.5] },
+                  { shot: "05", angle: vi ? "Chi tiết" : "Detail",              note: vi ? "Macro — texture sản phẩm" : "Macro — product texture",        bars: [0.4, 0.9, 0.8] },
+                  { shot: "06", angle: vi ? "Cảnh đẹp" : "Beauty shot",         note: vi ? "Overhead — lifestyle context" : "Overhead — lifestyle context", bars: [0.8, 0.5, 0.4] },
+                  { shot: "07", angle: vi ? "Branding" : "Branding",            note: vi ? "Close-up — logo reveal" : "Close-up — logo reveal",           bars: [0.3, 0.6, 0.9] },
+                  { shot: "08", angle: vi ? "Kết thúc" : "End card",            note: vi ? "Fade — CTA & tagline" : "Fade — CTA & tagline",               bars: [0.9, 0.8, 0.7] },
+                ].map((frame, idx) => (
+                  <div key={frame.shot} style={{ padding: "14px 14px 12px", borderRight: idx % 4 !== 3 ? "1px solid rgba(255,255,255,0.05)" : "none", borderBottom: idx < 4 ? "1px solid rgba(255,255,255,0.05)" : "none" }}>
+                    {/* Sketch area */}
+                    <div style={{ background: "#1a1a1a", borderRadius: 8, aspectRatio: "16/10", marginBottom: 10, position: "relative", overflow: "hidden" }}>
+                      {/* Simulated sketch lines */}
+                      <svg width="100%" height="100%" viewBox="0 0 160 100" preserveAspectRatio="none" style={{ position: "absolute", inset: 0 }}>
+                        {/* Sky/bg block */}
+                        <rect x="0" y="0" width="160" height={100 * frame.bars[0] * 0.45} fill="rgba(201,151,42,0.06)" rx="0"/>
+                        {/* Ground/mid block */}
+                        <rect x="0" y={100 * frame.bars[0] * 0.45} width="160" height={100 * frame.bars[1] * 0.3} fill="rgba(255,255,255,0.03)" rx="0"/>
+                        {/* Subject silhouette */}
+                        <ellipse cx={70 + frame.bars[2] * 20} cy={100 * frame.bars[0] * 0.45 - 8} rx={18 * frame.bars[2]} ry={22 * frame.bars[1]} fill="rgba(255,255,255,0.07)"/>
+                        {/* Rule-of-thirds lines */}
+                        <line x1="53" y1="0" x2="53" y2="100" stroke="rgba(201,151,42,0.12)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                        <line x1="107" y1="0" x2="107" y2="100" stroke="rgba(201,151,42,0.12)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                        <line x1="0" y1="33" x2="160" y2="33" stroke="rgba(201,151,42,0.12)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                        <line x1="0" y1="67" x2="160" y2="67" stroke="rgba(201,151,42,0.12)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                        {/* Frame border */}
+                        <rect x="1" y="1" width="158" height="98" fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1"/>
+                        {/* Shot number */}
+                        <text x="6" y="13" fontSize="8" fill="rgba(201,151,42,0.6)" fontWeight="bold" fontFamily="monospace">{frame.shot}</text>
+                      </svg>
+                      {/* Camera angle label */}
+                      <div style={{ position: "absolute", bottom: 5, right: 6, fontSize: 8, color: "rgba(255,255,255,0.25)", fontFamily: "monospace" }}>
+                        {idx % 3 === 0 ? "WIDE" : idx % 3 === 1 ? "CU" : "MS"}
+                      </div>
+                    </div>
+                    <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.7)", margin: "0 0 2px" }}>{frame.angle}</p>
+                    <p style={{ fontSize: 9, color: "rgba(255,255,255,0.28)", margin: 0, lineHeight: 1.5 }}>{frame.note}</p>
+                  </div>
+                ))}
+              </div>
+              {/* Footer note */}
+              <div style={{ padding: "10px 20px", background: "#0d0d0d", borderTop: "1px solid rgba(255,255,255,0.05)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span style={{ fontSize: 9, color: "rgba(255,255,255,0.2)" }}>
+                  {vi ? "Storyboard được duyệt trước khi bắt đầu quay" : "Storyboard approved before filming begins"}
+                </span>
+                <span style={{ fontSize: 9, color: "rgba(201,151,42,0.5)" }}>Bình An Media © {new Date().getFullYear()}</span>
+              </div>
+            </div>
+          </Section>
+
           {/* ── PORTFOLIO ─────────────────────────────────────── */}
-          <Section num="03" label={vi ? "Portfolio" : "Portfolio"}>
+          <Section num="04" label={vi ? "Portfolio" : "Portfolio"}>
             <h2 style={headingStyle}>{vi ? "Dự án nổi bật" : "Featured Work"}</h2>
             <p style={{ ...bodyStyle, marginBottom: 32 }}>{vi ? `${videos.length} dự án được chọn lọc` : `${videos.length} curated projects`}</p>
 
@@ -301,7 +405,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
 
           {/* ── GALLERY ───────────────────────────────────────── */}
           {galleryPhotos.length > 0 && (
-            <Section num="04" label={vi ? "Thư viện ảnh" : "Gallery"}>
+            <Section num="05" label={vi ? "Thư viện ảnh" : "Gallery"}>
               <h2 style={headingStyle}>{vi ? "Frame đẹp & Hậu trường" : "Stills & Behind the Scenes"}</h2>
               <p style={{ ...bodyStyle, marginBottom: 28 }}>{vi ? "Từng khoảnh khắc trên phim trường" : "Moments from our sets"}</p>
 
@@ -352,7 +456,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           )}
 
           {/* ── FOUNDER ───────────────────────────────────────── */}
-          <Section num={galleryPhotos.length > 0 ? "05" : "04"} label={vi ? "Người sáng lập" : "Founder"}>
+          <Section num={galleryPhotos.length > 0 ? "06" : "05"} label={vi ? "Người sáng lập" : "Founder"}>
             <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 40, alignItems: "start" }}>
               <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "#111", aspectRatio: "3/4" }}>
                 {founder.photoUrl ? (
@@ -383,7 +487,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
 
           {/* ── TESTIMONIALS ──────────────────────────────────── */}
           {testimonials.length > 0 && (
-            <Section num={galleryPhotos.length > 0 ? "06" : "05"} label={vi ? "Khách hàng nói gì" : "Testimonials"}>
+            <Section num={galleryPhotos.length > 0 ? "07" : "06"} label={vi ? "Khách hàng nói gì" : "Testimonials"}>
               <h2 style={headingStyle}>{vi ? "Đánh giá từ khách hàng" : "What Clients Say"}</h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
                 {testimonials.map((t, i) => (
@@ -401,7 +505,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           )}
 
           {/* ── WHY US ────────────────────────────────────────── */}
-          <Section num={galleryPhotos.length > 0 ? "07" : "06"} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
+          <Section num={galleryPhotos.length > 0 ? "08" : "07"} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
             <h2 style={headingStyle}>{vi ? "Cam kết của Bình An Media" : "Our Commitments"}</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
               {[
