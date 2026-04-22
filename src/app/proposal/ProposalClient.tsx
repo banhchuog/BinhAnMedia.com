@@ -62,12 +62,14 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     setDownloading(true);
     try {
       const html2pdf = (await import("html2pdf.js")).default;
-      await html2pdf()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (html2pdf() as any)
         .set({
-          margin: [0, 0, 0, 0],
+          margin: [10, 10, 10, 10],
           filename: `BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`,
-          html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff" },
+          html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff", imageTimeout: 15000 },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+          pagebreak: { mode: ["avoid-all", "css", "legacy"], before: ".pdf-page-break" },
         })
         .from(docRef.current)
         .save();
@@ -222,7 +224,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               ].map((svc) => {
                 const Icon = IconMap[svc.icon];
                 return (
-                  <div key={svc.vi} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 14, padding: "16px 18px" }}>
+                  <div key={svc.vi} className="pdf-no-break" style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 14, padding: "16px 18px" }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(201,151,42,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
                       {Icon && <Icon size={16} className="text-[#C9972A]" />}
                     </div>
@@ -262,7 +264,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                   {i < 4 && (
                     <div style={{ position: "absolute", top: 18, left: "60%", right: "-40%", height: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.4),rgba(201,151,42,0.05))", zIndex: 0 }} />
                   )}
-                  <div style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 14, padding: "18px 14px", position: "relative", zIndex: 1 }}>
+                  <div className="pdf-no-break" style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 14, padding: "18px 14px", position: "relative", zIndex: 1 }}>
                     <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(201,151,42,0.15)", border: "1px solid rgba(201,151,42,0.35)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
                       <span style={{ fontSize: 10, fontWeight: 900, color: "#C9972A" }}>{step.n}</span>
                     </div>
@@ -392,7 +394,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                       const thumb = v.thumbnail || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "");
                       const ytUrl = ytId ? `https://www.youtube.com/watch?v=${ytId}` : undefined;
                       return (
-                        <div key={v.id} style={{ background: "#faf8f4", borderRadius: 14, overflow: "hidden", border: "1px solid #ede8df" }}>
+                        <div key={v.id} className="pdf-no-break" style={{ background: "#faf8f4", borderRadius: 14, overflow: "hidden", border: "1px solid #ede8df" }}>
                           {/* Thumbnail — clickable on screen */}
                           <a
                             href={ytUrl}
@@ -474,7 +476,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               <h2 style={headingStyle}>{vi ? "Đánh giá từ khách hàng" : "What Clients Say"}</h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
                 {testimonials.map((t, i) => (
-                  <div key={i} style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 18, padding: "22px 20px" }}>
+                  <div key={i} className="pdf-no-break" style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 18, padding: "22px 20px" }}>
                     <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>
                       {[...Array(5)].map((_, j) => <Star key={j} size={11} fill="#C9972A" className="text-[#C9972A]" />)}
                     </div>
@@ -501,7 +503,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               ].map((r) => {
                 const Icon = IconMap[r.icon];
                 return (
-                  <div key={r.vi[0]} style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 16, padding: "20px 18px" }}>
+                  <div key={r.vi[0]} className="pdf-no-break" style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 16, padding: "20px 18px" }}>
                     <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(201,151,42,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
                       {Icon && <Icon size={15} className="text-[#C9972A]" />}
                     </div>
@@ -565,10 +567,15 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       </div>
 
       <style>{`
+        .pdf-page-break { page-break-before: always; break-before: page; }
+        .pdf-page-break:first-of-type { page-break-before: avoid; break-before: avoid; }
+        .pdf-no-break { page-break-inside: avoid; break-inside: avoid; }
         @media print {
           .no-print { display: none !important; }
           body { margin: 0; background: #ffffff; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          .pdf-page-break { page-break-before: always; }
+          .pdf-no-break { page-break-inside: avoid; }
         }
       `}</style>
     </>
@@ -585,7 +592,7 @@ const bodyStyle: React.CSSProperties = {
 
 function Section({ num, label, children }: { num: string; label: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 72 }}>
+    <div className="pdf-page-break" style={{ marginBottom: 56 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
         <span style={{ fontSize: 10, fontWeight: 900, color: "#C9972A", letterSpacing: "0.3em", textTransform: "uppercase" }}>{num}</span>
         <div style={{ height: 1, flex: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.3),transparent)" }} />
