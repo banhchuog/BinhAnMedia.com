@@ -207,17 +207,30 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
 
           {/* ── SERVICES ──────────────────────────────────────────── */}
           <Section num={clientLogos.length > 0 ? "03" : "02"} label={vi ? "Dịch vụ" : "Services"}>
-            <h2 style={headingStyle}>{vi ? "Chúng tôi làm được gì" : "What We Do"}</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
-              {services.map((svc) => {
-                const Icon = IconMap[svc.iconName];
+            <h2 style={headingStyle}>{vi ? "Chúng tôi có thể làm gì cho bạn" : "What We Can Do For You"}</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 28 }}>
+              {[
+                { icon: "Film",       vi: "TVC & Quảng cáo",       en: "TVC & Advertising",    tags: ["15s","30s","60s","Brand film"] },
+                { icon: "Music",      vi: "MV Ca nhạc",            en: "Music Video",          tags: ["Narrative","Performance","Cinematic"] },
+                { icon: "Building2",  vi: "Phim doanh nghiệp",    en: "Corporate Film",       tags: ["Brand story","Recruitment","CSR"] },
+                { icon: "Smartphone", vi: "Social Content",        en: "Social Content",       tags: ["Reels","TikTok","Shorts","Series"] },
+                { icon: "Camera",     vi: "Sự kiện & Livestream",  en: "Event & Livestream",   tags: ["Multi-cam","Same-day edit","Live"] },
+                { icon: "Sparkles",   vi: "Motion & Animation",    en: "Motion & Animation",   tags: ["Logo anim","Explainer","Infographic"] },
+              ].map((svc) => {
+                const Icon = IconMap[svc.icon];
                 return (
-                  <div key={svc.title} style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "22px 20px" }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(201,151,42,0.12)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                      {Icon && <Icon size={17} className="text-[#C9972A]" />}
+                  <div key={svc.vi} style={{ display: "flex", gap: 14, alignItems: "flex-start", background: "#111", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "16px 18px" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(201,151,42,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
+                      {Icon && <Icon size={16} className="text-[#C9972A]" />}
                     </div>
-                    <h3 style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: "0 0 8px" }}>{vi ? svc.title : svc.titleEn}</h3>
-                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, margin: 0 }}>{vi ? svc.desc : svc.descEn}</p>
+                    <div>
+                      <p style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: "0 0 8px" }}>{vi ? svc.vi : svc.en}</p>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                        {svc.tags.map(t => (
+                          <span key={t} style={{ fontSize: 10, color: "rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 999, padding: "2px 9px" }}>{t}</span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -327,7 +340,57 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               </div>
             </div>
           </Section>
+          {/* ── GALLERY ────────────────────────────────────────────── */}
+          {galleryPhotos.length > 0 && (
+            <Section num={clientLogos.length > 0 ? "05" : "04"} label={vi ? "Thư viện ảnh" : "Gallery"}>
+              <h2 style={headingStyle}>{vi ? "Frame đẹp & Hậu trường" : "Stills & Behind the Scenes"}</h2>
+              <p style={{ ...bodyStyle, marginTop: 8, marginBottom: 28 }}>{vi ? "Từng khoảnh khắc đẹp trên phim trường" : "Beautiful moments from our sets"}</p>
 
+              {framePhotos.length > 0 && (
+                <div style={{ marginBottom: 32 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.25em", margin: "0 0 14px" }}>
+                    {vi ? "Frame đẹp" : "Stills"}
+                  </p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+                    {framePhotos.map((photo) => (
+                      <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                        {photo.caption && (
+                          <div style={{ padding: "8px 10px", background: "#0d0d0d" }}>
+                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", margin: 0 }}>{photo.caption}</p>
+                            {photo.project && <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", margin: "2px 0 0" }}>{photo.project}</p>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {btsPhotos.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.25em", margin: "0 0 14px" }}>
+                    {vi ? "Hậu trường" : "Behind the Scenes"}
+                  </p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+                    {btsPhotos.map((photo) => (
+                      <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                        {photo.caption && (
+                          <div style={{ padding: "8px 10px", background: "#0d0d0d" }}>
+                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", margin: 0 }}>{photo.caption}</p>
+                            {photo.project && <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", margin: "2px 0 0" }}>{photo.project}</p>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Section>
+          )}
           {/* ── PORTFOLIO ─────────────────────────────────────── */}
           <Section num={clientLogos.length > 0 ? "05" : "04"} label={vi ? "Portfolio" : "Portfolio"}>
             <h2 style={headingStyle}>{vi ? "Dự án nổi bật" : "Featured Work"}</h2>
@@ -397,58 +460,6 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               );
             })}
           </Section>
-
-          {/* ── GALLERY ───────────────────────────────────────── */}
-          {galleryPhotos.length > 0 && (
-            <Section num={clientLogos.length > 0 ? "06" : "05"} label={vi ? "Thư viện ảnh" : "Gallery"}>
-              <h2 style={headingStyle}>{vi ? "Frame đẹp & Hậu trường" : "Stills & Behind the Scenes"}</h2>
-              <p style={{ ...bodyStyle, marginBottom: 28 }}>{vi ? "Từng khoảnh khắc trên phim trường" : "Moments from our sets"}</p>
-
-              {framePhotos.length > 0 && (
-                <div style={{ marginBottom: 36 }}>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 14 }}>
-                    {vi ? "Frame đẹp" : "Stills"}
-                  </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
-                    {framePhotos.map((photo) => (
-                      <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)", position: "relative" }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
-                        {photo.caption && (
-                          <div style={{ padding: "8px 10px", background: "#0d0d0d" }}>
-                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", margin: 0 }}>{photo.caption}</p>
-                            {photo.project && <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", margin: "2px 0 0" }}>{photo.project}</p>}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {btsPhotos.length > 0 && (
-                <div>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 14 }}>
-                    {vi ? "Hậu trường" : "Behind the Scenes"}
-                  </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
-                    {btsPhotos.map((photo) => (
-                      <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
-                        {photo.caption && (
-                          <div style={{ padding: "8px 10px", background: "#0d0d0d" }}>
-                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", margin: 0 }}>{photo.caption}</p>
-                            {photo.project && <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", margin: "2px 0 0" }}>{photo.project}</p>}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </Section>
-          )}
 
           {/* ── FOUNDER ───────────────────────────────────────── */}
           <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + (galleryPhotos.length > 0 ? 2 : 1)}`} label={vi ? "Người sáng lập" : "Founder"}>
