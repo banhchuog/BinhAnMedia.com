@@ -2,17 +2,16 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import {
-  Globe, Download, Loader2, Play, X, ArrowRight,
+  Globe, Download, Loader2, ArrowRight,
   Film, Music, Building2, Smartphone, Camera, Sparkles,
   Phone, Mail, MapPin, Globe2, Award, Clock, Shield, Layers, Zap, Star,
 } from "lucide-react";
-// ─── Shared Types (also exported for page.tsx) ───────────────────
+
+// ─── Shared Types ─────────────────────────────────────────────────
 export type VideoItem = { id: string; ytId: string; title: string; client: string; year: string; cat: string; desc?: string; views?: string; duration?: string; thumbnail?: string };
 export type FounderData = { name: string; title: string; experience: string; photoUrl: string; bio: string[]; linkUrl?: string; linkLabel?: string };
 export type TestimonialItem = { name: string; role: string; body: string };
 export type ServiceItem = { iconName: string; title: string; titleEn: string; desc: string; descEn: string };
-
-// ─── Types ────────────────────────────────────────────────────────
 type Lang = "vi" | "en";
 type GalleryPhoto = { id: string; url: string; type: "frame" | "bts"; caption: string; project: string };
 
@@ -22,18 +21,10 @@ const IconMap: Record<string, React.FC<{ size?: number; className?: string }>> =
   Award, Clock, Shield, Layers, Zap, Star,
 };
 
-// ─── Category config (same as showreel) ──────────────────────────
-const CAT_COLORS: Record<string, { accent: string; bg: string }> = {
-  TVC:       { accent: "#fb923c", bg: "rgba(251,146,60,0.08)" },
-  MV:        { accent: "#c084fc", bg: "rgba(192,132,252,0.08)" },
-  Corporate: { accent: "#60a5fa", bg: "rgba(96,165,250,0.08)" },
-  Social:    { accent: "#4ade80", bg: "rgba(74,222,128,0.08)" },
-  Event:     { accent: "#fbbf24", bg: "rgba(251,191,36,0.08)" },
-  Motion:    { accent: "#f472b6", bg: "rgba(244,114,182,0.08)" },
+const CAT_COLORS: Record<string, string> = {
+  TVC: "#fb923c", MV: "#c084fc", Corporate: "#60a5fa",
+  Social: "#4ade80", Event: "#fbbf24", Motion: "#f472b6",
 };
-
-const CATS_VI = ["Tất cả", "TVC", "MV", "Corporate", "Social", "Event", "Motion"];
-const CATS_EN = ["All", "TVC", "MV", "Corporate", "Social", "Event", "Motion"];
 
 function extractYtId(raw: string): string {
   if (!raw) return "";
@@ -43,7 +34,6 @@ function extractYtId(raw: string): string {
   return "";
 }
 
-// ─── Props ────────────────────────────────────────────────────────
 interface Props {
   heroId: string;
   clientLogos: string[];
@@ -53,18 +43,13 @@ interface Props {
   services: ServiceItem[];
 }
 
-// ─── Main ─────────────────────────────────────────────────────────
 export default function ProposalClient({ heroId, clientLogos, founder, testimonials, videos, services }: Props) {
   const [lang, setLang] = useState<Lang>("vi");
   const [downloading, setDownloading] = useState(false);
-  const [activeVideoCat, setActiveVideoCat] = useState("Tất cả");
-  const [lightboxVideo, setLightboxVideo] = useState<VideoItem | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
-  const [activeGalFilter, setActiveGalFilter] = useState<"all" | "frame" | "bts">("all");
-  const [lightboxPhoto, setLightboxPhoto] = useState<GalleryPhoto | null>(null);
   const docRef = useRef<HTMLDivElement>(null);
+  const vi = lang === "vi";
 
-  // Fetch gallery photos from settings
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
@@ -72,9 +57,6 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       .catch(() => {});
   }, []);
 
-  const vi = lang === "vi";
-
-  // ── PDF ──────────────────────────────────────────────────────────
   const handleDownload = useCallback(async () => {
     if (!docRef.current || downloading) return;
     setDownloading(true);
@@ -93,451 +75,402 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     finally { setDownloading(false); }
   }, [lang, downloading]);
 
-  // ── Filtered videos ──────────────────────────────────────────────
-  const cats = vi ? CATS_VI : CATS_EN;
-  const filteredVideos = videos.filter((v) => {
-    if (activeVideoCat === "Tất cả" || activeVideoCat === "All") return true;
-    return v.cat === activeVideoCat;
-  });
-
-  const filteredGallery = galleryPhotos.filter((p) => activeGalFilter === "all" || p.type === activeGalFilter);
-
-  // ── Helpers ──────────────────────────────────────────────────────
   const dateStr = new Date().toLocaleDateString(vi ? "vi-VN" : "en-GB", { day: "2-digit", month: "long", year: "numeric" });
+
+  // Group videos by category for display
+  const videosByCat = videos.reduce<Record<string, VideoItem[]>>((acc, v) => {
+    (acc[v.cat] = acc[v.cat] || []).push(v);
+    return acc;
+  }, {});
+  const catOrder = ["TVC", "MV", "Corporate", "Social", "Event", "Motion"];
+  const framePhotos = galleryPhotos.filter((p) => p.type === "frame");
+  const btsPhotos = galleryPhotos.filter((p) => p.type === "bts");
 
   return (
     <>
-      {/* ── Floating controls (screen-only) ─────────────────────── */}
-      <div className="no-print fixed top-4 right-4 z-50 flex items-center gap-2">
+      {/* ── Floating controls (screen only, hidden in PDF) ────── */}
+      <div className="no-print fixed top-5 right-5 z-50 flex items-center gap-2">
         <button
-          onClick={() => { setLang(l => l === "vi" ? "en" : "vi"); setActiveVideoCat(lang === "vi" ? "All" : "Tất cả"); }}
-          className="flex items-center gap-1.5 bg-white/10 backdrop-blur border border-white/20 text-white text-xs font-bold px-3 py-2 rounded-full hover:bg-white/20 transition"
+          onClick={() => setLang(l => l === "vi" ? "en" : "vi")}
+          className="flex items-center gap-1.5 bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold px-3 py-2 rounded-full hover:bg-white/20 transition"
         >
-          <Globe size={13} /> {vi ? "EN" : "VI"}
+          <Globe size={12} /> {vi ? "EN" : "VI"}
         </button>
         <button
           onClick={handleDownload}
           disabled={downloading}
           className="flex items-center gap-1.5 bg-[#C9972A] text-black text-xs font-bold px-4 py-2 rounded-full hover:bg-[#dba830] transition disabled:opacity-60"
         >
-          {downloading ? <><Loader2 size={13} className="animate-spin" /> {vi ? "Đang xuất..." : "Exporting..."}</> : <><Download size={13} /> {vi ? "Tải PDF" : "Download PDF"}</>}
+          {downloading
+            ? <><Loader2 size={12} className="animate-spin" /> {vi ? "Đang xuất..." : "Exporting..."}</>
+            : <><Download size={12} /> {vi ? "Tải PDF" : "Download PDF"}</>}
         </button>
       </div>
 
-      {/* ── Lightbox: Video ─────────────────────────────────────── */}
-      {lightboxVideo && (
-        <div className="no-print fixed inset-0 z-[999] bg-black/95 flex items-center justify-center p-4" onClick={() => setLightboxVideo(null)}>
-          <button className="absolute top-4 right-4 text-white/60 hover:text-white"><X size={24} /></button>
-          <div className="w-full max-w-3xl aspect-video" onClick={(e) => e.stopPropagation()}>
-            {extractYtId(lightboxVideo.ytId) ? (
-              <iframe
-                src={`https://www.youtube.com/embed/${extractYtId(lightboxVideo.ytId)}?autoplay=1`}
-                className="w-full h-full rounded-2xl"
-                allow="autoplay; encrypted-media"
-                allowFullScreen
-              />
-            ) : (
-              <div className="w-full h-full rounded-2xl bg-[#1a1a1a] flex items-center justify-center">
-                <p className="text-white/40 text-sm">{vi ? "Video chưa có link YouTube" : "No YouTube link yet"}</p>
-              </div>
-            )}
-          </div>
-          <div className="absolute bottom-6 text-center">
-            <p className="text-white font-bold text-sm">{lightboxVideo.title}</p>
-            <p className="text-white/40 text-xs mt-1">{lightboxVideo.client} · {lightboxVideo.year}</p>
-          </div>
-        </div>
-      )}
+      {/* ══════════════════ DOCUMENT ═══════════════════════════ */}
+      <div ref={docRef} style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "#0a0a0a", color: "#fff" }}>
 
-      {/* ── Lightbox: Photo ─────────────────────────────────────── */}
-      {lightboxPhoto && (
-        <div className="no-print fixed inset-0 z-[999] bg-black/97 flex items-center justify-center p-4" onClick={() => setLightboxPhoto(null)}>
-          <button className="absolute top-4 right-4 text-white/60 hover:text-white"><X size={24} /></button>
-          <div className="max-w-4xl max-h-[80vh] relative" onClick={(e) => e.stopPropagation()}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={lightboxPhoto.url} alt={lightboxPhoto.caption} className="max-w-full max-h-[78vh] object-contain rounded-xl" />
-            {(lightboxPhoto.caption || lightboxPhoto.project) && (
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent rounded-b-xl px-4 py-3">
-                {lightboxPhoto.caption && <p className="text-white text-sm font-semibold">{lightboxPhoto.caption}</p>}
-                {lightboxPhoto.project && <p className="text-white/50 text-xs mt-0.5">{lightboxPhoto.project}</p>}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            PAGE 1 — COVER
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "linear-gradient(150deg,#0a0a0a 0%,#130d02 55%,#0a0a0a 100%)", position: "relative", overflow: "hidden" }}>
+          {/* Gold radial glow */}
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 35%, rgba(201,151,42,0.13), transparent 65%)", pointerEvents: "none" }} />
+          {/* Top accent line */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#C9972A 40%,#C9972A 60%,transparent)" }} />
 
-      {/* ════════════════════════ DOCUMENT ══════════════════════════ */}
-      <div ref={docRef} className="bg-[#0a0a0a] text-white min-h-screen" style={{ fontFamily: "'Segoe UI','Inter',sans-serif" }}>
-
-        {/* ── COVER ─────────────────────────────────────────────── */}
-        <div className="relative min-h-screen flex flex-col overflow-hidden" style={{ background: "linear-gradient(135deg,#0a0a0a 0%,#140e03 60%,#0a0a0a 100%)" }}>
-          {/* Hero video blurred bg */}
-          <div className="absolute inset-0 opacity-15 pointer-events-none">
-            <iframe
-              src={`https://www.youtube.com/embed/${heroId}?autoplay=1&mute=1&loop=1&playlist=${heroId}&controls=0&playsinline=1`}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[177.8%] h-full min-w-full"
-              allow="autoplay; encrypted-media"
-              title="bg"
-            />
-          </div>
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 40%,rgba(201,151,42,0.12),transparent 70%)" }} />
-          {/* Gold top line */}
-          <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg,transparent,#C9972A,transparent)" }} />
-
-          {/* Top bar */}
-          <div className="relative flex items-center justify-between px-8 sm:px-16 pt-10">
+          {/* Header bar */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "36px 64px 0" }}>
             <div>
-              <span className="font-black text-2xl text-white">BinhAn</span><span className="font-black text-2xl text-[#C9972A]">Media</span>
+              <span style={{ fontWeight: 900, fontSize: 22, color: "#fff" }}>BinhAn</span>
+              <span style={{ fontWeight: 900, fontSize: 22, color: "#C9972A" }}>Media</span>
             </div>
-            <div className="text-right">
-              <div className="text-[10px] text-white/30 uppercase tracking-[0.25em]">{vi ? "Tài liệu giới thiệu" : "Company Presentation"}</div>
-              <div className="text-xs text-white/50 mt-0.5">{vi ? "Ngày phát hành" : "Issue Date"}: {dateStr}</div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.25em" }}>
+                {vi ? "Tài liệu giới thiệu" : "Company Presentation"}
+              </div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 3 }}>
+                {vi ? "Ngày phát hành" : "Issue date"}: {dateStr}
+              </div>
             </div>
           </div>
 
-          {/* Center */}
-          <div className="relative flex-1 flex flex-col items-center justify-center text-center px-8 py-20">
-            <p className="text-[10px] font-bold text-[#C9972A] uppercase tracking-[0.4em] mb-6">{vi ? "Kính gửi Quý khách hàng" : "Dear Valued Client"}</p>
-            <h1 className="text-6xl sm:text-7xl font-black leading-tight mb-5">
-              Bình An<br /><span className="text-[#C9972A]">Media</span>
+          {/* Hero center */}
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "60px 40px" }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.4em", marginBottom: 24 }}>
+              {vi ? "Kính gửi Quý Khách Hàng" : "Dear Valued Client"}
+            </p>
+            <h1 style={{ fontSize: 72, fontWeight: 900, lineHeight: 1.05, margin: "0 0 20px" }}>
+              Bình An<br />
+              <span style={{ color: "#C9972A" }}>Media</span>
             </h1>
-            <p className="text-lg font-semibold text-white/70 mb-2">{vi ? "Đơn vị sản xuất video chuyên nghiệp" : "Professional Video Production Company"}</p>
-            <p className="text-sm text-white/35 tracking-widest">{vi ? "TVC · MV Ca nhạc · Phim doanh nghiệp · Social Content" : "TVC · Music Video · Corporate Film · Social Content"}</p>
+            <p style={{ fontSize: 17, color: "rgba(255,255,255,0.6)", fontWeight: 600, marginBottom: 8 }}>
+              {vi ? "Đơn vị sản xuất video chuyên nghiệp" : "Professional Video Production Company"}
+            </p>
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em" }}>
+              TVC · {vi ? "MV Ca nhạc" : "Music Video"} · {vi ? "Phim doanh nghiệp" : "Corporate Film"} · Social Content
+            </p>
 
             {/* Stats */}
-            <div className="flex gap-10 sm:gap-16 justify-center mt-14">
+            <div style={{ display: "flex", gap: 56, justifyContent: "center", marginTop: 52 }}>
               {[
                 { v: "200+", l: vi ? "Dự án hoàn thành" : "Projects Completed" },
                 { v: "12+",  l: vi ? "Năm kinh nghiệm"  : "Years Experience" },
                 { v: "50+",  l: vi ? "Thương hiệu lớn"  : "Major Brands" },
                 { v: "4K",   l: vi ? "Tiêu chuẩn quay"  : "Production Std." },
               ].map((s) => (
-                <div key={s.l} className="text-center">
-                  <div className="text-2xl sm:text-3xl font-black text-[#C9972A]">{s.v}</div>
-                  <div className="text-[10px] text-white/35 mt-1 leading-tight">{s.l}</div>
+                <div key={s.l} style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 30, fontWeight: 900, color: "#C9972A" }}>{s.v}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>{s.l}</div>
                 </div>
               ))}
             </div>
 
             {/* Client logos */}
             {clientLogos.length > 0 && (
-              <div className="mt-12">
-                <p className="text-[9px] text-white/20 uppercase tracking-[0.3em] mb-4">{vi ? "Một số khách hàng" : "Some clients"}</p>
-                <div className="flex flex-wrap justify-center gap-5 items-center">
+              <div style={{ marginTop: 48 }}>
+                <p style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 16 }}>
+                  {vi ? "Một số khách hàng tiêu biểu" : "Some of our clients"}
+                </p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 20, justifyContent: "center", alignItems: "center" }}>
                   {clientLogos.map((url, i) => (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img key={i} src={url} alt="" className="h-6 w-auto object-contain" style={{ filter: "grayscale(1) brightness(0.6)", opacity: 0.5 }} />
+                    <img key={i} src={url} alt="" style={{ height: 24, width: "auto", objectFit: "contain", filter: "grayscale(1) brightness(0.5)", opacity: 0.5 }} />
                   ))}
                 </div>
               </div>
             )}
           </div>
 
-          <div className="relative px-8 sm:px-16 pb-10 flex items-center justify-between border-t border-white/6 pt-6">
-            <p className="text-[10px] text-white/25">hello@binhanmedia.vn · binhanmedia.vn</p>
-            <p className="text-[10px] text-white/15">© {new Date().getFullYear()} Bình An Media</p>
+          {/* Cover footer */}
+          <div style={{ display: "flex", justifyContent: "space-between", padding: "20px 64px 32px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>hello@binhanmedia.vn · binhanmedia.vn</p>
+            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.15)" }}>© {new Date().getFullYear()} Bình An Media</p>
           </div>
         </div>
 
-        {/* ── BODY ──────────────────────────────────────────────── */}
-        <div className="max-w-5xl mx-auto px-6 sm:px-12 py-20 space-y-24">
+        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            BODY — all sections
+        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div style={{ maxWidth: 900, margin: "0 auto", padding: "80px 40px" }}>
 
-          {/* ─ Services ─────────────────────────────────────────── */}
-          <section>
-            <SectionLabel>{vi ? "02 — Dịch vụ" : "02 — Services"}</SectionLabel>
-            <h2 className="text-3xl font-black text-white mb-10">{vi ? "Chúng tôi làm được gì" : "What We Do"}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {/* ── ABOUT ─────────────────────────────────────────── */}
+          <Section num="01" label={vi ? "Về chúng tôi" : "About Us"}>
+            <h2 style={headingStyle}>{vi ? "Bình An Media là ai?" : "Who is Bình An Media?"}</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 32, marginTop: 24 }}>
+              <p style={bodyStyle}>
+                {vi
+                  ? "Bình An Media là đơn vị sản xuất nội dung video chuyên nghiệp hàng đầu tại Việt Nam — từ TVC thương mại đến MV ca nhạc, phim doanh nghiệp, content mạng xã hội và sự kiện trực tiếp."
+                  : "Bình An Media is a leading professional video content production company in Vietnam — from commercial TVC to music videos, corporate films, social content and live events."}
+              </p>
+              <p style={bodyStyle}>
+                {vi
+                  ? "Được sáng lập bởi đạo diễn Đinh Công Hiếu với hơn 12 năm kinh nghiệm, chúng tôi đã đồng hành cùng hơn 200 thương hiệu — từ startup đến tập đoàn đa quốc gia — biến tầm nhìn thương hiệu thành những khung hình chạm đến cảm xúc."
+                  : "Founded by director Dinh Cong Hieu with over 12 years of experience, we have partnered with over 200 brands — from startups to multinationals — turning brand visions into frames that touch emotions."}
+              </p>
+            </div>
+            {/* Stat cards */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginTop: 32 }}>
+              {[
+                { v: "200+", l: vi ? "Dự án" : "Projects" },
+                { v: "12+",  l: vi ? "Năm kinh nghiệm" : "Years" },
+                { v: "50+",  l: vi ? "Thương hiệu" : "Brands" },
+                { v: "4K",   l: vi ? "Tiêu chuẩn" : "Standard" },
+              ].map((s) => (
+                <div key={s.l} style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 16px", textAlign: "center" }}>
+                  <div style={{ fontSize: 26, fontWeight: 900, color: "#C9972A" }}>{s.v}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", marginTop: 4 }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+          </Section>
+
+          {/* ── SERVICES ──────────────────────────────────────── */}
+          <Section num="02" label={vi ? "Dịch vụ" : "Services"}>
+            <h2 style={headingStyle}>{vi ? "Chúng tôi làm được gì" : "What We Do"}</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
               {services.map((svc) => {
                 const Icon = IconMap[svc.iconName];
                 return (
-                  <div key={svc.title} className="group bg-[#161616] border border-white/6 rounded-2xl p-6 hover:border-[#C9972A]/30 transition-all">
-                    <div className="w-10 h-10 rounded-xl bg-[#C9972A]/10 flex items-center justify-center mb-4">
-                      {Icon && <Icon size={18} className="text-[#C9972A]" />}
+                  <div key={svc.title} style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "22px 20px" }}>
+                    <div style={{ width: 38, height: 38, borderRadius: 10, background: "rgba(201,151,42,0.12)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                      {Icon && <Icon size={17} className="text-[#C9972A]" />}
                     </div>
-                    <h3 className="font-bold text-white text-[14px] mb-2">{vi ? svc.title : svc.titleEn}</h3>
-                    <p className="text-white/40 text-[12px] leading-relaxed">{vi ? svc.desc : svc.descEn}</p>
+                    <h3 style={{ fontSize: 13, fontWeight: 700, color: "#fff", margin: "0 0 8px" }}>{vi ? svc.title : svc.titleEn}</h3>
+                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", lineHeight: 1.7, margin: 0 }}>{vi ? svc.desc : svc.descEn}</p>
                   </div>
                 );
               })}
             </div>
-          </section>
+          </Section>
 
-          {/* ─ Portfolio videos ──────────────────────────────────── */}
-          <section>
-            <SectionLabel>{vi ? "03 — Portfolio" : "03 — Portfolio"}</SectionLabel>
-            <h2 className="text-3xl font-black text-white mb-3">{vi ? "Dự án nổi bật" : "Featured Work"}</h2>
-            <p className="text-white/40 text-sm mb-8">{vi ? `${videos.length} dự án — nhấn để xem video` : `${videos.length} projects — click to watch`}</p>
+          {/* ── PORTFOLIO ─────────────────────────────────────── */}
+          <Section num="03" label={vi ? "Portfolio" : "Portfolio"}>
+            <h2 style={headingStyle}>{vi ? "Dự án nổi bật" : "Featured Work"}</h2>
+            <p style={{ ...bodyStyle, marginBottom: 32 }}>{vi ? `${videos.length} dự án được chọn lọc` : `${videos.length} curated projects`}</p>
 
-            {/* Category filter */}
-            <div className="flex gap-2 flex-wrap mb-8">
-              {cats.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveVideoCat(cat)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold transition no-print ${
-                    activeVideoCat === cat
-                      ? "bg-[#C9972A] text-black"
-                      : "bg-white/5 text-white/50 border border-white/10 hover:border-white/25 hover:text-white"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Video grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredVideos.map((v) => {
-                const ytId = extractYtId(v.ytId);
-                const cc = CAT_COLORS[v.cat] || CAT_COLORS.TVC;
-                const thumb = v.thumbnail || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "");
-                return (
-                  <button
-                    key={v.id}
-                    onClick={() => setLightboxVideo(v)}
-                    className="group text-left bg-[#111] rounded-2xl overflow-hidden border border-white/6 hover:border-[#C9972A]/40 transition-all hover:-translate-y-0.5 no-print"
-                  >
-                    {/* Thumbnail */}
-                    <div className="relative aspect-video overflow-hidden bg-[#1a1a1a]">
-                      {thumb ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={thumb} alt={v.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: `linear-gradient(135deg,${cc.bg},transparent)` }}>
-                          <Film size={28} className="text-white/20" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition" />
-                      {/* Play button */}
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
-                        <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-                          <Play size={18} fill="white" className="text-white ml-0.5" />
-                        </div>
-                      </div>
-                      {/* Cat badge */}
-                      <span className="absolute top-2 left-2 text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: cc.accent, color: "#000" }}>{v.cat}</span>
-                      {v.views && <span className="absolute top-2 right-2 text-[9px] text-white/70 bg-black/60 px-2 py-0.5 rounded-full">{v.views}</span>}
-                      {v.duration && <span className="absolute bottom-2 right-2 text-[10px] text-white/70 bg-black/60 px-1.5 py-0.5 rounded font-mono">{v.duration}</span>}
-                    </div>
-                    {/* Info */}
-                    <div className="p-4">
-                      <p className="font-bold text-white text-[13px] leading-snug mb-1 line-clamp-2">{v.title}</p>
-                      <p className="text-[11px] text-white/35">{v.client}{v.year ? ` · ${v.year}` : ""}</p>
-                      {v.desc && <p className="text-[11px] text-white/30 mt-2 leading-relaxed line-clamp-2">{v.desc}</p>}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* PDF version: static grid without hover */}
-            <div className="pdf-only hidden grid grid-cols-3 gap-3">
-              {videos.slice(0, 9).map((v) => {
-                const ytId = extractYtId(v.ytId);
-                const thumb = v.thumbnail || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "");
-                const cc = CAT_COLORS[v.cat] || CAT_COLORS.TVC;
-                return (
-                  <div key={v.id} className="rounded-xl overflow-hidden bg-[#111] border border-white/8">
-                    <div className="relative aspect-video bg-[#1a1a1a]">
-                      {thumb && <img src={thumb} alt={v.title} className="w-full h-full object-cover" />}
-                      <span className="absolute top-1.5 left-1.5 text-[9px] font-black px-1.5 py-0.5 rounded-full" style={{ background: cc.accent, color: "#000" }}>{v.cat}</span>
-                    </div>
-                    <div className="p-3">
-                      <p className="font-bold text-white text-[11px] mb-0.5 line-clamp-1">{v.title}</p>
-                      <p className="text-[9px] text-white/35">{v.client}</p>
-                    </div>
+            {catOrder.map((cat) => {
+              const catVideos = videosByCat[cat];
+              if (!catVideos || catVideos.length === 0) return null;
+              const accent = CAT_COLORS[cat] || "#C9972A";
+              return (
+                <div key={cat} style={{ marginBottom: 40 }}>
+                  {/* Category heading */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                    <span style={{ fontSize: 10, fontWeight: 900, background: accent, color: "#000", padding: "3px 10px", borderRadius: 999 }}>{cat}</span>
+                    <div style={{ flex: 1, height: 1, background: "rgba(255,255,255,0.06)" }} />
+                    <span style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>{catVideos.length} {vi ? "video" : "videos"}</span>
                   </div>
-                );
-              })}
-            </div>
-          </section>
+                  {/* Video cards */}
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12 }}>
+                    {catVideos.map((v) => {
+                      const ytId = extractYtId(v.ytId);
+                      const thumb = v.thumbnail || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "");
+                      return (
+                        <div key={v.id} style={{ background: "#111", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
+                          {/* Thumbnail */}
+                          <div style={{ position: "relative", paddingBottom: "56.25%", background: "#1a1a1a" }}>
+                            {thumb && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={thumb} alt={v.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                            )}
+                            {/* Play icon overlay */}
+                            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.25)" }}>
+                              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                              </div>
+                            </div>
+                            {v.duration && (
+                              <span style={{ position: "absolute", bottom: 6, right: 6, fontSize: 9, color: "rgba(255,255,255,0.8)", background: "rgba(0,0,0,0.7)", padding: "2px 5px", borderRadius: 4, fontFamily: "monospace" }}>{v.duration}</span>
+                            )}
+                          </div>
+                          {/* Info */}
+                          <div style={{ padding: "12px 14px 14px" }}>
+                            <p style={{ fontSize: 12, fontWeight: 700, color: "#fff", margin: "0 0 4px", lineHeight: 1.3 }}>{v.title}</p>
+                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.35)", margin: 0 }}>{v.client}{v.year ? ` · ${v.year}` : ""}</p>
+                            {v.views && <p style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", margin: "3px 0 0" }}>{v.views}</p>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </Section>
 
-          {/* ─ Gallery ───────────────────────────────────────────── */}
+          {/* ── GALLERY ───────────────────────────────────────── */}
           {galleryPhotos.length > 0 && (
-            <section>
-              <SectionLabel>{vi ? "04 — Thư viện ảnh" : "04 — Gallery"}</SectionLabel>
-              <h2 className="text-3xl font-black text-white mb-3">{vi ? "Frame đẹp & Hậu trường" : "Stills & Behind the Scenes"}</h2>
-              <p className="text-white/40 text-sm mb-6">{vi ? "Từng khoảnh khắc đẹp trên phim trường" : "Beautiful moments from our sets"}</p>
+            <Section num="04" label={vi ? "Thư viện ảnh" : "Gallery"}>
+              <h2 style={headingStyle}>{vi ? "Frame đẹp & Hậu trường" : "Stills & Behind the Scenes"}</h2>
+              <p style={{ ...bodyStyle, marginBottom: 28 }}>{vi ? "Từng khoảnh khắc trên phim trường" : "Moments from our sets"}</p>
 
-              {/* Filter */}
-              <div className="flex gap-2 mb-8 no-print">
-                {([["all", vi ? "Tất cả" : "All"], ["frame", vi ? "Frame đẹp" : "Stills"], ["bts", vi ? "Hậu trường" : "Behind the Scenes"]] as const).map(([key, label]) => (
-                  <button
-                    key={key}
-                    onClick={() => setActiveGalFilter(key as "all" | "frame" | "bts")}
-                    className={`px-4 py-1.5 rounded-full text-xs font-semibold transition ${
-                      activeGalFilter === key ? "bg-[#C9972A] text-black" : "bg-white/5 text-white/50 border border-white/10 hover:border-white/25 hover:text-white"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Masonry-style grid */}
-              <div className="columns-2 sm:columns-3 gap-3 space-y-3">
-                {filteredGallery.map((photo, i) => (
-                  <button
-                    key={photo.id}
-                    onClick={() => setLightboxPhoto(photo)}
-                    className="group break-inside-avoid w-full text-left relative overflow-hidden rounded-xl bg-[#111] border border-white/6 hover:border-[#C9972A]/40 transition-all no-print block"
-                    style={{ marginBottom: "12px" }}
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photo.url}
-                      alt={photo.caption}
-                      className={`w-full object-cover group-hover:scale-105 transition-transform duration-500 ${i % 3 === 0 ? "aspect-video" : i % 3 === 1 ? "aspect-square" : "aspect-[4/5]"}`}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
-                    <div className="absolute bottom-0 inset-x-0 p-3 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition">
-                      {photo.caption && <p className="text-white text-xs font-semibold leading-snug">{photo.caption}</p>}
-                      {photo.project && <p className="text-white/50 text-[10px] mt-0.5">{photo.project}</p>}
-                    </div>
-                    {/* Type badge */}
-                    <span className={`absolute top-2 left-2 text-[9px] font-black px-2 py-0.5 rounded-full ${photo.type === "frame" ? "bg-[#C9972A] text-black" : "bg-white/15 text-white backdrop-blur"}`}>
-                      {photo.type === "frame" ? (vi ? "Frame" : "Still") : (vi ? "BTS" : "BTS")}
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* PDF static grid */}
-              <div className="pdf-only hidden grid grid-cols-3 gap-3">
-                {galleryPhotos.slice(0, 9).map((photo) => (
-                  <div key={photo.id} className="rounded-xl overflow-hidden bg-[#111] relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={photo.url} alt={photo.caption} className="w-full aspect-video object-cover" />
-                    {photo.caption && (
-                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5">
-                        <p className="text-white text-[9px] font-semibold line-clamp-1">{photo.caption}</p>
+              {framePhotos.length > 0 && (
+                <div style={{ marginBottom: 36 }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 14 }}>
+                    {vi ? "Frame đẹp" : "Stills"}
+                  </p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+                    {framePhotos.map((photo) => (
+                      <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)", position: "relative" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                        {photo.caption && (
+                          <div style={{ padding: "8px 10px", background: "#0d0d0d" }}>
+                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", margin: 0 }}>{photo.caption}</p>
+                            {photo.project && <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", margin: "2px 0 0" }}>{photo.project}</p>}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
-            </section>
+                </div>
+              )}
+
+              {btsPhotos.length > 0 && (
+                <div>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.25em", marginBottom: 14 }}>
+                    {vi ? "Hậu trường" : "Behind the Scenes"}
+                  </p>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+                    {btsPhotos.map((photo) => (
+                      <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                        {photo.caption && (
+                          <div style={{ padding: "8px 10px", background: "#0d0d0d" }}>
+                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", margin: 0 }}>{photo.caption}</p>
+                            {photo.project && <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", margin: "2px 0 0" }}>{photo.project}</p>}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </Section>
           )}
 
-          {/* ─ Founder ───────────────────────────────────────────── */}
-          <section>
-            <SectionLabel>{vi ? "05 — Người sáng lập" : "05 — Founder"}</SectionLabel>
-            <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8 md:gap-14 items-start">
-              <div className="relative w-48 sm:w-64 h-60 sm:h-80 rounded-2xl overflow-hidden border border-white/8 mx-auto md:mx-0">
+          {/* ── FOUNDER ───────────────────────────────────────── */}
+          <Section num={galleryPhotos.length > 0 ? "05" : "04"} label={vi ? "Người sáng lập" : "Founder"}>
+            <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 40, alignItems: "start" }}>
+              <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "#111", aspectRatio: "3/4" }}>
                 {founder.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={founder.photoUrl} alt={founder.name} className="w-full h-full object-cover" />
+                  <img src={founder.photoUrl} alt={founder.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg,rgba(201,151,42,0.2),#111)" }}>
-                    <span className="text-6xl font-black text-white/10 select-none">{founder.name.split(" ").map((w: string) => w[0]).join("")}</span>
+                  <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,rgba(201,151,42,0.15),#111)" }}>
+                    <span style={{ fontSize: 52, fontWeight: 900, color: "rgba(255,255,255,0.08)" }}>
+                      {founder.name.split(" ").map((w: string) => w[0]).join("")}
+                    </span>
                   </div>
                 )}
               </div>
               <div>
-                <p className="text-[10px] font-bold text-[#C9972A] uppercase tracking-[0.3em] mb-3">{founder.title}</p>
-                <h2 className="text-3xl font-black text-white mb-2">{founder.name}</h2>
-                <p className="text-[#C9972A] font-bold text-sm mb-5">{founder.experience} {vi ? "trong ngành sản xuất phim" : "in film production"}</p>
-                <div className="space-y-3">
-                  {founder.bio.map((p: string, i: number) => <p key={i} className="text-white/50 text-[13px] leading-relaxed">{p}</p>)}
+                <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.3em", margin: "0 0 10px" }}>{founder.title}</p>
+                <h2 style={{ fontSize: 28, fontWeight: 900, color: "#fff", margin: "0 0 6px" }}>{founder.name}</h2>
+                <p style={{ fontSize: 13, color: "#C9972A", fontWeight: 700, margin: "0 0 20px" }}>
+                  {founder.experience} {vi ? "trong ngành sản xuất phim" : "in film production"}
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {founder.bio.map((p: string, i: number) => (
+                    <p key={i} style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.75, margin: 0 }}>{p}</p>
+                  ))}
                 </div>
-                {founder.linkUrl && (
-                  <a href={founder.linkUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-6 border border-white/10 text-white/50 px-5 py-2.5 rounded-full text-xs hover:border-[#C9972A]/40 hover:text-[#C9972A] transition"
-                  >
-                    {founder.linkLabel || founder.linkUrl} <ArrowRight size={11} />
-                  </a>
-                )}
               </div>
             </div>
-          </section>
+          </Section>
 
-          {/* ─ Testimonials ──────────────────────────────────────── */}
+          {/* ── TESTIMONIALS ──────────────────────────────────── */}
           {testimonials.length > 0 && (
-            <section>
-              <SectionLabel>{vi ? "06 — Khách hàng nói" : "06 — What Clients Say"}</SectionLabel>
-              <h2 className="text-3xl font-black text-white mb-10">{vi ? "Đánh giá từ khách hàng" : "Client Testimonials"}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <Section num={galleryPhotos.length > 0 ? "06" : "05"} label={vi ? "Khách hàng nói gì" : "Testimonials"}>
+              <h2 style={headingStyle}>{vi ? "Đánh giá từ khách hàng" : "What Clients Say"}</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
                 {testimonials.map((t, i) => (
-                  <div key={i} className="bg-[#111] rounded-2xl p-6 border border-white/6">
-                    <div className="flex gap-0.5 mb-4">
-                      {[...Array(5)].map((_, j) => <Star key={j} size={12} fill="#C9972A" className="text-[#C9972A]" />)}
+                  <div key={i} style={{ background: "#111", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 18, padding: "22px 20px" }}>
+                    <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>
+                      {[...Array(5)].map((_, j) => <Star key={j} size={11} fill="#C9972A" className="text-[#C9972A]" />)}
                     </div>
-                    <p className="text-white/60 text-[13px] leading-relaxed mb-5 italic">&ldquo;{t.body}&rdquo;</p>
-                    <div>
-                      <p className="font-bold text-white text-sm">{t.name}</p>
-                      <p className="text-white/35 text-xs mt-0.5">{t.role}</p>
-                    </div>
+                    <p style={{ fontSize: 12, color: "rgba(255,255,255,0.55)", fontStyle: "italic", lineHeight: 1.7, margin: "0 0 16px" }}>&ldquo;{t.body}&rdquo;</p>
+                    <p style={{ fontSize: 12, fontWeight: 700, color: "#fff", margin: "0 0 2px" }}>{t.name}</p>
+                    <p style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", margin: 0 }}>{t.role}</p>
                   </div>
                 ))}
               </div>
-            </section>
+            </Section>
           )}
 
-          {/* ─ Why us ────────────────────────────────────────────── */}
-          <section>
-            <SectionLabel>{vi ? "07 — Tại sao chọn chúng tôi" : "07 — Why Choose Us"}</SectionLabel>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {/* ── WHY US ────────────────────────────────────────── */}
+          <Section num={galleryPhotos.length > 0 ? "07" : "06"} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
+            <h2 style={headingStyle}>{vi ? "Cam kết của Bình An Media" : "Our Commitments"}</h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
               {[
-                { icon: "Award",  vi: ["12+ năm chuyên môn",    "Đội ngũ đào tạo bài bản, kinh nghiệm thực chiến hàng trăm thương hiệu."],                en: ["12+ Years Expertise",    "Professionally trained team with real-world experience across hundreds of brands."] },
-                { icon: "Clock",  vi: ["Đúng hẹn cam kết",      "Quy trình chặt chẽ, milestone rõ ràng. Không bao giờ trễ deadline."],                     en: ["Deadline Committed",     "Rigorous workflow, clear milestones. Never miss a deadline."] },
-                { icon: "Shield", vi: ["Giá minh bạch",         "Báo giá chi tiết từng hạng mục, không phát sinh ẩn."],                                     en: ["Transparent Pricing",    "Detailed itemized quotes, no hidden costs."] },
-                { icon: "Layers", vi: ["Thiết bị chuyên nghiệp","Blackmagic, Sony FX, RED — chuẩn quảng cáo quốc tế."],                                    en: ["Pro Equipment",          "Blackmagic, Sony FX, RED — international advertising standard."] },
-                { icon: "Zap",    vi: ["Sáng tạo linh hoạt",    "Mỗi concept được thiết kế riêng, không làm template."],                                    en: ["Creative Flexibility",   "Every concept custom-designed, no templates."] },
-                { icon: "Star",   vi: ["Dịch vụ trọn gói",      "Script → post-production: một ekip, một quy trình nhất quán."],                           en: ["Full-Service Studio",    "Script to post-production: one team, one consistent workflow."] },
+                { icon: "Award",  vi: ["12+ năm chuyên môn",     "Đội ngũ đào tạo bài bản, kinh nghiệm thực chiến với hàng trăm thương hiệu."],                    en: ["12+ Years Expertise",   "Professionally trained team with real-world experience across hundreds of brands."] },
+                { icon: "Clock",  vi: ["Đúng hẹn cam kết",       "Quy trình chặt chẽ, milestone rõ ràng. Không bao giờ trễ deadline."],                             en: ["Deadline Committed",    "Rigorous workflow, clear milestones. Never miss a deadline."] },
+                { icon: "Shield", vi: ["Giá minh bạch",          "Báo giá chi tiết từng hạng mục. Không phát sinh ẩn."],                                            en: ["Transparent Pricing",   "Detailed itemized quotes. No hidden costs."] },
+                { icon: "Layers", vi: ["Thiết bị chuyên nghiệp", "Blackmagic, Sony FX, RED — chuẩn quảng cáo quốc tế."],                                           en: ["Pro Equipment",         "Blackmagic, Sony FX, RED — international advertising standard."] },
+                { icon: "Zap",    vi: ["Sáng tạo riêng biệt",    "Mỗi concept được thiết kế riêng, không dùng template."],                                          en: ["Custom Creative",       "Every concept custom-designed, no templates."] },
+                { icon: "Star",   vi: ["Trọn gói một ekip",      "Script → post-production: một đội ngũ duy nhất, quy trình nhất quán."],                          en: ["Full-Service Studio",   "Script to post: one team, one consistent workflow."] },
               ].map((r) => {
                 const Icon = IconMap[r.icon];
                 return (
-                  <div key={r.vi[0]} className="bg-[#111] border border-white/6 rounded-2xl p-5 hover:border-[#C9972A]/25 transition-all">
-                    <div className="w-9 h-9 rounded-xl bg-[#C9972A]/10 flex items-center justify-center mb-3">
-                      {Icon && <Icon size={16} className="text-[#C9972A]" />}
+                  <div key={r.vi[0]} style={{ background: "#111", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 16, padding: "20px 18px" }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(201,151,42,0.1)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                      {Icon && <Icon size={15} className="text-[#C9972A]" />}
                     </div>
-                    <h3 className="font-bold text-white text-[13px] mb-1.5">{vi ? r.vi[0] : r.en[0]}</h3>
-                    <p className="text-white/35 text-[11px] leading-relaxed">{vi ? r.vi[1] : r.en[1]}</p>
+                    <h3 style={{ fontSize: 12, fontWeight: 700, color: "#fff", margin: "0 0 6px" }}>{vi ? r.vi[0] : r.en[0]}</h3>
+                    <p style={{ fontSize: 11, color: "rgba(255,255,255,0.35)", lineHeight: 1.65, margin: 0 }}>{vi ? r.vi[1] : r.en[1]}</p>
                   </div>
                 );
               })}
             </div>
-          </section>
+          </Section>
 
-          {/* ─ CTA ───────────────────────────────────────────────── */}
-          <section>
-            <div className="rounded-3xl p-10 sm:p-14 text-center relative overflow-hidden" style={{ background: "linear-gradient(135deg,#0d0d0d,#1a1208)", border: "1px solid rgba(201,151,42,0.2)" }}>
-              <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse at 50% 0%,rgba(201,151,42,0.1),transparent 60%)" }} />
-              <p className="text-[10px] font-bold text-[#C9972A] uppercase tracking-[0.4em] mb-4 relative">{vi ? "Sẵn sàng hợp tác?" : "Ready to collaborate?"}</p>
-              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4 relative">{vi ? "Bắt đầu dự án của bạn" : "Start Your Project"}</h2>
-              <p className="text-white/50 text-sm mb-8 max-w-md mx-auto relative">{vi ? "Liên hệ để nhận tư vấn miễn phí và báo giá chi tiết." : "Contact us for a free consultation and detailed quote."}</p>
-              <div className="flex items-center justify-center gap-2 bg-[#C9972A] text-black font-bold text-sm px-8 py-3.5 rounded-full w-fit mx-auto relative">
-                {vi ? "Nhận báo giá miễn phí" : "Get a Free Quote"} <ArrowRight size={14} />
-              </div>
-              <p className="text-white/20 text-xs mt-5 relative">binhanmedia.vn · 0969 427 639 · Dinhconghieufilm@gmail.com</p>
+          {/* ── CTA ───────────────────────────────────────────── */}
+          <div style={{ borderRadius: 24, padding: "52px 48px", textAlign: "center", background: "linear-gradient(135deg,#0d0d0d,#1a1208)", border: "1px solid rgba(201,151,42,0.2)", position: "relative", overflow: "hidden", marginBottom: 60 }}>
+            <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 0%,rgba(201,151,42,0.1),transparent 60%)", pointerEvents: "none" }} />
+            <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.4em", margin: "0 0 16px", position: "relative" }}>
+              {vi ? "Sẵn sàng hợp tác?" : "Ready to collaborate?"}
+            </p>
+            <h2 style={{ fontSize: 34, fontWeight: 900, color: "#fff", margin: "0 0 14px", position: "relative" }}>
+              {vi ? "Bắt đầu dự án của bạn" : "Start Your Project"}
+            </h2>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.45)", maxWidth: 400, margin: "0 auto 28px", position: "relative" }}>
+              {vi ? "Liên hệ để nhận tư vấn miễn phí và báo giá chi tiết." : "Contact us for a free consultation and detailed quote."}
+            </p>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#C9972A", color: "#000", fontWeight: 700, fontSize: 13, padding: "12px 28px", borderRadius: 999, position: "relative" }}>
+              {vi ? "Nhận báo giá miễn phí" : "Get a Free Quote"} <ArrowRight size={14} />
             </div>
-          </section>
+            <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 20, position: "relative" }}>
+              binhanmedia.vn · 0969 427 639 · Dinhconghieufilm@gmail.com
+            </p>
+          </div>
 
-          {/* ─ Footer ────────────────────────────────────────────── */}
-          <footer className="border-t border-white/8 pt-8 pb-4">
-            <div className="flex flex-col sm:flex-row gap-6 justify-between items-start">
+          {/* ── FOOTER ────────────────────────────────────────── */}
+          <footer style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 28 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 32 }}>
               <div>
-                <div className="flex items-baseline gap-1 mb-3">
-                  <span className="font-black text-xl text-white">BinhAn</span>
-                  <span className="font-black text-xl text-[#C9972A]">Media</span>
+                <div style={{ marginBottom: 14 }}>
+                  <span style={{ fontWeight: 900, fontSize: 18, color: "#fff" }}>BinhAn</span>
+                  <span style={{ fontWeight: 900, fontSize: 18, color: "#C9972A" }}>Media</span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 32px" }}>
                   {[
-                    { icon: Phone,  v: "0969 427 639" },
-                    { icon: Mail,   v: "Dinhconghieufilm@gmail.com" },
-                    { icon: Globe2, v: "binhanmedia.vn" },
-                    { icon: MapPin, v: vi ? "TP. Hồ Chí Minh, Việt Nam" : "Ho Chi Minh City, Vietnam" },
-                  ].map(({ icon: Icon, v }) => (
-                    <div key={v} className="flex items-center gap-2 text-[12px] text-white/40">
-                      <Icon size={12} className="text-[#C9972A] flex-shrink-0" />{v}
+                    { Icon: Phone,  v: "0969 427 639" },
+                    { Icon: Mail,   v: "Dinhconghieufilm@gmail.com" },
+                    { Icon: Globe2, v: "binhanmedia.vn" },
+                    { Icon: MapPin, v: vi ? "TP. Hồ Chí Minh, Việt Nam" : "Ho Chi Minh City, Vietnam" },
+                  ].map(({ Icon, v }) => (
+                    <div key={v} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "rgba(255,255,255,0.4)" }}>
+                      <Icon size={11} className="text-[#C9972A]" style={{ flexShrink: 0, color: "#C9972A" }} />{v}
                     </div>
                   ))}
                 </div>
               </div>
-              <p className="text-[10px] text-white/20 max-w-xs leading-relaxed">
+              <p style={{ fontSize: 10, color: "rgba(255,255,255,0.18)", maxWidth: 260, lineHeight: 1.7, textAlign: "right" }}>
                 {vi
-                  ? "Tài liệu này được tạo bởi hệ thống Bình An Media. Mọi thông tin mang tính tham khảo."
-                  : "This document was generated by Bình An Media. All information is for reference purposes."}
+                  ? "Tài liệu này được tạo bởi hệ thống Bình An Media. Mọi thông tin mang tính tham khảo và có hiệu lực trong 15 ngày."
+                  : "This document was generated by Bình An Media system. All information is for reference and valid for 15 days."}
               </p>
             </div>
           </footer>
@@ -548,20 +481,31 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          .pdf-only { display: grid !important; }
           body { margin: 0; background: #0a0a0a; }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
-        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       `}</style>
     </>
   );
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+// ─── Helpers ──────────────────────────────────────────────────────
+const headingStyle: React.CSSProperties = {
+  fontSize: 26, fontWeight: 900, color: "#fff", margin: 0,
+};
+const bodyStyle: React.CSSProperties = {
+  fontSize: 13, color: "rgba(255,255,255,0.45)", lineHeight: 1.8, margin: 0,
+};
+
+function Section({ num, label, children }: { num: string; label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 mb-4">
-      <span className="text-[10px] font-black text-[#C9972A]/50 uppercase tracking-[0.3em]">{children}</span>
-      <div className="flex-1 h-px bg-gradient-to-r from-[#C9972A]/20 to-transparent" />
+    <div style={{ marginBottom: 72 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
+        <span style={{ fontSize: 10, fontWeight: 900, color: "rgba(201,151,42,0.5)", letterSpacing: "0.3em", textTransform: "uppercase" }}>{num}</span>
+        <div style={{ height: 1, flex: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.25),transparent)" }} />
+        <span style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.25em" }}>{label}</span>
+      </div>
+      {children}
     </div>
   );
 }
