@@ -53,14 +53,18 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
   const vi = lang === "vi";
 
   useEffect(() => {
-    fetch("/api/admin/settings")
-      .then((r) => r.json())
-      .then((d) => {
-        if (Array.isArray(d.galleryPhotos)) setGalleryPhotos(d.galleryPhotos);
-        if (Array.isArray(d.storyboardPhotos)) setStoryboardPhotos(d.storyboardPhotos);
-      })
-      .catch(() => {})
-      .finally(() => setReady(true));
+    const load = async () => {
+      try {
+        const r = await fetch("/api/admin/settings");
+        if (r.ok) {
+          const d = await r.json();
+          if (Array.isArray(d.galleryPhotos)) setGalleryPhotos(d.galleryPhotos);
+          if (Array.isArray(d.storyboardPhotos)) setStoryboardPhotos(d.storyboardPhotos);
+        }
+      } catch { /* show page with defaults */ }
+      finally { setReady(true); }
+    };
+    load();
   }, []);
 
   if (!ready) {
@@ -79,7 +83,8 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     try {
       const el = docRef.current;
       const { default: html2canvas } = await import("html2canvas");
-      const { default: jsPDF } = await import("jspdf");
+      const jsPDFModule = await import("jspdf");
+      const jsPDF = jsPDFModule.jsPDF ?? jsPDFModule.default;
 
       // Scroll to top and wait 2 frames + extra time for fonts/images to settle
       window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
@@ -107,15 +112,16 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         windowWidth: el.offsetWidth,
         windowHeight: el.scrollHeight,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onclone: (_clonedDoc: Document, clonedEl: HTMLElement) => {
+        onclone: (clonedDoc: Document) => {
+          const clonedEl = clonedDoc.getElementById(el.id) ?? clonedDoc.body;
           // Hide floating controls
-          clonedEl.querySelectorAll<HTMLElement>(".no-print").forEach(e => { e.style.display = "none"; });
+          clonedDoc.querySelectorAll<HTMLElement>(".no-print").forEach(e => { e.style.display = "none"; });
           // Show PDF-only static thumbnails
-          clonedEl.querySelectorAll<HTMLElement>(".pdf-only").forEach(e => { e.style.display = "block"; });
+          clonedDoc.querySelectorAll<HTMLElement>(".pdf-only").forEach(e => { e.style.display = "block"; });
           // Freeze marquee
-          clonedEl.querySelectorAll<HTMLElement>(".marquee-track").forEach(e => { e.style.animation = "none"; e.style.transform = "translateX(0)"; });
+          clonedDoc.querySelectorAll<HTMLElement>(".marquee-track").forEach(e => { e.style.animation = "none"; e.style.transform = "translateX(0)"; });
           // Remove iframes (YouTube won't render)
-          clonedEl.querySelectorAll<HTMLElement>("iframe").forEach(e => { e.remove(); });
+          clonedDoc.querySelectorAll<HTMLElement>("iframe").forEach(e => { e.remove(); });
           // Force full height on cloned element so nothing clips
           clonedEl.style.height = "auto";
           clonedEl.style.overflow = "visible";
