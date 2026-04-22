@@ -506,10 +506,10 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           {/* ── FOUNDER ───────────────────────────────────────── */}
           <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 2 : 1)}`} label={vi ? "Người sáng lập" : "Founder"}>
             <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 40, alignItems: "start" }}>
-              <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid #e2dbd0", background: "#f0ece5", aspectRatio: "3/4" }}>
+              <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid #e2dbd0", background: "#f0ece5", aspectRatio: "3/4", position: "relative" }}>
                 {founder.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={founder.photoUrl} alt={founder.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <img src={founder.photoUrl} alt={founder.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
                 ) : (
                   <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,rgba(201,151,42,0.12),#f0ece5)" }}>
                     <span style={{ fontSize: 52, fontWeight: 900, color: "rgba(201,151,42,0.25)" }}>
