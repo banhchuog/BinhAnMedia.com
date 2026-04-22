@@ -354,11 +354,12 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                   <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.25em", margin: "0 0 14px" }}>
                     {vi ? "Frame đẹp" : "Stills"}
                   </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+                  {/* Masonry-style: columns, ảnh giữ tỉ lệ gốc */}
+                  <div style={{ columns: 3, columnGap: 10 }}>
                     {framePhotos.map((photo) => (
-                      <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
+                      <div key={photo.id} style={{ breakInside: "avoid", marginBottom: 10, borderRadius: 10, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", display: "block" }} />
                       </div>
                     ))}
                   </div>
@@ -370,11 +371,12 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                   <p style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.35)", textTransform: "uppercase", letterSpacing: "0.25em", margin: "0 0 14px" }}>
                     {vi ? "Hậu trường" : "Behind the Scenes"}
                   </p>
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
+                  {/* Masonry-style: columns, ảnh giữ tỉ lệ gốc */}
+                  <div style={{ columns: 3, columnGap: 10 }}>
                     {btsPhotos.map((photo) => (
-                      <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
+                      <div key={photo.id} style={{ breakInside: "avoid", marginBottom: 10, borderRadius: 10, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", display: "block" }} />
                       </div>
                     ))}
                   </div>
