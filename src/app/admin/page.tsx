@@ -59,8 +59,6 @@ type AdminSettings = {
   testimonials: TestimonialItem[];
   catalogEdits: Record<string, CatalogEdit>;
   galleryPhotos: GalleryPhoto[];
-  galleryFrameFolder: string;
-  galleryBtsFolder: string;
 };
 const EMPTY_VIDEO = (): VideoItem => ({
   id: Date.now().toString(), title: "", cat: "TVC", client: "", year: new Date().getFullYear().toString(),
@@ -92,7 +90,7 @@ const svgSize = (svg: string, size: number) => {
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [sessionPw, setSessionPw] = useState("");
-  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {}, galleryPhotos: [], galleryFrameFolder: "", galleryBtsFolder: "" });
+  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {}, galleryPhotos: [] });
   const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "gallery" | "leads" | "applicants" | "settings">("leads");
   const [toastMsg, setToastMsg] = useState("");
   const [dbError, setDbError] = useState("");
@@ -137,8 +135,6 @@ export default function AdminPage() {
       testimonials: Array.isArray(data.testimonials) ? data.testimonials : [],
       catalogEdits: data.catalogEdits || {},
       galleryPhotos: Array.isArray(data.galleryPhotos) ? data.galleryPhotos : [],
-      galleryFrameFolder: data.galleryFrameFolder ?? "",
-      galleryBtsFolder: data.galleryBtsFolder ?? "",
     });
   }, []);
 
@@ -294,9 +290,8 @@ export default function AdminPage() {
         )}
         {tab === "gallery" && (
           <GalleryTab
-            frameFolder={settings.galleryFrameFolder}
-            btsFolder={settings.galleryBtsFolder}
-            onSave={(galleryFrameFolder, galleryBtsFolder) => save({ galleryFrameFolder, galleryBtsFolder })}
+            photos={settings.galleryPhotos}
+            onSave={(galleryPhotos) => save({ galleryPhotos })}
           />
         )}
         {tab === "settings" && (
@@ -2610,156 +2605,175 @@ function SettingsTab({
 }
 
 // ─── GalleryTab ──────────────────────────────────────────────────
-type DriveFile = { id: string; name: string; url: string };
 
-function FolderCard({
-  label, emoji, accentClass, folder, onFolderChange, onSave, saving,
+/** Compress a File to JPEG data-URL, max 900px wide, quality 0.78 */
+async function compressImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 900;
+        let { width, height } = img;
+        if (width > MAX) { height = Math.round((height * MAX) / width); width = MAX; }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function UploadZone({
+  type, photos, onAdd, onRemove,
 }: {
-  label: string; emoji: string; accentClass: string; folder: string;
-  onFolderChange: (v: string) => void; onSave: () => void; saving: boolean;
+  type: "frame" | "bts";
+  photos: GalleryPhoto[];
+  onAdd: (items: GalleryPhoto[]) => void;
+  onRemove: (id: string) => void;
 }) {
-  const [preview, setPreview] = useState<DriveFile[]>([]);
-  const [fetching, setFetching] = useState(false);
-  const [fetchError, setFetchError] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [processing, setProcessing] = useState(false);
+  const [drag, setDrag] = useState(false);
 
-  const fetchPreview = async () => {
-    if (!folder.trim()) return;
-    setFetching(true);
-    setFetchError("");
-    setPreview([]);
-    try {
-      const res = await fetch(`/api/drive-folder?url=${encodeURIComponent(folder.trim())}`);
-      const data = await res.json() as { files?: DriveFile[]; error?: string };
-      if (data.error) { setFetchError(data.error); }
-      else { setPreview(data.files || []); }
-    } catch (e) { setFetchError(String(e)); }
-    finally { setFetching(false); }
+  const isFrame = type === "frame";
+  const accent = isFrame ? "#C9972A" : "#1C1C1E";
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setProcessing(true);
+    const results: GalleryPhoto[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      try {
+        const url = await compressImage(file);
+        results.push({ id: Date.now().toString() + Math.random(), url, type, caption: "", project: "" });
+      } catch { /* skip broken files */ }
+    }
+    onAdd(results);
+    setProcessing(false);
   };
 
   return (
     <div className="bg-white rounded-2xl border border-black/8 overflow-hidden">
-      {/* Card header */}
+      {/* Header */}
       <div className="flex items-center gap-3 px-5 py-4 border-b border-black/6">
-        <span className="text-2xl">{emoji}</span>
+        <span className="text-xl">{isFrame ? "🎬" : "🎥"}</span>
         <div className="flex-1">
-          <p className="font-bold text-[#1C1C1E] text-sm">{label}</p>
-          <p className="text-[11px] text-[#8E8E93] mt-0.5">Dán link thư mục Google Drive đã chia sẻ công khai</p>
+          <p className="font-bold text-[#1C1C1E] text-sm">{isFrame ? "Frame đẹp từ dự án" : "Ảnh hậu trường (BTS)"}</p>
+          <p className="text-[11px] text-[#8E8E93] mt-0.5">
+            {photos.length} ảnh · Kéo thả hoặc chọn file · Tự nén về ~100KB trước khi lưu
+          </p>
         </div>
-      </div>
-      {/* Input row */}
-      <div className="px-5 py-4 flex flex-col sm:flex-row gap-2">
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={processing}
+          style={{ background: accent }}
+          className="flex items-center gap-1.5 text-white text-xs font-bold px-4 py-2 rounded-xl opacity-90 hover:opacity-100 transition disabled:opacity-40"
+        >
+          {processing ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+          {processing ? "Đang nén…" : "Thêm ảnh"}
+        </button>
         <input
-          value={folder}
-          onChange={(e) => { onFolderChange(e.target.value); setPreview([]); setFetchError(""); }}
-          placeholder="https://drive.google.com/drive/folders/..."
-          className="flex-1 bg-[#F2F2F7] border border-black/10 rounded-xl px-3 py-2.5 text-xs text-[#1C1C1E] placeholder:text-[#C7C7CC] focus:border-[#C9972A] focus:outline-none transition"
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => handleFiles(e.target.files)}
         />
-        <button
-          onClick={fetchPreview}
-          disabled={fetching || !folder.trim()}
-          className="flex items-center gap-1.5 bg-[#F2F2F7] border border-black/10 text-[#1C1C1E] text-xs font-semibold px-4 py-2.5 rounded-xl hover:border-[#C9972A]/50 transition disabled:opacity-40 whitespace-nowrap"
-        >
-          {fetching ? <Loader2 size={13} className="animate-spin" /> : <Eye size={13} />}
-          {fetching ? "Đang tải…" : "Xem trước"}
-        </button>
-        <button
-          onClick={onSave}
-          disabled={saving}
-          className={`flex items-center gap-1.5 text-white text-xs font-bold px-4 py-2.5 rounded-xl transition disabled:opacity-50 whitespace-nowrap ${accentClass}`}
-        >
-          {saving ? <><Loader2 size={13} className="animate-spin" /> Đang lưu…</> : <><Save size={13} /> Lưu</>}
-        </button>
       </div>
-      {/* Error */}
-      {fetchError && (
-        <div className="mx-5 mb-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-xs text-red-600">
-          ⚠️ {fetchError}
-        </div>
-      )}
-      {/* Preview grid */}
-      {preview.length > 0 && (
-        <div className="px-5 pb-5">
-          <p className="text-[11px] text-[#8E8E93] mb-3">{preview.length} ảnh tìm thấy trong thư mục</p>
-          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
-            {preview.map((f) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <div key={f.id} className="aspect-square rounded-lg overflow-hidden bg-[#F2F2F7] group relative">
-                <img
-                  src={f.url}
-                  alt={f.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  loading="lazy"
-                  onError={(e) => { (e.target as HTMLImageElement).style.opacity = "0.2"; }}
-                />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition flex items-end opacity-0 group-hover:opacity-100">
-                  <p className="text-[9px] text-white truncate px-1.5 pb-1.5 w-full">{f.name}</p>
-                </div>
+
+      {/* Drop zone */}
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => { e.preventDefault(); setDrag(false); handleFiles(e.dataTransfer.files); }}
+        onClick={() => photos.length === 0 && inputRef.current?.click()}
+        className={`transition-colors ${drag ? "bg-amber-50" : ""} ${photos.length === 0 ? "cursor-pointer" : ""}`}
+      >
+        {photos.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-14 text-[#8E8E93]">
+            <ImageIcon size={28} className="text-[#C7C7CC]" />
+            <p className="text-sm">Kéo thả ảnh vào đây hoặc nhấn để chọn</p>
+            <p className="text-[11px] text-[#C7C7CC]">JPG, PNG, WEBP · Nhiều file cùng lúc</p>
+          </div>
+        ) : (
+          <div className="p-4 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+            {photos.map((p) => (
+              <div key={p.id} className="relative aspect-video rounded-lg overflow-hidden bg-[#F2F2F7] group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <button
+                  onClick={(e) => { e.stopPropagation(); onRemove(p.id); }}
+                  className="absolute top-1 right-1 w-5 h-5 bg-black/70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+                >
+                  <X size={10} className="text-white" />
+                </button>
               </div>
             ))}
+            {/* Add more tile */}
+            <button
+              onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+              className="aspect-video rounded-lg border-2 border-dashed border-black/15 flex items-center justify-center hover:border-[#C9972A]/50 transition group"
+            >
+              <Plus size={18} className="text-[#C7C7CC] group-hover:text-[#C9972A] transition" />
+            </button>
           </div>
-        </div>
-      )}
-      {/* Empty state */}
-      {!fetching && preview.length === 0 && !fetchError && folder.trim() && (
-        <div className="px-5 pb-5 text-xs text-[#8E8E93] text-center py-4">
-          Nhấn "Xem trước" để tải ảnh từ Drive
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
 
-function GalleryTab({ frameFolder, btsFolder, onSave }: {
-  frameFolder: string;
-  btsFolder: string;
-  onSave: (frameFolder: string, btsFolder: string) => void;
-}) {
-  const [frame, setFrame] = useState(frameFolder);
-  const [bts, setBts] = useState(btsFolder);
-  const [savingFrame, setSavingFrame] = useState(false);
-  const [savingBts, setSavingBts] = useState(false);
+function GalleryTab({ photos, onSave }: { photos: GalleryPhoto[]; onSave: (p: GalleryPhoto[]) => void }) {
+  const [list, setList] = useState<GalleryPhoto[]>(photos);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => { setFrame(frameFolder); }, [frameFolder]);
-  useEffect(() => { setBts(btsFolder); }, [btsFolder]);
+  useEffect(() => { setList(photos); }, [photos]);
+
+  const framePhotos = list.filter((p) => p.type === "frame");
+  const btsPhotos = list.filter((p) => p.type === "bts");
+
+  const addItems = (items: GalleryPhoto[]) => setList((prev) => [...prev, ...items]);
+  const removeItem = (id: string) => setList((prev) => prev.filter((p) => p.id !== id));
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave(list);
+    setSaving(false);
+  };
 
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="bg-white rounded-2xl border border-black/8 p-5">
-        <h2 className="font-bold text-[#1C1C1E] text-base">Thư viện ảnh từ Google Drive</h2>
-        <p className="text-xs text-[#8E8E93] mt-1">
-          Chỉ cần dán link thư mục Drive đã chia sẻ công khai — web tự fetch và xếp gallery trong Proposal.
-          Cần có <code className="bg-[#F2F2F7] px-1 rounded">GOOGLE_DRIVE_API_KEY</code> trong <code className="bg-[#F2F2F7] px-1 rounded">.env</code>.
-        </p>
-        <a
-          href="https://console.cloud.google.com/apis/credentials"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 mt-2 text-[11px] text-[#C9972A] hover:underline"
-        >
-          <ExternalLink size={11} /> Tạo API key miễn phí tại Google Cloud Console
-        </a>
+      <div className="bg-white rounded-2xl border border-black/8 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="font-bold text-[#1C1C1E] text-base">Thư viện ảnh</h2>
+          <p className="text-xs text-[#8E8E93] mt-0.5">
+            Upload thẳng lên Railway — ảnh tự nén về ~100KB, lưu vào PostgreSQL.
+            Hiển thị trong Proposal.
+          </p>
+        </div>
+        {list.length > 0 && (
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 bg-[#C9972A] text-white font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-[#B8841E] transition disabled:opacity-50 shrink-0"
+          >
+            {saving ? <><Loader2 size={14} className="animate-spin" /> Đang lưu…</> : <><Save size={14} /> Lưu thư viện ({list.length})</>}
+          </button>
+        )}
       </div>
 
-      <FolderCard
-        label="Frame đẹp từ dự án"
-        emoji="🎬"
-        accentClass="bg-[#C9972A] hover:bg-[#B8841E]"
-        folder={frame}
-        onFolderChange={setFrame}
-        onSave={async () => { setSavingFrame(true); await onSave(frame, bts); setSavingFrame(false); }}
-        saving={savingFrame}
-      />
-
-      <FolderCard
-        label="Ảnh hậu trường (BTS)"
-        emoji="🎥"
-        accentClass="bg-[#1C1C1E] hover:bg-[#333]"
-        folder={bts}
-        onFolderChange={setBts}
-        onSave={async () => { setSavingBts(true); await onSave(frame, bts); setSavingBts(false); }}
-        saving={savingBts}
-      />
+      <UploadZone type="frame" photos={framePhotos} onAdd={addItems} onRemove={removeItem} />
+      <UploadZone type="bts"   photos={btsPhotos}   onAdd={addItems} onRemove={removeItem} />
     </div>
   );
 }

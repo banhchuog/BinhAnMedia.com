@@ -19,7 +19,7 @@ export async function POST(req: Request) {
     const {
       password, priceOverrides, presets, newPassword, heroVideoId,
       clientLogos, founder, customCatalogItems, customServices, testimonials,
-      catalogEdits, videos, galleryPhotos, galleryFrameFolder, galleryBtsFolder,
+      catalogEdits, videos, galleryPhotos,
     } = body;
 
     const storedPw = await getPassword();
@@ -60,8 +60,6 @@ export async function POST(req: Request) {
         ...(testimonials !== undefined ? { testimonials } : {}),
         ...(catalogEdits !== undefined ? { catalogEdits } : {}),
         ...(galleryPhotos !== undefined ? { galleryPhotos } : {}),
-        ...(galleryFrameFolder !== undefined ? { galleryFrameFolder } : {}),
-        ...(galleryBtsFolder !== undefined ? { galleryBtsFolder } : {}),
       },
     });
 

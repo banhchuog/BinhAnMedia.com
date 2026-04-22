@@ -46,30 +46,14 @@ interface Props {
 export default function ProposalClient({ heroId, clientLogos, founder, testimonials, videos, services }: Props) {
   const [lang, setLang] = useState<Lang>("vi");
   const [downloading, setDownloading] = useState(false);
-  const [framePhotos, setFramePhotos] = useState<{ id: string; name: string; url: string }[]>([]);
-  const [btsPhotos, setBtsPhotos] = useState<{ id: string; name: string; url: string }[]>([]);
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
   const docRef = useRef<HTMLDivElement>(null);
   const vi = lang === "vi";
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
-      .then(async (d) => {
-        const frameUrl: string = d.galleryFrameFolder ?? "";
-        const btsUrl: string = d.galleryBtsFolder ?? "";
-        if (frameUrl) {
-          fetch(`/api/drive-folder?url=${encodeURIComponent(frameUrl)}`)
-            .then((r) => r.json())
-            .then((data: { files?: { id: string; name: string; url: string }[] }) => { if (data.files) setFramePhotos(data.files); })
-            .catch(() => {});
-        }
-        if (btsUrl) {
-          fetch(`/api/drive-folder?url=${encodeURIComponent(btsUrl)}`)
-            .then((r) => r.json())
-            .then((data: { files?: { id: string; name: string; url: string }[] }) => { if (data.files) setBtsPhotos(data.files); })
-            .catch(() => {});
-        }
-      })
+      .then((d) => { if (Array.isArray(d.galleryPhotos)) setGalleryPhotos(d.galleryPhotos); })
       .catch(() => {});
   }, []);
 
@@ -99,6 +83,8 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     return acc;
   }, {});
   const catOrder = ["TVC", "MV", "Corporate", "Social", "Event", "Motion"];
+  const framePhotos = galleryPhotos.filter((p) => p.type === "frame");
+  const btsPhotos   = galleryPhotos.filter((p) => p.type === "bts");
 
   return (
     <>
@@ -372,7 +358,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     {framePhotos.map((photo) => (
                       <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.name} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
                       </div>
                     ))}
                   </div>
@@ -388,7 +374,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     {btsPhotos.map((photo) => (
                       <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.name} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
+                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
                       </div>
                     ))}
                   </div>
