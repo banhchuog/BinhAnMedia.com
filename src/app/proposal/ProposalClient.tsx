@@ -65,13 +65,17 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     if (!docRef.current || downloading) return;
     setDownloading(true);
     try {
-      // Scroll to top so html2canvas captures from correct origin
-      window.scrollTo(0, 0);
-      await new Promise(r => setTimeout(r, 120)); // wait for scroll + repaint
-
       const el = docRef.current;
       const { default: html2canvas } = await import("html2canvas");
       const { default: jsPDF } = await import("jspdf");
+
+      // Scroll to top and wait 2 frames + extra time for fonts/images to settle
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" as ScrollBehavior });
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      await new Promise(r => setTimeout(r, 400));
+
+      // After scroll, rect.top is the element's offset from the top of viewport
+      const rect = el.getBoundingClientRect();
 
       const canvas = await html2canvas(el, {
         scale: 2,
@@ -80,25 +84,37 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         logging: false,
         backgroundColor: "#ffffff",
         imageTimeout: 30000,
-        // Critical: anchor render at element's top-left, ignore page scroll
-        scrollX: -window.scrollX,
-        scrollY: -window.scrollY,
-        windowWidth: el.scrollWidth,
+        // Explicitly set full element dimensions — fixes cutoff at gallery
+        width: el.offsetWidth,
+        height: el.scrollHeight,
+        // Anchor capture to element top-left — fixes text/vector misalignment
+        x: rect.left,
+        y: rect.top,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: el.offsetWidth,
         windowHeight: el.scrollHeight,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onclone: (clonedDoc: Document) => {
-          clonedDoc.querySelectorAll<HTMLElement>(".no-print").forEach(e => { e.style.display = "none"; });
-          clonedDoc.querySelectorAll<HTMLElement>(".pdf-only").forEach(e => { e.style.display = "block"; });
-          clonedDoc.querySelectorAll<HTMLElement>(".marquee-track").forEach(e => { e.style.animation = "none"; e.style.transform = "translateX(0)"; });
-          clonedDoc.querySelectorAll<HTMLElement>("iframe").forEach(e => { e.remove(); });
+        onclone: (_clonedDoc: Document, clonedEl: HTMLElement) => {
+          // Hide floating controls
+          clonedEl.querySelectorAll<HTMLElement>(".no-print").forEach(e => { e.style.display = "none"; });
+          // Show PDF-only static thumbnails
+          clonedEl.querySelectorAll<HTMLElement>(".pdf-only").forEach(e => { e.style.display = "block"; });
+          // Freeze marquee
+          clonedEl.querySelectorAll<HTMLElement>(".marquee-track").forEach(e => { e.style.animation = "none"; e.style.transform = "translateX(0)"; });
+          // Remove iframes (YouTube won't render)
+          clonedEl.querySelectorAll<HTMLElement>("iframe").forEach(e => { e.remove(); });
+          // Force full height on cloned element so nothing clips
+          clonedEl.style.height = "auto";
+          clonedEl.style.overflow = "visible";
         },
       });
 
+      // Build 1 tall page sized exactly to canvas — no page breaks, no clipping
       const imgW = canvas.width;
       const imgH = canvas.height;
-      // 1 tall page sized exactly to canvas (pixels as unit avoids mm rounding)
       const pdf = new jsPDF({ unit: "px", format: [imgW, imgH], orientation: "portrait", compress: true });
-      pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, imgW, imgH);
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, imgW, imgH);
       pdf.save(`BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`);
     } catch (e) { console.error(e); }
     finally { setDownloading(false); }
