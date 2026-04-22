@@ -1,0 +1,59 @@
+// Bình An Media — PostgreSQL schema for Railway
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Single-row settings (key-value store) ────────────────────────
+model Settings {
+  id                 Int      @id @default(1)
+  password           String   @default("admin@2026")
+  heroVideoId        String   @default("")
+  priceOverrides     Json     @default("{}")
+  presets            Json     @default("{}")
+  clientLogos        Json     @default("[]")
+  founder            Json?
+  customCatalogItems Json     @default("[]")
+  customServices     Json     @default("[]")
+  testimonials       Json     @default("[]")
+  catalogEdits       Json     @default("{}")
+  galleryPhotos      Json     @default("[]")
+  galleryFrameFolder String   @default("")
+  galleryBtsFolder   String   @default("")
+  storyboardPhotos   Json     @default("[]")
+  updatedAt          DateTime @updatedAt
+}
+
+// ─── Showreel videos ──────────────────────────────────────────────
+model Video {
+  id        String   @id @default(cuid())
+  title     String   @default("")
+  cat       String   @default("TVC")
+  client    String   @default("")
+  year      String   @default("")
+  views     String   @default("")
+  duration  String   @default("")
+  ytId      String   @default("")
+  desc      String   @default("")
+  thumbnail String   @default("")
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+// ─── Quote leads ─────────────────────────────────────────────────
+model Lead {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String
+  note      String   @default("")
+  service   String   @default("")
+  total     Float    @default(0)
+  items     Json     @default("[]")
+  contacted Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
