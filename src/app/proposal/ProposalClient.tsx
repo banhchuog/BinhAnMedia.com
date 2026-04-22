@@ -284,32 +284,24 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             </div>
 
             {/* Storyboard visual */}
-            <div style={{ background: "#fff", border: "1px solid #e2dbd0", borderRadius: 18, overflow: "hidden" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid #ede8df", background: "#faf8f4" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <div style={{ display: "flex", gap: 5 }}>
-                    {["#ff5f57","#febc2e","#28c840"].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />)}
-                  </div>
-                  <span style={{ fontSize: 10, color: "#b0a898", fontFamily: "monospace" }}>storyboard_v2.pdf</span>
-                </div>
-                <span style={{ fontSize: 9, color: "#c4bbad" }}>{vi ? "Ví dụ minh hoạ" : "Illustration example"}</span>
+            {storyboardPhotos.length > 0 ? (
+              <div style={{ marginTop: 8 }}>
+                {storyboardPhotos.map((photo) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img key={photo.id} src={photo.url} alt={photo.caption || "Storyboard"} style={{ width: "100%", display: "block", borderRadius: 12, marginBottom: 10 }} />
+                ))}
               </div>
-
-              {storyboardPhotos.length > 0 ? (
-                /* ── Real uploaded storyboard photos ── */
-                <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(storyboardPhotos.length, 4)}, 1fr)`, gap: 0 }}>
-                  {storyboardPhotos.map((photo, idx) => {
-                    const cols = Math.min(storyboardPhotos.length, 4);
-                    return (
-                      <div key={photo.id} style={{ borderRight: idx % cols !== cols - 1 ? "1px solid #ede8df" : "none", borderBottom: idx < cols ? "1px solid #ede8df" : "none" }}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.caption || `Shot ${idx + 1}`} style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover" }} />
-                      </div>
-                    );
-                  })}
+            ) : (
+              <div style={{ background: "#fff", border: "1px solid #e2dbd0", borderRadius: 18, overflow: "hidden" }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 20px", borderBottom: "1px solid #ede8df", background: "#faf8f4" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <div style={{ display: "flex", gap: 5 }}>
+                      {["#ff5f57","#febc2e","#28c840"].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: "50%", background: c }} />)}
+                    </div>
+                    <span style={{ fontSize: 10, color: "#b0a898", fontFamily: "monospace" }}>storyboard_v2.pdf</span>
+                  </div>
+                  <span style={{ fontSize: 9, color: "#c4bbad" }}>{vi ? "Ví dụ minh hoạ" : "Illustration example"}</span>
                 </div>
-              ) : (
-                /* ── Mock SVG fallback ── */
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 0 }}>
                   {[
                     { shot: "01", angle: vi ? "Cảnh mở đầu" : "Opening shot",    note: vi ? "Wide — thiết lập không gian" : "Wide — establish space",     bars: [0.7, 0.4, 0.9] },
@@ -343,14 +335,14 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     </div>
                   ))}
                 </div>
-              )}
-              <div style={{ padding: "10px 20px", background: "#faf8f4", borderTop: "1px solid #ede8df", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <span style={{ fontSize: 9, color: "#b0a898" }}>
-                  {vi ? "Storyboard được duyệt trước khi bắt đầu quay" : "Storyboard approved before filming begins"}
-                </span>
-                <span style={{ fontSize: 9, color: "#C9972A" }}>Bình An Media © {new Date().getFullYear()}</span>
+                <div style={{ padding: "10px 20px", background: "#faf8f4", borderTop: "1px solid #ede8df", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 9, color: "#b0a898" }}>
+                    {vi ? "Storyboard được duyệt trước khi bắt đầu quay" : "Storyboard approved before filming begins"}
+                  </span>
+                  <span style={{ fontSize: 9, color: "#C9972A" }}>Bình An Media © {new Date().getFullYear()}</span>
+                </div>
               </div>
-            </div>
+            )}
           </Section>
           {/* ── GALLERY ────────────────────────────────────────────── */}
           {(framePhotos.length + btsPhotos.length) > 0 && (
