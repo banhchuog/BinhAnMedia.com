@@ -22,6 +22,7 @@ model Settings {
   customServices  Json     @default("[]")
   testimonials    Json     @default("[]")
   catalogEdits    Json     @default("{}")
+  galleryPhotos   Json     @default("[]")
   updatedAt       DateTime @updatedAt
 }
 

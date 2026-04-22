@@ -5,7 +5,7 @@ import { CATALOG, GROUPS, DEFAULT_PRESETS } from "@/lib/catalog";
 import type { CatalogItem, PresetItem } from "@/lib/catalog";
 import {
   Lock, LogOut, DollarSign, Package, Video, Settings,
-  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download, Briefcase, Eye, FileSpreadsheet, FileText,
+  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download, Briefcase, Eye, FileSpreadsheet, FileText, Loader2,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -39,6 +39,13 @@ type TestimonialItem = {
   role: string;
   body: string;
 };
+type GalleryPhoto = {
+  id: string;
+  url: string;
+  type: "frame" | "bts";
+  caption: string;
+  project: string;
+};
 type CatalogEdit = { name?: string; unit?: string };
 type AdminSettings = {
   priceOverrides: Record<string, number>;
@@ -51,6 +58,7 @@ type AdminSettings = {
   customServices: CustomService[];
   testimonials: TestimonialItem[];
   catalogEdits: Record<string, CatalogEdit>;
+  galleryPhotos: GalleryPhoto[];
 };
 const EMPTY_VIDEO = (): VideoItem => ({
   id: Date.now().toString(), title: "", cat: "TVC", client: "", year: new Date().getFullYear().toString(),
@@ -82,8 +90,8 @@ const svgSize = (svg: string, size: number) => {
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [sessionPw, setSessionPw] = useState("");
-  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {} });
-  const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "leads" | "applicants" | "settings">("leads");
+  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {}, galleryPhotos: [] });
+  const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "gallery" | "leads" | "applicants" | "settings">("leads");
   const [toastMsg, setToastMsg] = useState("");
   const [dbError, setDbError] = useState("");
 
@@ -126,6 +134,7 @@ export default function AdminPage() {
       customServices: Array.isArray(data.customServices) ? data.customServices : [],
       testimonials: Array.isArray(data.testimonials) ? data.testimonials : [],
       catalogEdits: data.catalogEdits || {},
+      galleryPhotos: Array.isArray(data.galleryPhotos) ? data.galleryPhotos : [],
     });
   }, []);
 
@@ -181,6 +190,7 @@ export default function AdminPage() {
     { id: "presets" as const,  label: "Gói mặc định",     Icon: Package },
     { id: "services" as const, label: "Dịch vụ",         Icon: Sparkles },
     { id: "videos" as const,   label: "Video Showreel",   Icon: Video },
+    { id: "gallery" as const,  label: "Thư viện ảnh",     Icon: ImageIcon },
     { id: "settings" as const, label: "Cài đặt",          Icon: Settings },
   ];
 
@@ -277,6 +287,12 @@ export default function AdminPage() {
         )}
         {tab === "applicants" && (
           <ApplicantsTab sessionPw={sessionPw} />
+        )}
+        {tab === "gallery" && (
+          <GalleryTab
+            photos={settings.galleryPhotos}
+            onSave={(galleryPhotos) => save({ galleryPhotos })}
+          />
         )}
         {tab === "settings" && (
           <SettingsTab
@@ -2584,6 +2600,166 @@ function SettingsTab({
           Tất cả thay đổi giá, gói, video được lưu trực tiếp trên server và áp dụng ngay cho tất cả khách hàng.
         </p>
       </div>
+    </div>
+  );
+}
+
+// ─── GalleryTab ──────────────────────────────────────────────────
+function GalleryTab({ photos, onSave }: { photos: GalleryPhoto[]; onSave: (p: GalleryPhoto[]) => void }) {
+  const [list, setList] = useState<GalleryPhoto[]>(photos);
+  const [saving, setSaving] = useState(false);
+  const [filter, setFilter] = useState<"all" | "frame" | "bts">("all");
+
+  useEffect(() => { setList(photos); }, [photos]);
+
+  const addPhoto = (type: "frame" | "bts") => {
+    setList((prev) => [...prev, { id: Date.now().toString(), url: "", type, caption: "", project: "" }]);
+  };
+
+  const update = (id: string, field: keyof GalleryPhoto, val: string) => {
+    setList((prev) => prev.map((p) => p.id === id ? { ...p, [field]: val } : p));
+  };
+
+  const remove = (id: string) => setList((prev) => prev.filter((p) => p.id !== id));
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave(list.filter((p) => p.url.trim()));
+    setSaving(false);
+  };
+
+  const filtered = filter === "all" ? list : list.filter((p) => p.type === filter);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-white rounded-2xl border border-black/8 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="font-bold text-[#1C1C1E] text-base">Thư viện ảnh</h2>
+          <p className="text-xs text-[#8E8E93] mt-0.5">Frame đẹp từ dự án & ảnh hậu trường — hiển thị trong Proposal</p>
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <button
+            onClick={() => addPhoto("frame")}
+            className="flex items-center gap-1.5 bg-[#C9972A] text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-[#B8841E] transition"
+          >
+            <Plus size={13} /> Thêm Frame
+          </button>
+          <button
+            onClick={() => addPhoto("bts")}
+            className="flex items-center gap-1.5 bg-[#1C1C1E] text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:bg-[#333] transition"
+          >
+            <Plus size={13} /> Thêm Hậu trường
+          </button>
+        </div>
+      </div>
+
+      {/* Filter + count */}
+      <div className="flex items-center gap-2">
+        {(["all", "frame", "bts"] as const).map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition ${filter === f ? "bg-[#C9972A] text-white" : "bg-white text-[#8E8E93] border border-black/10 hover:border-[#C9972A]/40"}`}
+          >
+            {f === "all" ? `Tất cả (${list.length})` : f === "frame" ? `Frame (${list.filter(p => p.type === "frame").length})` : `Hậu trường (${list.filter(p => p.type === "bts").length})`}
+          </button>
+        ))}
+        <span className="ml-auto text-xs text-[#8E8E93]">Dán URL ảnh từ Google Drive, Cloudinary, Imgur…</span>
+      </div>
+
+      {/* Photo list */}
+      {filtered.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-dashed border-black/15 p-12 text-center">
+          <ImageIcon size={28} className="text-[#C7C7CC] mx-auto mb-3" />
+          <p className="text-sm text-[#8E8E93]">Chưa có ảnh. Nhấn "Thêm Frame" hoặc "Thêm Hậu trường" để bắt đầu.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {filtered.map((photo) => (
+            <div key={photo.id} className="bg-white rounded-2xl border border-black/8 overflow-hidden">
+              {/* Preview */}
+              <div className="relative w-full aspect-video bg-[#f5f5f5] overflow-hidden">
+                {photo.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={photo.url} alt={photo.caption} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <ImageIcon size={32} className="text-[#C7C7CC]" />
+                  </div>
+                )}
+                {/* Type badge */}
+                <span className={`absolute top-2 left-2 text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide ${photo.type === "frame" ? "bg-[#C9972A] text-white" : "bg-[#1C1C1E] text-white"}`}>
+                  {photo.type === "frame" ? "Frame" : "BTS"}
+                </span>
+                <button
+                  onClick={() => remove(photo.id)}
+                  className="absolute top-2 right-2 w-7 h-7 bg-red-500/90 rounded-full flex items-center justify-center hover:bg-red-600 transition"
+                >
+                  <Trash2 size={12} className="text-white" />
+                </button>
+              </div>
+              {/* Fields */}
+              <div className="p-4 space-y-2.5">
+                <div>
+                  <label className="text-[10px] text-[#8E8E93] mb-1 block uppercase tracking-wide">URL ảnh *</label>
+                  <input
+                    value={photo.url}
+                    onChange={(e) => update(photo.id, "url", e.target.value)}
+                    placeholder="https://..."
+                    className="w-full bg-[#F2F2F7] border border-black/10 rounded-lg px-3 py-2 text-xs text-[#1C1C1E] placeholder:text-[#C7C7CC] focus:border-[#C9972A] focus:outline-none transition"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[10px] text-[#8E8E93] mb-1 block uppercase tracking-wide">Caption</label>
+                    <input
+                      value={photo.caption}
+                      onChange={(e) => update(photo.id, "caption", e.target.value)}
+                      placeholder="Mô tả ngắn"
+                      className="w-full bg-[#F2F2F7] border border-black/10 rounded-lg px-3 py-2 text-xs text-[#1C1C1E] placeholder:text-[#C7C7CC] focus:border-[#C9972A] focus:outline-none transition"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-[#8E8E93] mb-1 block uppercase tracking-wide">Dự án</label>
+                    <input
+                      value={photo.project}
+                      onChange={(e) => update(photo.id, "project", e.target.value)}
+                      placeholder="Tên dự án"
+                      className="w-full bg-[#F2F2F7] border border-black/10 rounded-lg px-3 py-2 text-xs text-[#1C1C1E] placeholder:text-[#C7C7CC] focus:border-[#C9972A] focus:outline-none transition"
+                    />
+                  </div>
+                </div>
+                {/* Type toggle */}
+                <div className="flex gap-1.5">
+                  {(["frame", "bts"] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => update(photo.id, "type", t)}
+                      className={`flex-1 text-[10px] font-bold py-1.5 rounded-lg transition ${photo.type === t ? (t === "frame" ? "bg-[#C9972A] text-white" : "bg-[#1C1C1E] text-white") : "bg-[#F2F2F7] text-[#8E8E93]"}`}
+                    >
+                      {t === "frame" ? "🎬 Frame" : "🎥 Hậu trường"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Save */}
+      {list.length > 0 && (
+        <div className="flex justify-end">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="flex items-center gap-2 bg-[#C9972A] text-white font-bold text-sm px-6 py-3 rounded-xl hover:bg-[#B8841E] transition disabled:opacity-50"
+          >
+            {saving ? <><Loader2 size={14} className="animate-spin" /> Đang lưu…</> : <><Save size={14} /> Lưu thư viện</>}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

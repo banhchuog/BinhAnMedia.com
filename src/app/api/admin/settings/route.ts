@@ -12,6 +12,7 @@ const EMPTY_RESPONSE = {
   customServices: [],
   testimonials: [],
   catalogEdits: {},
+  galleryPhotos: [],
   dbConnected: false,
   dbError: "",
 };
@@ -60,6 +61,7 @@ export async function GET() {
     customServices: cleanedServices,
     testimonials: settings.testimonials,
     catalogEdits: settings.catalogEdits,
+    galleryPhotos: settings.galleryPhotos ?? [],
     dbConnected: true,
     dbError: "",
     videos: videos.map((v) => ({

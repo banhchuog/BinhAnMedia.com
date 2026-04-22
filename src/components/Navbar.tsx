@@ -8,6 +8,7 @@ const navLinks = [
   { href: "/", label: "Trang chủ" },
   { href: "/showreel", label: "Showreel" },
   { href: "/quote", label: "Báo giá" },
+  { href: "/proposal", label: "Proposal" },
 ];
 
 const serviceLinks = [
@@ -24,6 +25,8 @@ export default function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLLIElement>(null);
   const pathname = usePathname();
+
+  if (pathname === "/proposal") return null;
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 30);

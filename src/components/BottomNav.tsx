@@ -12,6 +12,8 @@ const tabs = [
 export default function BottomNav() {
   const pathname = usePathname();
 
+  if (pathname === "/proposal") return null;
+
   return (
     <nav className="sm:hidden fixed bottom-6 inset-x-0 z-50 flex justify-center pointer-events-none">
       <div className="pointer-events-auto flex items-center gap-1 bg-[#161616]/96 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl shadow-black/70 px-2 py-2">

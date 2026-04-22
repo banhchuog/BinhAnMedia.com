@@ -1,7 +1,11 @@
+"use client";
 import Link from "next/link";
 import { Phone, Mail, MapPin, Youtube, Instagram, Facebook } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname === "/proposal") return null;
   return (
     <footer className="bg-[#0A0A0A] border-t border-white/8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
