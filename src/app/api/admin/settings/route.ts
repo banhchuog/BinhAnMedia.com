@@ -62,6 +62,8 @@ export async function GET() {
     testimonials: settings.testimonials,
     catalogEdits: settings.catalogEdits,
     galleryPhotos: settings.galleryPhotos ?? [],
+    galleryFrameFolder: (settings as Record<string, unknown>).galleryFrameFolder as string ?? "",
+    galleryBtsFolder: (settings as Record<string, unknown>).galleryBtsFolder as string ?? "",
     dbConnected: true,
     dbError: "",
     videos: videos.map((v) => ({

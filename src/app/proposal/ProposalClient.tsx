@@ -46,14 +46,30 @@ interface Props {
 export default function ProposalClient({ heroId, clientLogos, founder, testimonials, videos, services }: Props) {
   const [lang, setLang] = useState<Lang>("vi");
   const [downloading, setDownloading] = useState(false);
-  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+  const [framePhotos, setFramePhotos] = useState<{ id: string; name: string; url: string }[]>([]);
+  const [btsPhotos, setBtsPhotos] = useState<{ id: string; name: string; url: string }[]>([]);
   const docRef = useRef<HTMLDivElement>(null);
   const vi = lang === "vi";
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
-      .then((d) => { if (Array.isArray(d.galleryPhotos)) setGalleryPhotos(d.galleryPhotos); })
+      .then(async (d) => {
+        const frameUrl: string = d.galleryFrameFolder ?? "";
+        const btsUrl: string = d.galleryBtsFolder ?? "";
+        if (frameUrl) {
+          fetch(`/api/drive-folder?url=${encodeURIComponent(frameUrl)}`)
+            .then((r) => r.json())
+            .then((data: { files?: { id: string; name: string; url: string }[] }) => { if (data.files) setFramePhotos(data.files); })
+            .catch(() => {});
+        }
+        if (btsUrl) {
+          fetch(`/api/drive-folder?url=${encodeURIComponent(btsUrl)}`)
+            .then((r) => r.json())
+            .then((data: { files?: { id: string; name: string; url: string }[] }) => { if (data.files) setBtsPhotos(data.files); })
+            .catch(() => {});
+        }
+      })
       .catch(() => {});
   }, []);
 
@@ -83,8 +99,6 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     return acc;
   }, {});
   const catOrder = ["TVC", "MV", "Corporate", "Social", "Event", "Motion"];
-  const framePhotos = galleryPhotos.filter((p) => p.type === "frame");
-  const btsPhotos = galleryPhotos.filter((p) => p.type === "bts");
 
   return (
     <>
@@ -113,39 +127,42 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         {/* ━━ COVER HEADER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <div style={{ background: "linear-gradient(135deg,#0a0a0a,#130d02)", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#C9972A 40%,#C9972A 60%,transparent)" }} />
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 30% 50%,rgba(201,151,42,0.08),transparent 60%)", pointerEvents: "none" }} />
-          <div style={{ maxWidth: 900, margin: "0 auto", padding: "36px 40px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 32, position: "relative" }}>
-            {/* Left: brand + greeting */}
-            <div>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 10 }}>
-                <span style={{ fontWeight: 900, fontSize: 20, color: "#fff" }}>BinhAn</span>
-                <span style={{ fontWeight: 900, fontSize: 20, color: "#C9972A" }}>Media</span>
-                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", marginLeft: 8 }}>· binhanmedia.vn</span>
-              </div>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", margin: "0 0 4px", fontWeight: 500 }}>
-                {vi ? "Kính gửi Quý Khách Hàng," : "Dear Valued Client,"}
-              </p>
-              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", margin: 0, maxWidth: 420, lineHeight: 1.65 }}>
-                {vi
-                  ? "Đây là tài liệu giới thiệu năng lực sản xuất của Bình An Media — đơn vị chuyên TVC, MV, phim doanh nghiệp và nội dung số."
-                  : "This is Bình An Media's capability proposal — specialists in TVC, Music Video, Corporate Film and Digital Content."}
-              </p>
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 60%,rgba(201,151,42,0.07),transparent 65%)", pointerEvents: "none" }} />
+          <div style={{ maxWidth: 900, margin: "0 auto", padding: "60px 40px 52px", textAlign: "center", position: "relative" }}>
+            {/* Brand */}
+            <div style={{ display: "inline-flex", alignItems: "baseline", gap: 2, marginBottom: 18 }}>
+              <span style={{ fontWeight: 900, fontSize: 30, color: "#fff", letterSpacing: "-0.02em" }}>BinhAn</span>
+              <span style={{ fontWeight: 900, fontSize: 30, color: "#C9972A", letterSpacing: "-0.02em" }}>Media</span>
+              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginLeft: 12, letterSpacing: "0.04em" }}>binhanmedia.com</span>
             </div>
-            {/* Right: meta */}
-            <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 4 }}>
+            {/* Label divider */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginBottom: 26 }}>
+              <div style={{ height: 1, width: 44, background: "rgba(201,151,42,0.3)" }} />
+              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.22em" }}>
                 {vi ? "Tài liệu năng lực" : "Capability Proposal"}
-              </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{dateStr}</div>
-              <div style={{ display: "flex", gap: 16, justifyContent: "flex-end", marginTop: 14 }}>
-                {[{v:"200+",l:vi?"dự án":"projects"},{v:"12+",l:vi?"năm":"years"},{v:"50+",l:vi?"thương hiệu":"brands"}].map(s=>(
-                  <div key={s.l} style={{ textAlign: "center" }}>
-                    <div style={{ fontSize: 18, fontWeight: 900, color: "#C9972A", lineHeight: 1 }}>{s.v}</div>
-                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>{s.l}</div>
-                  </div>
-                ))}
-              </div>
+              </span>
+              <div style={{ height: 1, width: 44, background: "rgba(201,151,42,0.3)" }} />
             </div>
+            {/* Greeting */}
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.55)", margin: "0 0 10px", fontWeight: 500 }}>
+              {vi ? "Kính gửi Quý Khách Hàng," : "Dear Valued Client,"}
+            </p>
+            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.28)", margin: "0 auto 36px", maxWidth: 540, lineHeight: 1.75 }}>
+              {vi
+                ? "Đây là tài liệu giới thiệu năng lực sản xuất của Bình An Media — đơn vị chuyên TVC, MV, phim doanh nghiệp và nội dung số."
+                : "This is Bình An Media's capability proposal — specialists in TVC, Music Video, Corporate Film and Digital Content."}
+            </p>
+            {/* Stats row */}
+            <div style={{ display: "flex", justifyContent: "center", gap: 48 }}>
+              {[{v:"200+",l:vi?"dự án":"projects"},{v:"12+",l:vi?"năm":"years"},{v:"50+",l:vi?"thương hiệu":"brands"}].map(s=>(
+                <div key={s.l} style={{ textAlign: "center" }}>
+                  <div style={{ fontSize: 24, fontWeight: 900, color: "#C9972A", lineHeight: 1 }}>{s.v}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 5, letterSpacing: "0.06em" }}>{s.l}</div>
+                </div>
+              ))}
+            </div>
+            {/* Date */}
+            <div style={{ marginTop: 30, fontSize: 10, color: "rgba(255,255,255,0.18)", letterSpacing: "0.1em" }}>{dateStr}</div>
           </div>
         </div>
 
@@ -341,7 +358,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             </div>
           </Section>
           {/* ── GALLERY ────────────────────────────────────────────── */}
-          {galleryPhotos.length > 0 && (
+          {(framePhotos.length + btsPhotos.length) > 0 && (
             <Section num={clientLogos.length > 0 ? "05" : "04"} label={vi ? "Thư viện ảnh" : "Gallery"}>
               <h2 style={headingStyle}>{vi ? "Frame đẹp & Hậu trường" : "Stills & Behind the Scenes"}</h2>
               <p style={{ ...bodyStyle, marginTop: 8, marginBottom: 28 }}>{vi ? "Từng khoảnh khắc đẹp trên phim trường" : "Beautiful moments from our sets"}</p>
@@ -355,13 +372,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     {framePhotos.map((photo) => (
                       <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
-                        {photo.caption && (
-                          <div style={{ padding: "8px 10px", background: "#0d0d0d" }}>
-                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", margin: 0 }}>{photo.caption}</p>
-                            {photo.project && <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", margin: "2px 0 0" }}>{photo.project}</p>}
-                          </div>
-                        )}
+                        <img src={photo.url} alt={photo.name} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
                       </div>
                     ))}
                   </div>
@@ -377,13 +388,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     {btsPhotos.map((photo) => (
                       <div key={photo.id} style={{ borderRadius: 12, overflow: "hidden", background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={photo.url} alt={photo.caption} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
-                        {photo.caption && (
-                          <div style={{ padding: "8px 10px", background: "#0d0d0d" }}>
-                            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", margin: 0 }}>{photo.caption}</p>
-                            {photo.project && <p style={{ fontSize: 9, color: "rgba(255,255,255,0.25)", margin: "2px 0 0" }}>{photo.project}</p>}
-                          </div>
-                        )}
+                        <img src={photo.url} alt={photo.name} style={{ width: "100%", aspectRatio: "16/9", objectFit: "cover", display: "block" }} />
                       </div>
                     ))}
                   </div>
@@ -462,7 +467,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           </Section>
 
           {/* ── FOUNDER ───────────────────────────────────────── */}
-          <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + (galleryPhotos.length > 0 ? 2 : 1)}`} label={vi ? "Người sáng lập" : "Founder"}>
+          <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 2 : 1)}`} label={vi ? "Người sáng lập" : "Founder"}>
             <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 40, alignItems: "start" }}>
               <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "#111", aspectRatio: "3/4" }}>
                 {founder.photoUrl ? (
@@ -493,7 +498,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
 
           {/* ── TESTIMONIALS ──────────────────────────────────── */}
           {testimonials.length > 0 && (
-            <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + (galleryPhotos.length > 0 ? 3 : 2)}`} label={vi ? "Khách hàng nói gì" : "Testimonials"}>
+            <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 3 : 2)}`} label={vi ? "Khách hàng nói gì" : "Testimonials"}>
               <h2 style={headingStyle}>{vi ? "Đánh giá từ khách hàng" : "What Clients Say"}</h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
                 {testimonials.map((t, i) => (
@@ -511,7 +516,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           )}
 
           {/* ── WHY US ────────────────────────────────────────── */}
-          <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + (galleryPhotos.length > 0 ? 4 : 3) + (testimonials.length > 0 ? 1 : 0)}`} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
+          <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 4 : 3) + (testimonials.length > 0 ? 1 : 0)}`} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
             <h2 style={headingStyle}>{vi ? "Cam kết của Bình An Media" : "Our Commitments"}</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
               {[
@@ -552,7 +557,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
               {vi ? "Nhận báo giá miễn phí" : "Get a Free Quote"} <ArrowRight size={14} />
             </div>
             <p style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginTop: 20, position: "relative" }}>
-              binhanmedia.vn · 0969 427 639 · Dinhconghieufilm@gmail.com
+              binhanmedia.com · 0969 427 639 · Dinhconghieufilm@gmail.com
             </p>
           </div>
 
@@ -568,7 +573,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                   {[
                     { Icon: Phone,  v: "0969 427 639" },
                     { Icon: Mail,   v: "Dinhconghieufilm@gmail.com" },
-                    { Icon: Globe2, v: "binhanmedia.vn" },
+                    { Icon: Globe2, v: "binhanmedia.com" },
                     { Icon: MapPin, v: vi ? "TP. Hồ Chí Minh, Việt Nam" : "Ho Chi Minh City, Vietnam" },
                   ].map(({ Icon, v }) => (
                     <div key={v} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "rgba(255,255,255,0.4)" }}>

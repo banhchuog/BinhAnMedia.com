@@ -22,8 +22,10 @@ model Settings {
   customServices  Json     @default("[]")
   testimonials    Json     @default("[]")
   catalogEdits    Json     @default("{}")
-  galleryPhotos   Json     @default("[]")
-  updatedAt       DateTime @updatedAt
+  galleryPhotos      Json     @default("[]")
+  galleryFrameFolder String   @default("")
+  galleryBtsFolder   String   @default("")
+  updatedAt          DateTime @updatedAt
 }
 
 // ─── Showreel videos ──────────────────────────────────────────────
