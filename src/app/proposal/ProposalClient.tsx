@@ -216,7 +216,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                 { v: "200+", l: vi ? "Dự án" : "Projects" },
                 { v: "12+",  l: vi ? "Năm kinh nghiệm" : "Years" },
                 { v: "50+",  l: vi ? "Thương hiệu" : "Brands" },
-                { v: "4K",   l: vi ? "Tiêu chuẩn" : "Standard" },
+                { v: "4K đến 8K",   l: vi ? "Tiêu chuẩn" : "Standard" },
               ].map((s) => (
                 <div key={s.l} style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 14, padding: "20px 16px", textAlign: "center" }}>
                   <div style={{ fontSize: 26, fontWeight: 900, color: "#C9972A" }}>{s.v}</div>
