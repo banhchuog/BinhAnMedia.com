@@ -47,13 +47,17 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
   const [lang, setLang] = useState<Lang>("vi");
   const [downloading, setDownloading] = useState(false);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+  const [storyboardPhotos, setStoryboardPhotos] = useState<GalleryPhoto[]>([]);
   const docRef = useRef<HTMLDivElement>(null);
   const vi = lang === "vi";
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
-      .then((d) => { if (Array.isArray(d.galleryPhotos)) setGalleryPhotos(d.galleryPhotos); })
+      .then((d) => {
+        if (Array.isArray(d.galleryPhotos)) setGalleryPhotos(d.galleryPhotos);
+        if (Array.isArray(d.storyboardPhotos)) setStoryboardPhotos(d.storyboardPhotos);
+      })
       .catch(() => {});
   }, []);
 
@@ -290,39 +294,56 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                 </div>
                 <span style={{ fontSize: 9, color: "#c4bbad" }}>{vi ? "Ví dụ minh hoạ" : "Illustration example"}</span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 0 }}>
-                {[
-                  { shot: "01", angle: vi ? "Cảnh mở đầu" : "Opening shot",    note: vi ? "Wide — thiết lập không gian" : "Wide — establish space",     bars: [0.7, 0.4, 0.9] },
-                  { shot: "02", angle: vi ? "Giới thiệu SP" : "Product intro",  note: vi ? "Close-up — sản phẩm hero" : "Close-up — hero product",        bars: [0.5, 0.8, 0.6] },
-                  { shot: "03", angle: vi ? "Nhân vật" : "Character",           note: vi ? "Medium — cảm xúc chân thực" : "Medium — authentic emotion",   bars: [0.9, 0.3, 0.7] },
-                  { shot: "04", angle: vi ? "Hành động" : "Action",             note: vi ? "Tracking — theo chuyển động" : "Tracking — follow movement",  bars: [0.6, 0.7, 0.5] },
-                  { shot: "05", angle: vi ? "Chi tiết" : "Detail",              note: vi ? "Macro — texture sản phẩm" : "Macro — product texture",        bars: [0.4, 0.9, 0.8] },
-                  { shot: "06", angle: vi ? "Cảnh đẹp" : "Beauty shot",         note: vi ? "Overhead — lifestyle context" : "Overhead — lifestyle context", bars: [0.8, 0.5, 0.4] },
-                  { shot: "07", angle: vi ? "Branding" : "Branding",            note: vi ? "Close-up — logo reveal" : "Close-up — logo reveal",           bars: [0.3, 0.6, 0.9] },
-                  { shot: "08", angle: vi ? "Kết thúc" : "End card",            note: vi ? "Fade — CTA & tagline" : "Fade — CTA & tagline",               bars: [0.9, 0.8, 0.7] },
-                ].map((frame, idx) => (
-                  <div key={frame.shot} style={{ padding: "14px 14px 12px", borderRight: idx % 4 !== 3 ? "1px solid #ede8df" : "none", borderBottom: idx < 4 ? "1px solid #ede8df" : "none", background: "#fff" }}>
-                    <div style={{ background: "#f0ece5", borderRadius: 8, aspectRatio: "16/10", marginBottom: 10, position: "relative", overflow: "hidden" }}>
-                      <svg width="100%" height="100%" viewBox="0 0 160 100" preserveAspectRatio="none" style={{ position: "absolute", inset: 0 }}>
-                        <rect x="0" y="0" width="160" height={100 * frame.bars[0] * 0.45} fill="rgba(201,151,42,0.10)" rx="0"/>
-                        <rect x="0" y={100 * frame.bars[0] * 0.45} width="160" height={100 * frame.bars[1] * 0.3} fill="rgba(0,0,0,0.04)" rx="0"/>
-                        <ellipse cx={70 + frame.bars[2] * 20} cy={100 * frame.bars[0] * 0.45 - 8} rx={18 * frame.bars[2]} ry={22 * frame.bars[1]} fill="rgba(0,0,0,0.08)"/>
-                        <line x1="53" y1="0" x2="53" y2="100" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
-                        <line x1="107" y1="0" x2="107" y2="100" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
-                        <line x1="0" y1="33" x2="160" y2="33" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
-                        <line x1="0" y1="67" x2="160" y2="67" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
-                        <rect x="1" y="1" width="158" height="98" fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>
-                        <text x="6" y="13" fontSize="8" fill="rgba(201,151,42,0.7)" fontWeight="bold" fontFamily="monospace">{frame.shot}</text>
-                      </svg>
-                      <div style={{ position: "absolute", bottom: 5, right: 6, fontSize: 8, color: "rgba(0,0,0,0.25)", fontFamily: "monospace" }}>
-                        {idx % 3 === 0 ? "WIDE" : idx % 3 === 1 ? "CU" : "MS"}
+
+              {storyboardPhotos.length > 0 ? (
+                /* ── Real uploaded storyboard photos ── */
+                <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(storyboardPhotos.length, 4)}, 1fr)`, gap: 0 }}>
+                  {storyboardPhotos.map((photo, idx) => {
+                    const cols = Math.min(storyboardPhotos.length, 4);
+                    return (
+                      <div key={photo.id} style={{ borderRight: idx % cols !== cols - 1 ? "1px solid #ede8df" : "none", borderBottom: idx < cols ? "1px solid #ede8df" : "none" }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={photo.url} alt={photo.caption || `Shot ${idx + 1}`} style={{ width: "100%", display: "block", aspectRatio: "16/10", objectFit: "cover" }} />
                       </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                /* ── Mock SVG fallback ── */
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 0 }}>
+                  {[
+                    { shot: "01", angle: vi ? "Cảnh mở đầu" : "Opening shot",    note: vi ? "Wide — thiết lập không gian" : "Wide — establish space",     bars: [0.7, 0.4, 0.9] },
+                    { shot: "02", angle: vi ? "Giới thiệu SP" : "Product intro",  note: vi ? "Close-up — sản phẩm hero" : "Close-up — hero product",        bars: [0.5, 0.8, 0.6] },
+                    { shot: "03", angle: vi ? "Nhân vật" : "Character",           note: vi ? "Medium — cảm xúc chân thực" : "Medium — authentic emotion",   bars: [0.9, 0.3, 0.7] },
+                    { shot: "04", angle: vi ? "Hành động" : "Action",             note: vi ? "Tracking — theo chuyển động" : "Tracking — follow movement",  bars: [0.6, 0.7, 0.5] },
+                    { shot: "05", angle: vi ? "Chi tiết" : "Detail",              note: vi ? "Macro — texture sản phẩm" : "Macro — product texture",        bars: [0.4, 0.9, 0.8] },
+                    { shot: "06", angle: vi ? "Cảnh đẹp" : "Beauty shot",         note: vi ? "Overhead — lifestyle context" : "Overhead — lifestyle context", bars: [0.8, 0.5, 0.4] },
+                    { shot: "07", angle: vi ? "Branding" : "Branding",            note: vi ? "Close-up — logo reveal" : "Close-up — logo reveal",           bars: [0.3, 0.6, 0.9] },
+                    { shot: "08", angle: vi ? "Kết thúc" : "End card",            note: vi ? "Fade — CTA & tagline" : "Fade — CTA & tagline",               bars: [0.9, 0.8, 0.7] },
+                  ].map((frame, idx) => (
+                    <div key={frame.shot} style={{ padding: "14px 14px 12px", borderRight: idx % 4 !== 3 ? "1px solid #ede8df" : "none", borderBottom: idx < 4 ? "1px solid #ede8df" : "none", background: "#fff" }}>
+                      <div style={{ background: "#f0ece5", borderRadius: 8, aspectRatio: "16/10", marginBottom: 10, position: "relative", overflow: "hidden" }}>
+                        <svg width="100%" height="100%" viewBox="0 0 160 100" preserveAspectRatio="none" style={{ position: "absolute", inset: 0 }}>
+                          <rect x="0" y="0" width="160" height={100 * frame.bars[0] * 0.45} fill="rgba(201,151,42,0.10)" rx="0"/>
+                          <rect x="0" y={100 * frame.bars[0] * 0.45} width="160" height={100 * frame.bars[1] * 0.3} fill="rgba(0,0,0,0.04)" rx="0"/>
+                          <ellipse cx={70 + frame.bars[2] * 20} cy={100 * frame.bars[0] * 0.45 - 8} rx={18 * frame.bars[2]} ry={22 * frame.bars[1]} fill="rgba(0,0,0,0.08)"/>
+                          <line x1="53" y1="0" x2="53" y2="100" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                          <line x1="107" y1="0" x2="107" y2="100" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                          <line x1="0" y1="33" x2="160" y2="33" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                          <line x1="0" y1="67" x2="160" y2="67" stroke="rgba(201,151,42,0.2)" strokeWidth="0.5" strokeDasharray="3,3"/>
+                          <rect x="1" y="1" width="158" height="98" fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth="1"/>
+                          <text x="6" y="13" fontSize="8" fill="rgba(201,151,42,0.7)" fontWeight="bold" fontFamily="monospace">{frame.shot}</text>
+                        </svg>
+                        <div style={{ position: "absolute", bottom: 5, right: 6, fontSize: 8, color: "rgba(0,0,0,0.25)", fontFamily: "monospace" }}>
+                          {idx % 3 === 0 ? "WIDE" : idx % 3 === 1 ? "CU" : "MS"}
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 10, fontWeight: 700, color: "#3a3530", margin: "0 0 2px" }}>{frame.angle}</p>
+                      <p style={{ fontSize: 9, color: "#9a8f82", margin: 0, lineHeight: 1.5 }}>{frame.note}</p>
                     </div>
-                    <p style={{ fontSize: 10, fontWeight: 700, color: "#3a3530", margin: "0 0 2px" }}>{frame.angle}</p>
-                    <p style={{ fontSize: 9, color: "#9a8f82", margin: 0, lineHeight: 1.5 }}>{frame.note}</p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
               <div style={{ padding: "10px 20px", background: "#faf8f4", borderTop: "1px solid #ede8df", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <span style={{ fontSize: 9, color: "#b0a898" }}>
                   {vi ? "Storyboard được duyệt trước khi bắt đầu quay" : "Storyboard approved before filming begins"}

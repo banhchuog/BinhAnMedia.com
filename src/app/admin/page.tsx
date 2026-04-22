@@ -59,6 +59,7 @@ type AdminSettings = {
   testimonials: TestimonialItem[];
   catalogEdits: Record<string, CatalogEdit>;
   galleryPhotos: GalleryPhoto[];
+  storyboardPhotos: GalleryPhoto[];
 };
 const EMPTY_VIDEO = (): VideoItem => ({
   id: Date.now().toString(), title: "", cat: "TVC", client: "", year: new Date().getFullYear().toString(),
@@ -90,7 +91,7 @@ const svgSize = (svg: string, size: number) => {
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [sessionPw, setSessionPw] = useState("");
-  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {}, galleryPhotos: [] });
+  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {}, galleryPhotos: [], storyboardPhotos: [] });
   const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "gallery" | "leads" | "applicants" | "settings">("leads");
   const [toastMsg, setToastMsg] = useState("");
   const [dbError, setDbError] = useState("");
@@ -135,6 +136,7 @@ export default function AdminPage() {
       testimonials: Array.isArray(data.testimonials) ? data.testimonials : [],
       catalogEdits: data.catalogEdits || {},
       galleryPhotos: Array.isArray(data.galleryPhotos) ? data.galleryPhotos : [],
+      storyboardPhotos: Array.isArray(data.storyboardPhotos) ? data.storyboardPhotos : [],
     });
   }, []);
 
@@ -291,7 +293,8 @@ export default function AdminPage() {
         {tab === "gallery" && (
           <GalleryTab
             photos={settings.galleryPhotos}
-            onSave={(galleryPhotos) => save({ galleryPhotos })}
+            storyboardPhotos={settings.storyboardPhotos}
+            onSave={(galleryPhotos, storyboardPhotos) => save({ galleryPhotos, storyboardPhotos })}
           />
         )}
         {tab === "settings" && (
@@ -2604,6 +2607,87 @@ function SettingsTab({
   );
 }
 
+// ─── StoryboardUploadZone ─────────────────────────────────────────
+function StoryboardUploadZone({ photos, onAdd, onRemove }: { photos: GalleryPhoto[]; onAdd: (items: GalleryPhoto[]) => void; onRemove: (id: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [processing, setProcessing] = useState(false);
+  const [drag, setDrag] = useState(false);
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setProcessing(true);
+    const results: GalleryPhoto[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      try {
+        const url = await compressImage(file);
+        results.push({ id: Date.now().toString() + Math.random(), url, type: "frame", caption: "", project: "" });
+      } catch { /* skip */ }
+    }
+    onAdd(results);
+    setProcessing(false);
+  };
+
+  return (
+    <div className="bg-white rounded-2xl border border-black/8 overflow-hidden">
+      <div className="flex items-center gap-3 px-5 py-4 border-b border-black/6">
+        <span className="text-xl">🎨</span>
+        <div className="flex-1">
+          <p className="font-bold text-[#1C1C1E] text-sm">Ảnh Storyboard</p>
+          <p className="text-[11px] text-[#8E8E93] mt-0.5">
+            {photos.length} ảnh · Hiển thị trong phần Quy trình sản xuất của Proposal · JPG/PNG/WEBP
+          </p>
+        </div>
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={processing}
+          className="flex items-center gap-1.5 bg-[#6b5e4d] text-white text-xs font-bold px-4 py-2 rounded-xl opacity-90 hover:opacity-100 transition disabled:opacity-40"
+        >
+          {processing ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+          {processing ? "Đang nén…" : "Thêm ảnh"}
+        </button>
+        <input ref={inputRef} type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+      </div>
+      <div
+        onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => { e.preventDefault(); setDrag(false); handleFiles(e.dataTransfer.files); }}
+        onClick={() => photos.length === 0 && inputRef.current?.click()}
+        className={`transition-colors ${drag ? "bg-amber-50" : ""} ${photos.length === 0 ? "cursor-pointer" : ""}`}
+      >
+        {photos.length === 0 ? (
+          <div className="flex flex-col items-center justify-center gap-2 py-14 text-[#8E8E93]">
+            <ImageIcon size={28} className="text-[#C7C7CC]" />
+            <p className="text-sm">Kéo thả ảnh storyboard vào đây hoặc nhấn để chọn</p>
+            <p className="text-[11px] text-[#C7C7CC]">Chưa có ảnh → hiện sketch minh hoạ mặc định</p>
+          </div>
+        ) : (
+          <div className="p-4 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+            {photos.map((p) => (
+              <div key={p.id} className="relative aspect-video rounded-lg overflow-hidden bg-[#F2F2F7] group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={p.url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <button
+                  onClick={(e) => { e.stopPropagation(); onRemove(p.id); }}
+                  className="absolute top-1 right-1 w-5 h-5 bg-black/70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+                >
+                  <X size={10} className="text-white" />
+                </button>
+              </div>
+            ))}
+            <button
+              onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
+              className="aspect-video rounded-lg border-2 border-dashed border-black/15 flex items-center justify-center hover:border-[#C9972A]/50 transition group"
+            >
+              <Plus size={18} className="text-[#C7C7CC] group-hover:text-[#C9972A] transition" />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── GalleryTab ──────────────────────────────────────────────────
 
 /** Compress a File to JPEG data-URL, max 900px wide, quality 0.78 */
@@ -2732,11 +2816,13 @@ function UploadZone({
   );
 }
 
-function GalleryTab({ photos, onSave }: { photos: GalleryPhoto[]; onSave: (p: GalleryPhoto[]) => void }) {
+function GalleryTab({ photos, storyboardPhotos: initStoryboard, onSave }: { photos: GalleryPhoto[]; storyboardPhotos: GalleryPhoto[]; onSave: (p: GalleryPhoto[], s: GalleryPhoto[]) => void }) {
   const [list, setList] = useState<GalleryPhoto[]>(photos);
+  const [sbList, setSbList] = useState<GalleryPhoto[]>(initStoryboard);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => { setList(photos); }, [photos]);
+  useEffect(() => { setSbList(initStoryboard); }, [initStoryboard]);
 
   const framePhotos = list.filter((p) => p.type === "frame");
   const btsPhotos = list.filter((p) => p.type === "bts");
@@ -2744,9 +2830,12 @@ function GalleryTab({ photos, onSave }: { photos: GalleryPhoto[]; onSave: (p: Ga
   const addItems = (items: GalleryPhoto[]) => setList((prev) => [...prev, ...items]);
   const removeItem = (id: string) => setList((prev) => prev.filter((p) => p.id !== id));
 
+  const addSbItems = (items: GalleryPhoto[]) => setSbList((prev) => [...prev, ...items]);
+  const removeSbItem = (id: string) => setSbList((prev) => prev.filter((p) => p.id !== id));
+
   const handleSave = async () => {
     setSaving(true);
-    await onSave(list);
+    await onSave(list, sbList);
     setSaving(false);
   };
 
@@ -2761,19 +2850,22 @@ function GalleryTab({ photos, onSave }: { photos: GalleryPhoto[]; onSave: (p: Ga
             Hiển thị trong Proposal.
           </p>
         </div>
-        {list.length > 0 && (
+        {(list.length > 0 || sbList.length > 0) && (
           <button
             onClick={handleSave}
             disabled={saving}
             className="flex items-center gap-2 bg-[#C9972A] text-white font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-[#B8841E] transition disabled:opacity-50 shrink-0"
           >
-            {saving ? <><Loader2 size={14} className="animate-spin" /> Đang lưu…</> : <><Save size={14} /> Lưu thư viện ({list.length})</>}
+            {saving ? <><Loader2 size={14} className="animate-spin" /> Đang lưu…</> : <><Save size={14} /> Lưu ({list.length + sbList.length} ảnh)</>}
           </button>
         )}
       </div>
 
       <UploadZone type="frame" photos={framePhotos} onAdd={addItems} onRemove={removeItem} />
       <UploadZone type="bts"   photos={btsPhotos}   onAdd={addItems} onRemove={removeItem} />
+
+      {/* Storyboard */}
+      <StoryboardUploadZone photos={sbList} onAdd={addSbItems} onRemove={removeSbItem} />
     </div>
   );
 }
