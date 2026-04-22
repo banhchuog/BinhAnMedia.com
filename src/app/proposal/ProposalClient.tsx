@@ -117,45 +117,72 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       <div ref={docRef} style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "#ffffff", color: "#1a1a1a" }}>
 
         {/* ━━ COVER HEADER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div style={{ background: "linear-gradient(135deg,#0f0f0f,#1a1005)", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#C9972A 40%,#C9972A 60%,transparent)" }} />
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 60%,rgba(201,151,42,0.07),transparent 65%)", pointerEvents: "none" }} />
-          <div style={{ maxWidth: 900, margin: "0 auto", padding: "60px 40px 52px", textAlign: "center", position: "relative" }}>
-            {/* Brand */}
-            <div style={{ display: "inline-flex", alignItems: "baseline", gap: 2, marginBottom: 18 }}>
-              <span style={{ fontWeight: 900, fontSize: 30, color: "#fff", letterSpacing: "-0.02em" }}>BinhAn</span>
-              <span style={{ fontWeight: 900, fontSize: 30, color: "#C9972A", letterSpacing: "-0.02em" }}>Media</span>
-              <span style={{ fontSize: 11, color: "rgba(255,255,255,0.2)", marginLeft: 12, letterSpacing: "0.04em" }}>binhanmedia.com</span>
+        <div style={{ background: "#ffffff", borderBottom: "1px solid #ede8df", position: "relative", overflow: "hidden" }}>
+
+          {/* Top accent line */}
+          <div style={{ height: 3, background: "linear-gradient(90deg,#C9972A 0%,#e8b84b 50%,#C9972A 100%)" }} />
+
+          {/* Main content */}
+          <div style={{ maxWidth: 900, margin: "0 auto", padding: "52px 40px 40px", display: "grid", gridTemplateColumns: "1fr auto", gap: 48, alignItems: "center" }}>
+            {/* Left — text */}
+            <div>
+              {/* Brand */}
+              <div style={{ display: "flex", alignItems: "baseline", gap: 3, marginBottom: 16 }}>
+                <span style={{ fontWeight: 900, fontSize: 36, color: "#1a1a1a", letterSpacing: "-0.03em", lineHeight: 1 }}>BinhAn</span>
+                <span style={{ fontWeight: 900, fontSize: 36, color: "#C9972A", letterSpacing: "-0.03em", lineHeight: 1 }}>Media</span>
+              </div>
+              {/* Tag */}
+              <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(201,151,42,0.08)", border: "1px solid rgba(201,151,42,0.2)", borderRadius: 999, padding: "4px 14px", marginBottom: 20 }}>
+                <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#C9972A" }} />
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.25em" }}>
+                  {vi ? "Tài liệu năng lực sản xuất" : "Video Production Proposal"}
+                </span>
+              </div>
+              {/* Greeting */}
+              <p style={{ fontSize: 15, fontWeight: 600, color: "#1a1a1a", margin: "0 0 8px" }}>
+                {vi ? "Kính gửi Quý Khách Hàng," : "Dear Valued Client,"}
+              </p>
+              <p style={{ fontSize: 13, color: "#6b6259", margin: "0 0 28px", maxWidth: 420, lineHeight: 1.8 }}>
+                {vi
+                  ? "Bình An Media trân trọng gửi đến Quý Khách tài liệu giới thiệu năng lực — đơn vị chuyên sản xuất TVC, MV, phim doanh nghiệp và nội dung số."
+                  : "Bình An Media is pleased to present our capability proposal — specialists in TVC, MV, Corporate Film and Digital Content production."}
+              </p>
+              {/* Stats */}
+              <div style={{ display: "flex", gap: 32 }}>
+                {[{v:"200+",l:vi?"Dự án":"Projects"},{v:"12+",l:vi?"Năm KN":"Years"},{v:"50+",l:vi?"Thương hiệu":"Brands"}].map(s => (
+                  <div key={s.l}>
+                    <div style={{ fontSize: 22, fontWeight: 900, color: "#C9972A", lineHeight: 1 }}>{s.v}</div>
+                    <div style={{ fontSize: 10, color: "#9a8f82", marginTop: 4, letterSpacing: "0.06em" }}>{s.l}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-            {/* Label divider */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16, marginBottom: 26 }}>
-              <div style={{ height: 1, width: 44, background: "rgba(201,151,42,0.3)" }} />
-              <span style={{ fontSize: 10, color: "rgba(255,255,255,0.25)", textTransform: "uppercase", letterSpacing: "0.22em" }}>
-                {vi ? "Tài liệu năng lực" : "Capability Proposal"}
-              </span>
-              <div style={{ height: 1, width: 44, background: "rgba(201,151,42,0.3)" }} />
+            {/* Right — date + domain */}
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontSize: 11, color: "#9a8f82", marginBottom: 6 }}>{dateStr}</div>
+              <div style={{ fontSize: 11, color: "#C9972A", fontWeight: 700 }}>binhanmedia.com</div>
             </div>
-            {/* Greeting */}
-            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.55)", margin: "0 0 10px", fontWeight: 500 }}>
-              {vi ? "Kính gửi Quý Khách Hàng," : "Dear Valued Client,"}
-            </p>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,0.28)", margin: "0 auto 36px", maxWidth: 540, lineHeight: 1.75 }}>
-              {vi
-                ? "Đây là tài liệu giới thiệu năng lực sản xuất của Bình An Media — đơn vị chuyên TVC, MV, phim doanh nghiệp và nội dung số."
-                : "This is Bình An Media's capability proposal — specialists in TVC, Music Video, Corporate Film and Digital Content."}
-            </p>
-            {/* Stats row */}
-            <div style={{ display: "flex", justifyContent: "center", gap: 48 }}>
-              {[{v:"200+",l:vi?"dự án":"projects"},{v:"12+",l:vi?"năm":"years"},{v:"50+",l:vi?"thương hiệu":"brands"}].map(s=>(
-                <div key={s.l} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 24, fontWeight: 900, color: "#C9972A", lineHeight: 1 }}>{s.v}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 5, letterSpacing: "0.06em" }}>{s.l}</div>
-                </div>
-              ))}
-            </div>
-            {/* Date */}
-            <div style={{ marginTop: 30, fontSize: 10, color: "rgba(255,255,255,0.18)", letterSpacing: "0.1em" }}>{dateStr}</div>
           </div>
+
+          {/* Gallery strip — marquee of frame photos */}
+          {(framePhotos.length + btsPhotos.length) > 0 && (
+            <div style={{ overflow: "hidden", borderTop: "1px solid #f0ece5", position: "relative" }}>
+              {/* fade edges */}
+              <div style={{ position: "absolute", left: 0, top: 0, bottom: 0, width: 60, background: "linear-gradient(90deg,#fff,transparent)", zIndex: 2, pointerEvents: "none" }} />
+              <div style={{ position: "absolute", right: 0, top: 0, bottom: 0, width: 60, background: "linear-gradient(270deg,#fff,transparent)", zIndex: 2, pointerEvents: "none" }} />
+              <div className="marquee-track" style={{ display: "flex", gap: 8, padding: "10px 0", width: "max-content" }}>
+                {[...framePhotos, ...btsPhotos, ...framePhotos, ...btsPhotos].map((photo, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={`${photo.id}-${i}`}
+                    src={photo.url}
+                    alt=""
+                    style={{ height: 72, width: "auto", borderRadius: 8, objectFit: "cover", flexShrink: 0, display: "block" }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -583,12 +610,16 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         .pdf-page-break { page-break-before: always; break-before: page; }
         .pdf-page-break:first-of-type { page-break-before: avoid; break-before: avoid; }
         .pdf-no-break { page-break-inside: avoid; break-inside: avoid; }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .marquee-track { animation: marquee 28s linear infinite; }
+        .marquee-track:hover { animation-play-state: paused; }
         @media print {
           .no-print { display: none !important; }
           body { margin: 0; background: #ffffff; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .pdf-page-break { page-break-before: always; }
           .pdf-no-break { page-break-inside: avoid; }
+          .marquee-track { animation: none !important; }
         }
       `}</style>
     </>
