@@ -589,9 +589,14 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             <p style={{ fontSize: 13, color: "#6b6259", maxWidth: 400, margin: "0 auto 28px", position: "relative" }}>
               {vi ? "Liên hệ để nhận tư vấn miễn phí và báo giá chi tiết." : "Contact us for a free consultation and detailed quote."}
             </p>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#C9972A", color: "#fff", fontWeight: 700, fontSize: 13, padding: "12px 28px", borderRadius: 999, position: "relative" }}>
+            <a
+              href="/quote"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#C9972A", color: "#fff", fontWeight: 700, fontSize: 13, padding: "12px 28px", borderRadius: 999, position: "relative", textDecoration: "none", cursor: "pointer" }}
+            >
               {vi ? "Nhận báo giá miễn phí" : "Get a Free Quote"} <ArrowRight size={14} />
-            </div>
+            </a>
             <p style={{ fontSize: 11, color: "#9a8f82", marginTop: 20, position: "relative" }}>
               binhanmedia.com · 0969 427 639 · Dinhconghieufilm@gmail.com
             </p>
