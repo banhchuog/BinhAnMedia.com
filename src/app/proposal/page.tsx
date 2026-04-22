@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/db";
 import ProposalClient from "./ProposalClient";
-import type { VideoItem, FounderData, TestimonialItem, ServiceItem } from "./ProposalClient";
+import type { VideoItem, FounderData, TestimonialItem, ServiceItem, GalleryPhoto } from "./ProposalClient";
 
 const DEFAULT_VIDEOS: VideoItem[] = [
   { id: "1", ytId: "dQw4w9WgXcQ", title: "TVC Thương hiệu ABC", client: "ABC Corp", year: "2024", cat: "TVC" },
@@ -39,6 +39,36 @@ const DEFAULT_SERVICES: ServiceItem[] = [
 
 export const dynamic = "force-dynamic";
 
+function normalizeGalleryPhotos(value: unknown): GalleryPhoto[] {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === "object")
+      .map((item, index) => ({
+        id: String(item.id ?? `photo-${index}`),
+        url: typeof item.url === "string" ? item.url : "",
+        type: (item.type === "bts" ? "bts" : "frame") as GalleryPhoto["type"],
+        caption: typeof item.caption === "string" ? item.caption : "",
+        project: typeof item.project === "string" ? item.project : "",
+      }))
+      .filter((item) => item.url.length > 0);
+  }
+
+  if (value && typeof value === "object") {
+    const item = value as Record<string, unknown>;
+    if (typeof item.url === "string" && item.url.length > 0) {
+      return [{
+        id: String(item.id ?? "photo-0"),
+        url: item.url,
+        type: (item.type === "bts" ? "bts" : "frame") as GalleryPhoto["type"],
+        caption: typeof item.caption === "string" ? item.caption : "",
+        project: typeof item.project === "string" ? item.project : "",
+      }];
+    }
+  }
+
+  return [];
+}
+
 export default async function ProposalPage() {
   let heroId = "dQw4w9WgXcQ";
   let clientLogos: string[] = [];
@@ -46,6 +76,8 @@ export default async function ProposalPage() {
   let testimonials = DEFAULT_TESTIMONIALS;
   let videos = DEFAULT_VIDEOS;
   let services = DEFAULT_SERVICES;
+  let galleryPhotos: GalleryPhoto[] = [];
+  let storyboardPhotos: GalleryPhoto[] = [];
 
   // ── Fetch videos (independent – must not be blocked by settings error) ──
   if (prisma) {
@@ -75,6 +107,8 @@ export default async function ProposalPage() {
       if (settings) {
         if (settings.heroVideoId) heroId = settings.heroVideoId;
         if (Array.isArray(settings.clientLogos)) clientLogos = settings.clientLogos as string[];
+        galleryPhotos = normalizeGalleryPhotos((settings as unknown as { galleryPhotos?: unknown }).galleryPhotos);
+        storyboardPhotos = normalizeGalleryPhotos((settings as unknown as { storyboardPhotos?: unknown }).storyboardPhotos);
 
         const f = settings.founder as Record<string, unknown> | null;
         if (f && typeof f === "object") {
@@ -123,6 +157,8 @@ export default async function ProposalPage() {
       testimonials={testimonials}
       videos={videos}
       services={services}
+      galleryPhotos={galleryPhotos}
+      storyboardPhotos={storyboardPhotos}
     />
   );
 }

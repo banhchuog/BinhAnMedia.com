@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import {
   Globe, Download, Loader2, ArrowRight,
   Film, Music, Building2, Smartphone, Camera, Sparkles,
@@ -13,7 +13,7 @@ export type FounderData = { name: string; title: string; experience: string; pho
 export type TestimonialItem = { name: string; role: string; body: string };
 export type ServiceItem = { iconName: string; title: string; titleEn: string; desc: string; descEn: string };
 type Lang = "vi" | "en";
-type GalleryPhoto = { id: string; url: string; type: "frame" | "bts"; caption: string; project: string };
+export type GalleryPhoto = { id: string; url: string; type: "frame" | "bts"; caption: string; project: string };
 
 // ─── Icon map ─────────────────────────────────────────────────────
 const IconMap: Record<string, React.FC<{ size?: number; className?: string }>> = {
@@ -41,41 +41,29 @@ interface Props {
   testimonials: TestimonialItem[];
   videos: VideoItem[];
   services: ServiceItem[];
+  galleryPhotos: GalleryPhoto[];
+  storyboardPhotos: GalleryPhoto[];
 }
 
-export default function ProposalClient({ heroId, clientLogos, founder, testimonials, videos, services }: Props) {
+export default function ProposalClient({ heroId, clientLogos, founder, testimonials, videos, services, galleryPhotos, storyboardPhotos }: Props) {
   const [lang, setLang] = useState<Lang>("vi");
   const [downloading, setDownloading] = useState(false);
-  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
-  const [storyboardPhotos, setStoryboardPhotos] = useState<GalleryPhoto[]>([]);
-  const [ready, setReady] = useState(false);
   const docRef = useRef<HTMLDivElement>(null);
   const vi = lang === "vi";
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const r = await fetch("/api/admin/settings");
-        if (r.ok) {
-          const d = await r.json();
-          if (Array.isArray(d.galleryPhotos)) setGalleryPhotos(d.galleryPhotos);
-          if (Array.isArray(d.storyboardPhotos)) setStoryboardPhotos(d.storyboardPhotos);
-        }
-      } catch { /* show page with defaults */ }
-      finally { setReady(true); }
-    };
-    load();
-  }, []);
-
-  if (!ready) {
-    return (
-      <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#faf8f4", gap: 16 }}>
-        <div style={{ width: 40, height: 40, border: "3px solid #ede8df", borderTop: "3px solid #C9972A", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-        <p style={{ fontSize: 13, color: "#9a8f82", fontFamily: "'Inter','Segoe UI',sans-serif" }}>Đang tải tài liệu...</p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-      </div>
-    );
-  }
+  const safeFounder: FounderData = {
+    name: typeof founder?.name === "string" && founder.name.trim() ? founder.name : "Đinh Công Hiếu",
+    title: typeof founder?.title === "string" && founder.title.trim() ? founder.title : "Founder & Đạo diễn",
+    experience: typeof founder?.experience === "string" && founder.experience.trim() ? founder.experience : "12+ năm",
+    photoUrl: typeof founder?.photoUrl === "string" ? founder.photoUrl : "",
+    bio: Array.isArray(founder?.bio) ? founder.bio.filter((item): item is string => typeof item === "string" && item.trim().length > 0) : [],
+    linkUrl: founder?.linkUrl,
+    linkLabel: founder?.linkLabel,
+  };
+  const safeTestimonials = Array.isArray(testimonials) ? testimonials.filter((item): item is TestimonialItem => Boolean(item) && typeof item === "object") : [];
+  const safeVideos = Array.isArray(videos) ? videos.filter((item): item is VideoItem => Boolean(item) && typeof item === "object") : [];
+  const safeGalleryPhotos = Array.isArray(galleryPhotos) ? galleryPhotos.filter((item): item is GalleryPhoto => Boolean(item) && typeof item === "object" && typeof item.url === "string" && item.url.length > 0) : [];
+  const safeStoryboardPhotos = Array.isArray(storyboardPhotos) ? storyboardPhotos.filter((item): item is GalleryPhoto => Boolean(item) && typeof item === "object" && typeof item.url === "string" && item.url.length > 0) : [];
 
   const handleDownload = useCallback(async () => {
     if (!docRef.current || downloading) return;
@@ -141,13 +129,13 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
   const dateStr = new Date().toLocaleDateString(vi ? "vi-VN" : "en-GB", { day: "2-digit", month: "long", year: "numeric" });
 
   // Group videos by category for display
-  const videosByCat = videos.reduce<Record<string, VideoItem[]>>((acc, v) => {
+  const videosByCat = safeVideos.reduce<Record<string, VideoItem[]>>((acc, v) => {
     (acc[v.cat] = acc[v.cat] || []).push(v);
     return acc;
   }, {});
   const catOrder = ["TVC", "MV", "Corporate", "Social", "Event", "Motion"];
-  const framePhotos = galleryPhotos.filter((p) => p.type === "frame");
-  const btsPhotos   = galleryPhotos.filter((p) => p.type === "bts");
+  const framePhotos = safeGalleryPhotos.filter((p) => p.type === "frame");
+  const btsPhotos   = safeGalleryPhotos.filter((p) => p.type === "bts");
 
   return (
     <>
@@ -171,7 +159,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       </div>
 
       {/* ══════════════════ DOCUMENT ═══════════════════════════ */}
-      <div ref={docRef} style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "#ffffff", color: "#1a1a1a" }}>
+      <div id="proposal-doc" ref={docRef} style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "#ffffff", color: "#1a1a1a" }}>
 
         {/* ━━ COVER HEADER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
         <div style={{ background: "#ffffff", borderBottom: "1px solid #ede8df", position: "relative", overflow: "hidden" }}>
@@ -368,9 +356,9 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             </div>
 
             {/* Storyboard visual */}
-            {storyboardPhotos.length > 0 ? (
+            {safeStoryboardPhotos.length > 0 ? (
               <div style={{ marginTop: 8 }}>
-                {storyboardPhotos.map((photo) => (
+                {safeStoryboardPhotos.map((photo) => (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img key={photo.id} src={photo.url} alt={photo.caption || "Storyboard"} style={{ width: "100%", display: "block", borderRadius: 12, marginBottom: 10 }} />
                 ))}
@@ -470,7 +458,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           {/* ── PORTFOLIO ─────────────────────────────────────── */}
           <Section num={clientLogos.length > 0 ? "05" : "04"} label={vi ? "Portfolio" : "Portfolio"}>
             <h2 style={headingStyle}>{vi ? "Dự án nổi bật" : "Featured Work"}</h2>
-            <p style={{ ...bodyStyle, marginBottom: 32 }}>{vi ? `${videos.length} dự án được chọn lọc` : `${videos.length} curated projects`}</p>
+            <p style={{ ...bodyStyle, marginBottom: 32 }}>{vi ? `${safeVideos.length} dự án được chọn lọc` : `${safeVideos.length} curated projects`}</p>
 
             {catOrder.map((cat) => {
               const catVideos = videosByCat[cat];
@@ -541,25 +529,25 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 2 : 1)}`} label={vi ? "Người sáng lập" : "Founder"}>
             <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 40, alignItems: "start" }}>
               <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid #e2dbd0", background: "#f0ece5", aspectRatio: "3/4", position: "relative" }}>
-                {founder.photoUrl ? (
+                {safeFounder.photoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={founder.photoUrl} alt={founder.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
+                  <img src={safeFounder.photoUrl} alt={safeFounder.name} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top" }} />
                 ) : (
                   <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "linear-gradient(135deg,rgba(201,151,42,0.12),#f0ece5)" }}>
                     <span style={{ fontSize: 52, fontWeight: 900, color: "rgba(201,151,42,0.25)" }}>
-                      {founder.name.split(" ").map((w: string) => w[0]).join("")}
+                      {safeFounder.name.split(" ").map((w: string) => w[0]).join("")}
                     </span>
                   </div>
                 )}
               </div>
               <div>
-                <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.3em", margin: "0 0 10px" }}>{founder.title}</p>
-                <h2 style={{ fontSize: 28, fontWeight: 900, color: "#1a1a1a", margin: "0 0 6px" }}>{founder.name}</h2>
+                <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.3em", margin: "0 0 10px" }}>{safeFounder.title}</p>
+                <h2 style={{ fontSize: 28, fontWeight: 900, color: "#1a1a1a", margin: "0 0 6px" }}>{safeFounder.name}</h2>
                 <p style={{ fontSize: 13, color: "#C9972A", fontWeight: 700, margin: "0 0 20px" }}>
-                  {founder.experience} {vi ? "trong ngành sản xuất phim" : "in film production"}
+                  {safeFounder.experience} {vi ? "trong ngành sản xuất phim" : "in film production"}
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                  {founder.bio.map((p: string, i: number) => (
+                  {safeFounder.bio.map((p: string, i: number) => (
                     <p key={i} style={{ fontSize: 13, color: "#6b6259", lineHeight: 1.75, margin: 0 }}>{p}</p>
                   ))}
                 </div>
@@ -568,11 +556,11 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           </Section>
 
           {/* ── TESTIMONIALS ──────────────────────────────────── */}
-          {testimonials.length > 0 && (
+          {safeTestimonials.length > 0 && (
             <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 3 : 2)}`} label={vi ? "Khách hàng nói gì" : "Testimonials"}>
               <h2 style={headingStyle}>{vi ? "Đánh giá từ khách hàng" : "What Clients Say"}</h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
-                {testimonials.map((t, i) => (
+                {safeTestimonials.map((t, i) => (
                   <div key={i} className="pdf-no-break" style={{ background: "#faf8f4", border: "1px solid #ede8df", borderRadius: 18, padding: "22px 20px" }}>
                     <div style={{ display: "flex", gap: 2, marginBottom: 14 }}>
                       {[...Array(5)].map((_, j) => <Star key={j} size={11} fill="#C9972A" className="text-[#C9972A]" />)}
@@ -587,7 +575,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           )}
 
           {/* ── WHY US ────────────────────────────────────────── */}
-          <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 4 : 3) + (testimonials.length > 0 ? 1 : 0)}`} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
+          <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + ((framePhotos.length + btsPhotos.length) > 0 ? 4 : 3) + (safeTestimonials.length > 0 ? 1 : 0)}`} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
             <h2 style={headingStyle}>{vi ? "Cam kết của Bình An Media" : "Our Commitments"}</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
               {[
