@@ -65,45 +65,41 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
     if (!docRef.current || downloading) return;
     setDownloading(true);
     try {
-      const html2pdf = (await import("html2pdf.js")).default;
+      // Scroll to top so html2canvas captures from correct origin
+      window.scrollTo(0, 0);
+      await new Promise(r => setTimeout(r, 120)); // wait for scroll + repaint
 
-      // Pre-measure full content height to build a single-page PDF (no page breaks)
       const el = docRef.current;
-      const A4_WIDTH_MM = 210;
-      const MARGIN_MM = 10;
-      const contentWidthMM = A4_WIDTH_MM - MARGIN_MM * 2;
-      const scale = 2;
-      // Pixel width of the rendered element
-      const elWidthPx = el.scrollWidth;
-      const mmPerPx = contentWidthMM / elWidthPx;
-      const totalHeightMM = el.scrollHeight * mmPerPx + MARGIN_MM * 2;
+      const { default: html2canvas } = await import("html2canvas");
+      const { default: jsPDF } = await import("jspdf");
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (html2pdf() as any)
-        .set({
-          margin: [MARGIN_MM, MARGIN_MM, MARGIN_MM, MARGIN_MM],
-          filename: `BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`,
-          html2canvas: {
-            scale,
-            useCORS: true,
-            logging: false,
-            backgroundColor: "#ffffff",
-            imageTimeout: 30000,
-            allowTaint: true,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onclone: (clonedDoc: Document) => {
-              clonedDoc.querySelectorAll<HTMLElement>(".no-print").forEach(el => { el.style.display = "none"; });
-              clonedDoc.querySelectorAll<HTMLElement>(".pdf-only").forEach(el => { el.style.display = "block"; });
-              clonedDoc.querySelectorAll<HTMLElement>(".marquee-track").forEach(el => { el.style.animation = "none"; el.style.transform = "translateX(0)"; });
-              clonedDoc.querySelectorAll<HTMLElement>("iframe").forEach(el => { el.remove(); });
-            },
-          },
-          // Custom page size = exact content height → 1 tall page, zero page breaks
-          jsPDF: { unit: "mm", format: [A4_WIDTH_MM, Math.ceil(totalHeightMM)], orientation: "portrait" },
-          pagebreak: { mode: [] },
-        })
-        .from(el)
-        .save();
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        backgroundColor: "#ffffff",
+        imageTimeout: 30000,
+        // Critical: anchor render at element's top-left, ignore page scroll
+        scrollX: -window.scrollX,
+        scrollY: -window.scrollY,
+        windowWidth: el.scrollWidth,
+        windowHeight: el.scrollHeight,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onclone: (clonedDoc: Document) => {
+          clonedDoc.querySelectorAll<HTMLElement>(".no-print").forEach(e => { e.style.display = "none"; });
+          clonedDoc.querySelectorAll<HTMLElement>(".pdf-only").forEach(e => { e.style.display = "block"; });
+          clonedDoc.querySelectorAll<HTMLElement>(".marquee-track").forEach(e => { e.style.animation = "none"; e.style.transform = "translateX(0)"; });
+          clonedDoc.querySelectorAll<HTMLElement>("iframe").forEach(e => { e.remove(); });
+        },
+      });
+
+      const imgW = canvas.width;
+      const imgH = canvas.height;
+      // 1 tall page sized exactly to canvas (pixels as unit avoids mm rounding)
+      const pdf = new jsPDF({ unit: "px", format: [imgW, imgH], orientation: "portrait", compress: true });
+      pdf.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, imgW, imgH);
+      pdf.save(`BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`);
     } catch (e) { console.error(e); }
     finally { setDownloading(false); }
   }, [lang, downloading]);
