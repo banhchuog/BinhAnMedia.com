@@ -88,6 +88,8 @@ async function renderSectionCanvas(
   clone.style.width = "100%";
   clone.style.height = "auto";
   clone.style.overflow = "visible";
+  clone.style.background = "#ffffff";
+  clone.style.color = "#1a1a1a";
 
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
@@ -100,9 +102,8 @@ async function renderSectionCanvas(
 
     return await html2canvas(clone, {
       scale: 2,
-      foreignObjectRendering: true,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       logging: false,
       backgroundColor: "#ffffff",
       imageTimeout: 30000,
@@ -156,7 +157,7 @@ function appendCanvasToPdf(
     );
 
     const renderedHeightMm = sliceHeightPx * mmPerPx;
-    pdf.addImage(sliceCanvas.toDataURL("image/jpeg", 0.96), "JPEG", marginMm, marginMm, contentWidth, renderedHeightMm, undefined, "FAST");
+    pdf.addImage(sliceCanvas.toDataURL("image/png"), "PNG", marginMm, marginMm, contentWidth, renderedHeightMm, undefined, "FAST");
 
     offsetY += sliceHeightPx;
     startOnNewPage = true;
