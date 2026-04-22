@@ -45,6 +45,14 @@ async function waitForImages(container: HTMLElement) {
   );
 }
 
+async function waitForFonts() {
+  if (typeof document !== "undefined" && "fonts" in document) {
+    try {
+      await (document as Document & { fonts: FontFaceSet }).fonts.ready;
+    } catch {}
+  }
+}
+
 function prepareCloneForPdf(container: HTMLElement) {
   container.querySelectorAll<HTMLElement>(".no-print").forEach((el) => { el.style.display = "none"; });
   container.querySelectorAll<HTMLElement>(".pdf-only").forEach((el) => { el.style.display = "block"; });
@@ -86,11 +94,13 @@ async function renderSectionCanvas(
 
   try {
     prepareCloneForPdf(wrapper);
+    await waitForFonts();
     await waitForImages(wrapper);
     await new Promise((resolve) => requestAnimationFrame(() => resolve(null)));
 
     return await html2canvas(clone, {
       scale: 2,
+      foreignObjectRendering: true,
       useCORS: true,
       allowTaint: true,
       logging: false,
@@ -398,7 +408,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                       <p style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a", margin: "0 0 8px" }}>{vi ? svc.vi : svc.en}</p>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
                         {svc.tags.map(t => (
-                          <span key={t} style={{ fontSize: 10, color: "#8a7d6e", background: "#fff", border: "1px solid #e2dbd0", borderRadius: 999, padding: "2px 9px" }}>{t}</span>
+                          <span key={t} style={{ ...pillStyle, fontSize: 10, color: "#8a7d6e", background: "#fff", border: "1px solid #e2dbd0", borderRadius: 999, padding: "3px 9px 2px", minHeight: 22 }}>{t}</span>
                         ))}
                       </div>
                     </div>
@@ -558,7 +568,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                 <div key={cat} style={{ marginBottom: 40 }}>
                   {/* Category heading */}
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-                    <span style={{ fontSize: 10, fontWeight: 900, background: accent, color: "#000", padding: "3px 10px", borderRadius: 999 }}>{cat}</span>
+                    <span style={{ ...pillStyle, fontSize: 10, fontWeight: 900, background: accent, color: "#000", padding: "4px 10px 3px", borderRadius: 999, minHeight: 22 }}>{cat}</span>
                     <div style={{ flex: 1, height: 1, background: "rgba(0,0,0,0.08)" }} />
                     <span style={{ fontSize: 10, color: "#b0a898" }}>{catVideos.length} {vi ? "video" : "videos"}</span>
                   </div>
@@ -588,7 +598,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                               </div>
                             </div>
                             {v.duration && (
-                              <span style={{ position: "absolute", bottom: 6, right: 6, fontSize: 9, color: "rgba(255,255,255,0.8)", background: "rgba(0,0,0,0.7)", padding: "2px 5px", borderRadius: 4, fontFamily: "monospace" }}>{v.duration}</span>
+                              <span style={{ ...pillStyle, position: "absolute", bottom: 6, right: 6, fontSize: 9, color: "rgba(255,255,255,0.8)", background: "rgba(0,0,0,0.7)", padding: "3px 5px 2px", borderRadius: 4, fontFamily: "monospace", minHeight: 18 }}>{v.duration}</span>
                             )}
                           </a>
                           {/* PDF-only static thumbnail (no link) */}
@@ -771,6 +781,14 @@ const headingStyle: React.CSSProperties = {
 };
 const bodyStyle: React.CSSProperties = {
   fontSize: 13, color: "#6b6259", lineHeight: 1.8, margin: 0,
+};
+const pillStyle: React.CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  lineHeight: 1,
+  whiteSpace: "nowrap",
+  verticalAlign: "middle",
 };
 
 function Section({ num, label, children }: { num: string; label: string; children: React.ReactNode }) {
