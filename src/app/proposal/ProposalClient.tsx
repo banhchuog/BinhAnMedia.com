@@ -110,82 +110,42 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       {/* ══════════════════ DOCUMENT ═══════════════════════════ */}
       <div ref={docRef} style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "#0a0a0a", color: "#fff" }}>
 
-        {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-            PAGE 1 — COVER
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-        <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", background: "linear-gradient(150deg,#0a0a0a 0%,#130d02 55%,#0a0a0a 100%)", position: "relative", overflow: "hidden" }}>
-          {/* Gold radial glow */}
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 50% 35%, rgba(201,151,42,0.13), transparent 65%)", pointerEvents: "none" }} />
-          {/* Top accent line */}
+        {/* ━━ COVER HEADER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+        <div style={{ background: "linear-gradient(135deg,#0a0a0a,#130d02)", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: "linear-gradient(90deg,transparent,#C9972A 40%,#C9972A 60%,transparent)" }} />
-
-          {/* Header bar */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "36px 64px 0" }}>
+          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 30% 50%,rgba(201,151,42,0.08),transparent 60%)", pointerEvents: "none" }} />
+          <div style={{ maxWidth: 900, margin: "0 auto", padding: "36px 40px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 32, position: "relative" }}>
+            {/* Left: brand + greeting */}
             <div>
-              <span style={{ fontWeight: 900, fontSize: 22, color: "#fff" }}>BinhAn</span>
-              <span style={{ fontWeight: 900, fontSize: 22, color: "#C9972A" }}>Media</span>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", textTransform: "uppercase", letterSpacing: "0.25em" }}>
-                {vi ? "Tài liệu giới thiệu" : "Company Presentation"}
+              <div style={{ display: "flex", alignItems: "baseline", gap: 2, marginBottom: 10 }}>
+                <span style={{ fontWeight: 900, fontSize: 20, color: "#fff" }}>BinhAn</span>
+                <span style={{ fontWeight: 900, fontSize: 20, color: "#C9972A" }}>Media</span>
+                <span style={{ fontSize: 12, color: "rgba(255,255,255,0.25)", marginLeft: 8 }}>· binhanmedia.vn</span>
               </div>
-              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", marginTop: 3 }}>
-                {vi ? "Ngày phát hành" : "Issue date"}: {dateStr}
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", margin: "0 0 4px", fontWeight: 500 }}>
+                {vi ? "Kính gửi Quý Khách Hàng," : "Dear Valued Client,"}
+              </p>
+              <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", margin: 0, maxWidth: 420, lineHeight: 1.65 }}>
+                {vi
+                  ? "Đây là tài liệu giới thiệu năng lực sản xuất của Bình An Media — đơn vị chuyên TVC, MV, phim doanh nghiệp và nội dung số."
+                  : "This is Bình An Media's capability proposal — specialists in TVC, Music Video, Corporate Film and Digital Content."}
+              </p>
+            </div>
+            {/* Right: meta */}
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ fontSize: 10, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.2em", marginBottom: 4 }}>
+                {vi ? "Tài liệu năng lực" : "Capability Proposal"}
+              </div>
+              <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>{dateStr}</div>
+              <div style={{ display: "flex", gap: 16, justifyContent: "flex-end", marginTop: 14 }}>
+                {[{v:"200+",l:vi?"dự án":"projects"},{v:"12+",l:vi?"năm":"years"},{v:"50+",l:vi?"thương hiệu":"brands"}].map(s=>(
+                  <div key={s.l} style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 18, fontWeight: 900, color: "#C9972A", lineHeight: 1 }}>{s.v}</div>
+                    <div style={{ fontSize: 9, color: "rgba(255,255,255,0.3)", marginTop: 2 }}>{s.l}</div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
-
-          {/* Hero center */}
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", padding: "60px 40px" }}>
-            <p style={{ fontSize: 10, fontWeight: 700, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.4em", marginBottom: 24 }}>
-              {vi ? "Kính gửi Quý Khách Hàng" : "Dear Valued Client"}
-            </p>
-            <h1 style={{ fontSize: 72, fontWeight: 900, lineHeight: 1.05, margin: "0 0 20px" }}>
-              Bình An<br />
-              <span style={{ color: "#C9972A" }}>Media</span>
-            </h1>
-            <p style={{ fontSize: 17, color: "rgba(255,255,255,0.6)", fontWeight: 600, marginBottom: 8 }}>
-              {vi ? "Đơn vị sản xuất video chuyên nghiệp" : "Professional Video Production Company"}
-            </p>
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", letterSpacing: "0.2em" }}>
-              TVC · {vi ? "MV Ca nhạc" : "Music Video"} · {vi ? "Phim doanh nghiệp" : "Corporate Film"} · Social Content
-            </p>
-
-            {/* Stats */}
-            <div style={{ display: "flex", gap: 56, justifyContent: "center", marginTop: 52 }}>
-              {[
-                { v: "200+", l: vi ? "Dự án hoàn thành" : "Projects Completed" },
-                { v: "12+",  l: vi ? "Năm kinh nghiệm"  : "Years Experience" },
-                { v: "50+",  l: vi ? "Thương hiệu lớn"  : "Major Brands" },
-                { v: "4K",   l: vi ? "Tiêu chuẩn quay"  : "Production Std." },
-              ].map((s) => (
-                <div key={s.l} style={{ textAlign: "center" }}>
-                  <div style={{ fontSize: 30, fontWeight: 900, color: "#C9972A" }}>{s.v}</div>
-                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.3)", marginTop: 4 }}>{s.l}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Client logos */}
-            {clientLogos.length > 0 && (
-              <div style={{ marginTop: 48 }}>
-                <p style={{ fontSize: 9, color: "rgba(255,255,255,0.2)", textTransform: "uppercase", letterSpacing: "0.3em", marginBottom: 16 }}>
-                  {vi ? "Một số khách hàng tiêu biểu" : "Some of our clients"}
-                </p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 20, justifyContent: "center", alignItems: "center" }}>
-                  {clientLogos.map((url, i) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img key={i} src={url} alt="" style={{ height: 24, width: "auto", objectFit: "contain", filter: "grayscale(1) brightness(0.5)", opacity: 0.5 }} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Cover footer */}
-          <div style={{ display: "flex", justifyContent: "space-between", padding: "20px 64px 32px", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.2)" }}>hello@binhanmedia.vn · binhanmedia.vn</p>
-            <p style={{ fontSize: 10, color: "rgba(255,255,255,0.15)" }}>© {new Date().getFullYear()} Bình An Media</p>
           </div>
         </div>
 
@@ -225,8 +185,28 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             </div>
           </Section>
 
-          {/* ── SERVICES ──────────────────────────────────────── */}
-          <Section num="02" label={vi ? "Dịch vụ" : "Services"}>
+          {/* ── CLIENT LOGOS ──────────────────────────────────── */}
+          {clientLogos.length > 0 && (
+            <Section num="02" label={vi ? "Khách hàng" : "Clients"}>
+              <h2 style={headingStyle}>{vi ? "Khách hàng tiêu biểu" : "Our Clients"}</h2>
+              <p style={{ ...bodyStyle, marginTop: 8, marginBottom: 32 }}>
+                {vi
+                  ? "Bình An Media tự hào đồng hành cùng hơn 50 thương hiệu lớn nhỏ trên nhiều ngành hàng tại Việt Nam và khu vực."
+                  : "Bình An Media is proud to have partnered with over 50 brands across various industries in Vietnam and the region."}
+              </p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, alignItems: "center" }}>
+                {clientLogos.map((url, i) => (
+                  <div key={i} style={{ background: "#161616", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={url} alt="" style={{ height: 28, width: "auto", maxWidth: 100, objectFit: "contain", filter: "brightness(0.7) grayscale(0.3)" }} />
+                  </div>
+                ))}
+              </div>
+            </Section>
+          )}
+
+          {/* ── SERVICES ──────────────────────────────────────────── */}
+          <Section num={clientLogos.length > 0 ? "03" : "02"} label={vi ? "Dịch vụ" : "Services"}>
             <h2 style={headingStyle}>{vi ? "Chúng tôi làm được gì" : "What We Do"}</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
               {services.map((svc) => {
@@ -244,8 +224,8 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             </div>
           </Section>
 
-          {/* ── PRODUCTION PROCESS ───────────────────────────── */}
-          <Section num="03" label={vi ? "Quy trình sản xuất" : "Production Process"}>
+          {/* ── PRODUCTION PROCESS ────────────────────────────── */}
+          <Section num={clientLogos.length > 0 ? "04" : "03"} label={vi ? "Quy trình sản xuất" : "Production Process"}>
             <h2 style={headingStyle}>{vi ? "Chúng tôi làm việc như thế nào" : "How We Work"}</h2>
             <p style={{ ...bodyStyle, marginTop: 10, marginBottom: 36 }}>
               {vi
@@ -349,7 +329,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           </Section>
 
           {/* ── PORTFOLIO ─────────────────────────────────────── */}
-          <Section num="04" label={vi ? "Portfolio" : "Portfolio"}>
+          <Section num={clientLogos.length > 0 ? "05" : "04"} label={vi ? "Portfolio" : "Portfolio"}>
             <h2 style={headingStyle}>{vi ? "Dự án nổi bật" : "Featured Work"}</h2>
             <p style={{ ...bodyStyle, marginBottom: 32 }}>{vi ? `${videos.length} dự án được chọn lọc` : `${videos.length} curated projects`}</p>
 
@@ -370,23 +350,38 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     {catVideos.map((v) => {
                       const ytId = extractYtId(v.ytId);
                       const thumb = v.thumbnail || (ytId ? `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg` : "");
+                      const ytUrl = ytId ? `https://www.youtube.com/watch?v=${ytId}` : undefined;
                       return (
                         <div key={v.id} style={{ background: "#111", borderRadius: 14, overflow: "hidden", border: "1px solid rgba(255,255,255,0.07)" }}>
-                          {/* Thumbnail */}
-                          <div style={{ position: "relative", paddingBottom: "56.25%", background: "#1a1a1a" }}>
+                          {/* Thumbnail — clickable on screen */}
+                          <a
+                            href={ytUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="no-print"
+                            style={{ display: "block", position: "relative", paddingBottom: "56.25%", background: "#1a1a1a", cursor: ytUrl ? "pointer" : "default", textDecoration: "none" }}
+                          >
                             {thumb && (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img src={thumb} alt={v.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
                             )}
-                            {/* Play icon overlay */}
-                            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.25)" }}>
-                              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(255,255,255,0.15)", backdropFilter: "blur(4px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.2)" }}>
+                              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(201,151,42,0.85)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 12px rgba(0,0,0,0.4)" }}>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
                               </div>
                             </div>
                             {v.duration && (
                               <span style={{ position: "absolute", bottom: 6, right: 6, fontSize: 9, color: "rgba(255,255,255,0.8)", background: "rgba(0,0,0,0.7)", padding: "2px 5px", borderRadius: 4, fontFamily: "monospace" }}>{v.duration}</span>
                             )}
+                          </a>
+                          {/* PDF-only static thumbnail (no link) */}
+                          <div className="pdf-only" style={{ display: "none", position: "relative", paddingBottom: "56.25%", background: "#1a1a1a" }}>
+                            {thumb && <img src={thumb} alt={v.title} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />}
+                            <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(201,151,42,0.7)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
+                              </div>
+                            </div>
                           </div>
                           {/* Info */}
                           <div style={{ padding: "12px 14px 14px" }}>
@@ -405,7 +400,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
 
           {/* ── GALLERY ───────────────────────────────────────── */}
           {galleryPhotos.length > 0 && (
-            <Section num="05" label={vi ? "Thư viện ảnh" : "Gallery"}>
+            <Section num={clientLogos.length > 0 ? "06" : "05"} label={vi ? "Thư viện ảnh" : "Gallery"}>
               <h2 style={headingStyle}>{vi ? "Frame đẹp & Hậu trường" : "Stills & Behind the Scenes"}</h2>
               <p style={{ ...bodyStyle, marginBottom: 28 }}>{vi ? "Từng khoảnh khắc trên phim trường" : "Moments from our sets"}</p>
 
@@ -456,7 +451,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           )}
 
           {/* ── FOUNDER ───────────────────────────────────────── */}
-          <Section num={galleryPhotos.length > 0 ? "06" : "05"} label={vi ? "Người sáng lập" : "Founder"}>
+          <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + (galleryPhotos.length > 0 ? 2 : 1)}`} label={vi ? "Người sáng lập" : "Founder"}>
             <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 40, alignItems: "start" }}>
               <div style={{ borderRadius: 20, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", background: "#111", aspectRatio: "3/4" }}>
                 {founder.photoUrl ? (
@@ -487,7 +482,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
 
           {/* ── TESTIMONIALS ──────────────────────────────────── */}
           {testimonials.length > 0 && (
-            <Section num={galleryPhotos.length > 0 ? "07" : "06"} label={vi ? "Khách hàng nói gì" : "Testimonials"}>
+            <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + (galleryPhotos.length > 0 ? 3 : 2)}`} label={vi ? "Khách hàng nói gì" : "Testimonials"}>
               <h2 style={headingStyle}>{vi ? "Đánh giá từ khách hàng" : "What Clients Say"}</h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
                 {testimonials.map((t, i) => (
@@ -505,7 +500,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
           )}
 
           {/* ── WHY US ────────────────────────────────────────── */}
-          <Section num={galleryPhotos.length > 0 ? "08" : "07"} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
+          <Section num={`0${(clientLogos.length > 0 ? 5 : 4) + (galleryPhotos.length > 0 ? 4 : 3) + (testimonials.length > 0 ? 1 : 0)}`} label={vi ? "Tại sao chọn chúng tôi" : "Why Choose Us"}>
             <h2 style={headingStyle}>{vi ? "Cam kết của Bình An Media" : "Our Commitments"}</h2>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 14, marginTop: 24 }}>
               {[
