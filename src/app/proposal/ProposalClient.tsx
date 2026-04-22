@@ -283,18 +283,18 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             <h2 style={headingStyle}>{vi ? "Chúng tôi làm việc như thế nào" : "How We Work"}</h2>
             <p style={{ ...bodyStyle, marginTop: 10, marginBottom: 36 }}>
               {vi
-                ? "Mỗi dự án được thực hiện theo quy trình 5 bước chuẩn hoá — minh bạch, đúng hẹn và luôn có sự phê duyệt của khách hàng trước khi chuyển giai đoạn."
-                : "Every project follows a standardised 5-step process — transparent, on-schedule, and with client approval at every stage before moving forward."}
+                ? "Mỗi dự án được triển khai theo quy trình 5 bước rõ ràng — từ tiếp nhận brief, phát triển ý tưởng, sản xuất, hậu kỳ đến bàn giao cuối cùng. Ở mỗi giai đoạn, Bình An Media đều cập nhật tiến độ, gửi hạng mục cần duyệt và chỉ chuyển bước khi đã thống nhất với khách hàng."
+                : "Every project follows a clear 5-step process — from brief intake, concept development and production to post-production and final delivery. At each stage, Bình An Media provides progress updates, submits approval items, and only moves forward once aligned with the client."}
             </p>
 
             {/* Steps */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10, marginBottom: 40 }}>
               {[
-                { n: "01", vi: ["Khởi động",       "Brief, mục tiêu, ngân sách. Ký hợp đồng & thanh toán đợt 1."],                          en: ["Kickoff",         "Brief, goals, budget. Contract signing & first payment."] },
-                { n: "02", vi: ["Ý tưởng &\nKịch bản", "Concept, script, storyboard chi tiết. Duyệt với khách hàng."],                       en: ["Concept &\nScript", "Concept, script, detailed storyboard. Client approval."] },
-                { n: "03", vi: ["Sản xuất",         "Quay phim theo call sheet. Khách hàng có thể theo dõi trực tiếp."],                      en: ["Production",      "Shoot per call sheet. Client can observe on-set."] },
-                { n: "04", vi: ["Hậu kỳ",           "Dựng, color grade, âm thanh, motion. Gửi bản nháp để góp ý."],                          en: ["Post-Production", "Edit, color grade, sound, motion. Draft sent for feedback."] },
-                { n: "05", vi: ["Bàn giao",         "Chỉnh sửa theo phản hồi, xuất file chất lượng cao, bàn giao file gốc."],                 en: ["Delivery",        "Revisions, high-quality export, source files handed over."] },
+                { n: "01", vi: ["Khởi động",       "Tiếp nhận brief, mục tiêu truyền thông, ngân sách và timeline. Hai bên thống nhất phạm vi công việc, ký hợp đồng và thanh toán đợt 1 để bắt đầu dự án."], en: ["Kickoff", "We receive the brief, objectives, budget, and timeline. Both sides align on scope, sign the agreement, and complete the first payment to start the project."] },
+                { n: "02", vi: ["Ý tưởng &\nKịch bản", "Phát triển concept, thông điệp, kịch bản và storyboard chi tiết. Toàn bộ ý tưởng được gửi khách hàng duyệt trước khi bước vào sản xuất."], en: ["Concept &\nScript", "We develop the creative concept, message, script, and detailed storyboard. All creative materials are submitted for client approval before production."] },
+                { n: "03", vi: ["Sản xuất",         "Tổ chức quay theo call sheet, bối cảnh, nhân sự và thiết bị đã chốt. Khách hàng có thể theo dõi trực tiếp hoặc nhận cập nhật xuyên suốt ngày quay."], en: ["Production", "We execute the shoot based on the approved call sheet, locations, crew, and equipment. Clients can observe on set or receive updates throughout the shoot day."] },
+                { n: "04", vi: ["Hậu kỳ",           "Dựng offline, chỉnh màu, âm thanh, motion graphic và hoàn thiện phiên bản nháp. Bản preview được gửi để khách hàng góp ý và yêu cầu chỉnh sửa nếu cần."], en: ["Post-Production", "We handle offline edit, color grading, sound, motion graphics, and prepare the first draft. A preview version is shared for feedback and revision requests."] },
+                { n: "05", vi: ["Bàn giao",         "Hoàn thiện theo phản hồi cuối, xuất file đúng chuẩn nền tảng và bàn giao thành phẩm. Nếu có trong thoả thuận, khách hàng cũng nhận file gốc hoặc thư viện liên quan."], en: ["Delivery", "We finalize based on the last round of feedback, export in the required platform formats, and deliver the final assets. If included in scope, source files or related libraries are also handed over."] },
               ].map((step, i) => (
                 <div key={step.n} style={{ position: "relative" }}>
                   {i < 4 && (
@@ -316,6 +316,16 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
             </div>
 
             {/* Storyboard visual */}
+            <div style={{ marginTop: 4, marginBottom: 14, padding: "12px 14px", background: "rgba(201,151,42,0.07)", border: "1px solid rgba(201,151,42,0.18)", borderRadius: 12 }}>
+              <p style={{ margin: "0 0 4px", fontSize: 10, fontWeight: 800, color: "#C9972A", textTransform: "uppercase", letterSpacing: "0.2em" }}>
+                {vi ? "Lưu ý về storyboard" : "Storyboard note"}
+              </p>
+              <p style={{ margin: 0, fontSize: 11, lineHeight: 1.7, color: "#7b7065" }}>
+                {vi
+                  ? "Storyboard bên dưới là mẫu minh hoạ để khách hàng hình dung cách Bình An Media trình bày bố cục khung hình, góc máy và nhịp kể chuyện. Khi triển khai dự án thực tế, storyboard sẽ được xây dựng riêng theo brief, sản phẩm và mục tiêu truyền thông của từng khách hàng."
+                  : "The storyboard below is a sample reference showing how Bình An Media presents framing, camera angles, and narrative flow. For actual projects, the storyboard is custom-built based on each client’s brief, product, and communication goals."}
+              </p>
+            </div>
             {safeStoryboardPhotos.length > 0 ? (
               <div style={{ marginTop: 8 }}>
                 {safeStoryboardPhotos.map((photo) => (
@@ -332,7 +342,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     </div>
                     <span style={{ fontSize: 10, color: "#b0a898", fontFamily: "monospace" }}>storyboard_v2.pdf</span>
                   </div>
-                  <span style={{ fontSize: 9, color: "#c4bbad" }}>{vi ? "Ví dụ minh hoạ" : "Illustration example"}</span>
+                  <span style={{ fontSize: 9, color: "#c4bbad", fontWeight: 700 }}>{vi ? "Mẫu storyboard minh hoạ" : "Sample storyboard reference"}</span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 0 }}>
                   {[
@@ -369,7 +379,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                 </div>
                 <div style={{ padding: "10px 20px", background: "#faf8f4", borderTop: "1px solid #ede8df", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span style={{ fontSize: 9, color: "#b0a898" }}>
-                    {vi ? "Storyboard được duyệt trước khi bắt đầu quay" : "Storyboard approved before filming begins"}
+                    {vi ? "Đây là storyboard mẫu minh hoạ; phiên bản chính thức sẽ được duyệt trước khi bắt đầu quay" : "This is a sample storyboard reference; the official storyboard is approved before filming begins"}
                   </span>
                   <span style={{ fontSize: 9, color: "#C9972A" }}>Bình An Media © {new Date().getFullYear()}</span>
                 </div>
