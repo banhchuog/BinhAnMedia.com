@@ -71,9 +71,34 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
         .set({
           margin: [10, 10, 10, 10],
           filename: `BinhAnMedia_Proposal_${lang.toUpperCase()}_${new Date().getFullYear()}.pdf`,
-          html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: "#ffffff", imageTimeout: 15000 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: "#ffffff",
+            imageTimeout: 30000,
+            allowTaint: true,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            onclone: (clonedDoc: Document) => {
+              // Hide floating controls & screen-only elements
+              clonedDoc.querySelectorAll<HTMLElement>(".no-print").forEach(el => { el.style.display = "none"; });
+              // Show PDF-only static elements (e.g. static thumbnail)
+              clonedDoc.querySelectorAll<HTMLElement>(".pdf-only").forEach(el => { el.style.display = "block"; });
+              // Stop marquee animation to avoid blank strip
+              clonedDoc.querySelectorAll<HTMLElement>(".marquee-track").forEach(el => { el.style.animation = "none"; el.style.transform = "translateX(0)"; });
+              // Remove any iframes (YouTube embeds won't render)
+              clonedDoc.querySelectorAll<HTMLElement>("iframe").forEach(el => { el.remove(); });
+              // Ensure background colors print
+              clonedDoc.querySelectorAll<HTMLElement>("[style]").forEach(el => {
+                if (el.style.background || el.style.backgroundColor) {
+                  el.style.setProperty("-webkit-print-color-adjust", "exact");
+                  el.style.setProperty("print-color-adjust", "exact");
+                }
+              });
+            },
+          },
           jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-          pagebreak: { mode: ["avoid-all", "css", "legacy"], before: ".pdf-page-break" },
+          pagebreak: { mode: ["css", "legacy"], avoid: ".pdf-no-break" },
         })
         .from(docRef.current)
         .save();
@@ -607,19 +632,18 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
       </div>
 
       <style>{`
-        .pdf-page-break { page-break-before: always; break-before: page; }
-        .pdf-page-break:first-of-type { page-break-before: avoid; break-before: avoid; }
         .pdf-no-break { page-break-inside: avoid; break-inside: avoid; }
+        .pdf-only { display: none; }
         @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
         .marquee-track { animation: marquee 28s linear infinite; }
         .marquee-track:hover { animation-play-state: paused; }
         @media print {
           .no-print { display: none !important; }
+          .pdf-only { display: block !important; }
           body { margin: 0; background: #ffffff; }
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          .pdf-page-break { page-break-before: always; }
           .pdf-no-break { page-break-inside: avoid; }
-          .marquee-track { animation: none !important; }
+          .marquee-track { animation: none !important; transform: translateX(0) !important; }
         }
       `}</style>
     </>
@@ -636,7 +660,7 @@ const bodyStyle: React.CSSProperties = {
 
 function Section({ num, label, children }: { num: string; label: string; children: React.ReactNode }) {
   return (
-    <div className="pdf-page-break" style={{ marginBottom: 56 }}>
+    <div style={{ marginBottom: 56 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 28 }}>
         <span style={{ fontSize: 10, fontWeight: 900, color: "#C9972A", letterSpacing: "0.3em", textTransform: "uppercase" }}>{num}</span>
         <div style={{ height: 1, flex: 1, background: "linear-gradient(90deg,rgba(201,151,42,0.3),transparent)" }} />
