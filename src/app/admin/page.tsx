@@ -52,6 +52,7 @@ type DirectorProjectMedia = {
   photos: { id: string; url: string; caption: string }[];
   youtubeLinks: { id: string; ytId: string; label: string }[];
   heroPhoto?: string;
+  trailerYtId?: string;
 };
 type AdminSettings = {
   priceOverrides: Record<string, number>;
@@ -2716,6 +2717,7 @@ const EMPTY_PROJECT_MEDIA = (): DirectorProjectMedia => ({
   photos: [],
   youtubeLinks: [],
   heroPhoto: "",
+  trailerYtId: "",
 });
 
 function DirectorMediaTab({
@@ -2734,6 +2736,7 @@ function DirectorMediaTab({
         photos: Array.isArray(dm.photos) ? dm.photos : [],
         youtubeLinks: dm.youtubeLinks ?? [],
         heroPhoto: dm.heroPhoto ?? "",
+        trailerYtId: dm.trailerYtId ?? "",
       } : EMPTY_PROJECT_MEDIA();
     }
     return init;
@@ -2848,6 +2851,7 @@ function DirectorMediaTab({
                 {pm.heroPhoto && <span className="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-semibold">Hero ✓</span>}
                 {pm.photos.length > 0 && <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-semibold">{pm.photos.length} ảnh</span>}
                 {pm.youtubeLinks.length > 0 && <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-semibold">{pm.youtubeLinks.length} video</span>}
+                {pm.trailerYtId && <span className="text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full font-semibold">Trailer ✓</span>}
               </div>
               {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
             </button>
@@ -2995,10 +2999,54 @@ function DirectorMediaTab({
                   </div>
                 </div>
 
+                {/* ── Trailer ── */}
+                <div>
+                  <p className="text-xs font-semibold text-[#3C3C43] mb-2 uppercase tracking-wide">Trailer chính thức — YouTube ID hoặc URL</p>
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={pm.trailerYtId ?? ""}
+                      onChange={(e) => updateProject(proj.id, { trailerYtId: e.target.value.trim() })}
+                      placeholder="VD: dQw4w9WgXcQ hoặc https://youtu.be/..."
+                      className="flex-1 text-xs border border-black/10 rounded px-3 py-2 bg-[#F2F2F7] focus:outline-none focus:border-[#C9972A]"
+                    />
+                    {pm.trailerYtId && (() => {
+                      const tid = pm.trailerYtId.startsWith("http")
+                        ? (pm.trailerYtId.match(/(?:v=|youtu\.be\/)([\w-]{11})/)?.[1] ?? pm.trailerYtId)
+                        : pm.trailerYtId;
+                      return (
+                        <a href={`https://youtu.be/${tid}`} target="_blank" rel="noopener noreferrer" className="text-[#C9972A] hover:text-[#b5862a] flex-shrink-0">
+                          <ExternalLink size={14} />
+                        </a>
+                      );
+                    })()}
+                    {pm.trailerYtId && (
+                      <button onClick={() => updateProject(proj.id, { trailerYtId: "" })} className="text-red-400 hover:text-red-600 flex-shrink-0">
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                  {pm.trailerYtId && (() => {
+                    const tid = pm.trailerYtId.startsWith("http")
+                      ? (pm.trailerYtId.match(/(?:v=|youtu\.be\/)([\w-]{11})/)?.[1] ?? pm.trailerYtId)
+                      : pm.trailerYtId;
+                    return (
+                      <div className="mt-2 rounded overflow-hidden" style={{ aspectRatio: "16/9", maxWidth: 320 }}>
+                        <iframe
+                          src={`https://www.youtube.com/embed/${tid}`}
+                          title="Trailer preview"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full border-0"
+                        />
+                      </div>
+                    );
+                  })()}
+                </div>
+
                 {/* ── YouTube Links ── */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-xs font-semibold text-[#3C3C43] uppercase tracking-wide">YouTube Links</p>
+                    <p className="text-xs font-semibold text-[#3C3C43] uppercase tracking-wide">YouTube Links khác</p>
                     <button
                       onClick={() => addYtLink(proj.id)}
                       className="flex items-center gap-1 text-xs text-[#C9972A] hover:text-[#b5862a] font-semibold"

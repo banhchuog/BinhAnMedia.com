@@ -286,6 +286,7 @@ export default async function DinhCongHieuPage() {
     photos?: { id: string; url: string; caption: string }[];
     youtubeLinks?: { id: string; ytId: string; label: string }[];
     heroPhoto?: string;
+    trailerYtId?: string;
   };
   let directorMedia: Record<string, DirectorProjectMedia> = {};
   try {
@@ -312,6 +313,7 @@ export default async function DinhCongHieuPage() {
       // Photos from DB (if any), otherwise no photos (empty array = show placeholders off)
       dbPhotos: Array.isArray(dm?.photos) ? dm!.photos!.filter((ph) => ph.url?.startsWith("data:")) : [],
       youtubeLinks: dm?.youtubeLinks ?? [],
+      trailerYtId: dm?.trailerYtId ?? "",
     };
   });
 
@@ -568,6 +570,36 @@ export default async function DinhCongHieuPage() {
                       ))}
                     </div>
                   )}
+                </div>
+              );
+            })()}
+
+            {/* ── Trailer Embed ── */}
+            {p.trailerYtId && (() => {
+              const raw = p.trailerYtId;
+              const tid = raw.startsWith("http")
+                ? (raw.match(/(?:v=|youtu\.be\/|embed\/)?([\w-]{11})/)?.[1] ?? raw)
+                : raw;
+              return (
+                <div className="mt-10">
+                  <p
+                    className="text-[9px] tracking-[0.4em] uppercase font-black mb-4"
+                    style={{ color: p.accent }}
+                  >
+                    Trailer chính thức
+                  </p>
+                  <div
+                    className="relative w-full overflow-hidden"
+                    style={{ aspectRatio: "16/9", maxWidth: 800, borderRadius: 3, border: `1px solid ${p.accent}22` }}
+                  >
+                    <iframe
+                      src={`https://www.youtube.com/embed/${tid}?rel=0&modestbranding=1`}
+                      title={`${p.title} Trailer`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      className="absolute inset-0 w-full h-full border-0"
+                    />
+                  </div>
                 </div>
               );
             })()}
