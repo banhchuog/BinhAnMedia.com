@@ -283,8 +283,7 @@ export default async function DinhCongHieuPage() {
   // Fetch directorMedia from DB
   type DirectorProjectMedia = {
     poster?: string;
-    wide?: string;
-    frames?: { id: string; url: string; caption: string }[];
+    photos?: { id: string; url: string; caption: string }[];
     youtubeLinks?: { id: string; ytId: string; label: string }[];
   };
   let directorMedia: Record<string, DirectorProjectMedia> = {};
@@ -300,19 +299,15 @@ export default async function DinhCongHieuPage() {
     }
   } catch {}
 
-  // Merge DB media into projects (DB values override static fallbacks when non-empty)
+  // Merge DB media into projects
   const mergedProjects = projects.map((p) => {
     const dm = directorMedia[p.id];
-    if (!dm) return p;
     return {
       ...p,
-      poster: dm.poster?.startsWith("data:") ? dm.poster : p.poster,
-      wide: dm.wide?.startsWith("data:") ? dm.wide : p.wide,
-      frames: p.frames.map((f, i) => {
-        const df = dm.frames?.[i];
-        return df?.url?.startsWith("data:") ? { src: df.url, caption: df.caption || f.caption } : f;
-      }),
-      youtubeLinks: dm.youtubeLinks ?? [],
+      poster: dm?.poster?.startsWith("data:") ? dm.poster : p.poster,
+      // Photos from DB (if any), otherwise no photos (empty array = show placeholders off)
+      dbPhotos: Array.isArray(dm?.photos) ? dm!.photos!.filter((ph) => ph.url?.startsWith("data:")) : [],
+      youtubeLinks: dm?.youtubeLinks ?? [],
     };
   });
 
@@ -524,49 +519,50 @@ export default async function DinhCongHieuPage() {
               </div>
             </div>
 
-            {/* ── Wide banner (21:9) ── */}
-            <div className="mb-3">
-              <WideBanner src={p.wide} title={p.title} accent={p.accent} />
-            </div>
+            {/* ── Poster + Photos grid ── */}
+            {(() => {
+              const photos = p.dbPhotos;
+              const hasPoster = p.poster?.startsWith("data:");
+              const hasPhotos = photos.length > 0;
 
-            {/* ── Row 1: Poster (portrait) + 2 landscape frames ── */}
-            <div className="grid grid-cols-3 gap-3 mb-3">
-              <div className="row-span-2 col-span-1">
-                <PosterFrame src={p.poster} title={p.title} accent={p.accent} />
-              </div>
-              {p.frames.slice(0, 2).map((f) => (
-                <div key={f.src} className="col-span-1">
-                  <FilmFrame src={f.src} caption={f.caption} accent={p.accent} />
+              if (!hasPoster && !hasPhotos) return null;
+
+              return (
+                <div className="space-y-3">
+                  {/* Layout: poster on left + photos grid on right (if both exist) */}
+                  {hasPoster && hasPhotos ? (
+                    <div className="grid grid-cols-3 gap-3">
+                      {/* Poster column */}
+                      <div className="col-span-1">
+                        <PosterFrame src={p.poster} title={p.title} accent={p.accent} />
+                      </div>
+                      {/* Photos grid fills remaining 2 cols */}
+                      <div className="col-span-2 grid grid-cols-2 gap-3 content-start">
+                        {photos.map((ph) => (
+                          <FilmFrame key={ph.id} src={ph.url} caption={ph.caption} accent={p.accent} />
+                        ))}
+                      </div>
+                    </div>
+                  ) : hasPoster ? (
+                    <div className="max-w-[220px]">
+                      <PosterFrame src={p.poster} title={p.title} accent={p.accent} />
+                    </div>
+                  ) : (
+                    /* Only photos — masonry-style 4 col grid */
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {photos.map((ph) => (
+                        <FilmFrame key={ph.id} src={ph.url} caption={ph.caption} accent={p.accent} />
+                      ))}
+                    </div>
+                  )}
                 </div>
-              ))}
-              {/* 3rd landscape frame fills bottom-right of the 3-col grid */}
-              {p.frames.slice(2, 4).map((f) => (
-                <div key={f.src} className="col-span-1">
-                  <FilmFrame src={f.src} caption={f.caption} accent={p.accent} />
-                </div>
-              ))}
-            </div>
-
-            {/* ── 4 frames in a row ── */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-3">
-              {p.frames.slice(4, 8).map((f) => (
-                <FilmFrame key={f.src} src={f.src} caption={f.caption} accent={p.accent} />
-              ))}
-            </div>
-
-            {/* ── Extra frames if any ── */}
-            {p.frames.length > 8 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {p.frames.slice(8).map((f) => (
-                  <FilmFrame key={f.src} src={f.src} caption={f.caption} accent={p.accent} />
-                ))}
-              </div>
-            )}
+              );
+            })()}
 
             {/* ── YouTube Links ── */}
-            {("youtubeLinks" in p) && Array.isArray((p as { youtubeLinks?: { id: string; ytId: string; label: string }[] }).youtubeLinks) && (p as { youtubeLinks?: { id: string; ytId: string; label: string }[] }).youtubeLinks!.length > 0 && (
+            {p.youtubeLinks.length > 0 && (
               <div className="mt-10 flex flex-wrap gap-3">
-                {(p as { youtubeLinks: { id: string; ytId: string; label: string }[] }).youtubeLinks.map((yt) => (
+                {p.youtubeLinks.map((yt) => (
                   <a
                     key={yt.id}
                     href={yt.ytId.startsWith("http") ? yt.ytId : `https://youtu.be/${yt.ytId}`}

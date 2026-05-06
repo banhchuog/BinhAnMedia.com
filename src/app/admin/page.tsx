@@ -49,8 +49,7 @@ type GalleryPhoto = {
 type CatalogEdit = { name?: string; unit?: string };
 type DirectorProjectMedia = {
   poster: string;
-  wide: string;
-  frames: { id: string; url: string; caption: string }[];
+  photos: { id: string; url: string; caption: string }[];
   youtubeLinks: { id: string; ytId: string; label: string }[];
 };
 type AdminSettings = {
@@ -2713,8 +2712,7 @@ const DIRECTOR_PROJECTS = [
 
 const EMPTY_PROJECT_MEDIA = (): DirectorProjectMedia => ({
   poster: "",
-  wide: "",
-  frames: Array.from({ length: 8 }, (_, i) => ({ id: `f${i}`, url: "", caption: "" })),
+  photos: [],
   youtubeLinks: [],
 });
 
@@ -2728,41 +2726,61 @@ function DirectorMediaTab({
   const [local, setLocal] = useState<Record<string, DirectorProjectMedia>>(() => {
     const init: Record<string, DirectorProjectMedia> = {};
     for (const p of DIRECTOR_PROJECTS) {
-      init[p.id] = directorMedia[p.id] ? {
-        poster: directorMedia[p.id].poster ?? "",
-        wide: directorMedia[p.id].wide ?? "",
-        frames: Array.from({ length: 8 }, (_, i) => directorMedia[p.id].frames?.[i] ?? { id: `f${i}`, url: "", caption: "" }),
-        youtubeLinks: directorMedia[p.id].youtubeLinks ?? [],
+      const dm = directorMedia[p.id];
+      init[p.id] = dm ? {
+        poster: dm.poster ?? "",
+        photos: Array.isArray(dm.photos) ? dm.photos : [],
+        youtubeLinks: dm.youtubeLinks ?? [],
       } : EMPTY_PROJECT_MEDIA();
     }
     return init;
   });
   const [saving, setSaving] = useState(false);
   const [openProject, setOpenProject] = useState<string>(DIRECTOR_PROJECTS[0].id);
+  const [processing, setProcessing] = useState<Record<string, boolean>>({});
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const posterRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const updateProject = (pid: string, patch: Partial<DirectorProjectMedia>) =>
     setLocal((prev) => ({ ...prev, [pid]: { ...prev[pid], ...patch } }));
 
-  const uploadSingle = async (file: File, pid: string, field: "poster" | "wide") => {
+  const uploadPoster = async (file: File, pid: string) => {
     const url = await compressImage(file);
-    updateProject(pid, { [field]: url });
+    updateProject(pid, { poster: url });
   };
 
-  const uploadFrame = async (file: File, pid: string, frameIdx: number) => {
-    const url = await compressImage(file);
-    setLocal((prev) => {
-      const frames = [...prev[pid].frames];
-      frames[frameIdx] = { ...frames[frameIdx], url };
-      return { ...prev, [pid]: { ...prev[pid], frames } };
-    });
+  const handlePhotoFiles = async (files: FileList | null, pid: string) => {
+    if (!files || files.length === 0) return;
+    setProcessing((p) => ({ ...p, [pid]: true }));
+    const results: { id: string; url: string; caption: string }[] = [];
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith("image/")) continue;
+      try {
+        const url = await compressImage(file);
+        results.push({ id: Date.now().toString() + Math.random(), url, caption: "" });
+      } catch { /* skip */ }
+    }
+    setLocal((prev) => ({
+      ...prev,
+      [pid]: { ...prev[pid], photos: [...prev[pid].photos, ...results] },
+    }));
+    setProcessing((p) => ({ ...p, [pid]: false }));
   };
 
-  const setFrameCaption = (pid: string, frameIdx: number, caption: string) =>
-    setLocal((prev) => {
-      const frames = [...prev[pid].frames];
-      frames[frameIdx] = { ...frames[frameIdx], caption };
-      return { ...prev, [pid]: { ...prev[pid], frames } };
-    });
+  const removePhoto = (pid: string, photoId: string) =>
+    setLocal((prev) => ({
+      ...prev,
+      [pid]: { ...prev[pid], photos: prev[pid].photos.filter((ph) => ph.id !== photoId) },
+    }));
+
+  const setPhotoCaption = (pid: string, photoId: string, caption: string) =>
+    setLocal((prev) => ({
+      ...prev,
+      [pid]: {
+        ...prev[pid],
+        photos: prev[pid].photos.map((ph) => ph.id === photoId ? { ...ph, caption } : ph),
+      },
+    }));
 
   const addYtLink = (pid: string) =>
     setLocal((prev) => ({
@@ -2777,6 +2795,238 @@ function DirectorMediaTab({
     setLocal((prev) => ({
       ...prev,
       [pid]: { ...prev[pid], youtubeLinks: prev[pid].youtubeLinks.filter((l) => l.id !== lid) },
+    }));
+
+  const setYtField = (pid: string, lid: string, field: "ytId" | "label", value: string) =>
+    setLocal((prev) => ({
+      ...prev,
+      [pid]: {
+        ...prev[pid],
+        youtubeLinks: prev[pid].youtubeLinks.map((l) => l.id === lid ? { ...l, [field]: value } : l),
+      },
+    }));
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-[#1C1C1E] flex items-center gap-2">
+          <Film size={18} className="text-[#C9972A]" /> Hồ sơ Đạo diễn — Quản lý media
+        </h2>
+        <button
+          onClick={async () => { setSaving(true); await onSave(local); setSaving(false); }}
+          disabled={saving}
+          className="flex items-center gap-1.5 bg-[#C9972A] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#b5862a] transition disabled:opacity-50"
+        >
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Lưu tất cả
+        </button>
+      </div>
+
+      {DIRECTOR_PROJECTS.map((proj) => {
+        const pm = local[proj.id];
+        const isOpen = openProject === proj.id;
+        const isProcessing = !!processing[proj.id];
+        return (
+          <div key={proj.id} className="bg-white rounded-xl border border-black/8 overflow-hidden">
+            {/* Header */}
+            <button
+              onClick={() => setOpenProject(isOpen ? "" : proj.id)}
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-black/2 transition"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: proj.accent }} />
+                <span className="font-bold text-[#1C1C1E]">{proj.title}</span>
+                <span className="text-xs text-[#8E8E93]">{proj.year}</span>
+                {pm.poster && <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-semibold">Poster ✓</span>}
+                {pm.photos.length > 0 && <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-semibold">{pm.photos.length} ảnh</span>}
+                {pm.youtubeLinks.length > 0 && <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-semibold">{pm.youtubeLinks.length} video</span>}
+              </div>
+              {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+
+            {isOpen && (
+              <div className="px-5 pb-5 space-y-6 border-t border-black/6 pt-5">
+
+                {/* ── Poster ── */}
+                <div>
+                  <p className="text-xs font-semibold text-[#3C3C43] mb-3 uppercase tracking-wide">Poster (2:3) — 1 ảnh</p>
+                  <div className="flex items-start gap-4">
+                    <label className="cursor-pointer flex-shrink-0">
+                      <input
+                        ref={(el) => { posterRefs.current[proj.id] = el; }}
+                        type="file" accept="image/*" className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPoster(f, proj.id); }}
+                      />
+                      {pm.poster ? (
+                        <div className="relative group w-24" style={{ aspectRatio: "2/3" }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={pm.poster} alt="poster" className="w-full h-full object-cover rounded-lg" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center">
+                            <span className="text-white text-[10px] font-semibold">Đổi</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-24 border-2 border-dashed border-black/15 rounded-lg flex flex-col items-center justify-center gap-1 text-[#8E8E93] hover:border-[#C9972A] transition" style={{ aspectRatio: "2/3" }}>
+                          <Upload size={16} />
+                          <span className="text-[9px]">Upload</span>
+                        </div>
+                      )}
+                    </label>
+                    <div className="flex flex-col gap-2 pt-1">
+                      <p className="text-xs text-[#3C3C43]">Tỷ lệ 2:3 — hiển thị nổi bật trong trang hồ sơ</p>
+                      {pm.poster && (
+                        <button onClick={() => updateProject(proj.id, { poster: "" })} className="text-xs text-red-400 hover:text-red-600 text-left">Xóa poster</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Photos gallery-style ── */}
+                <div className="bg-[#F9F9F9] rounded-xl border border-black/8 overflow-hidden">
+                  <div className="flex items-center gap-3 px-5 py-4 border-b border-black/6">
+                    <span className="text-xl">🎬</span>
+                    <div className="flex-1">
+                      <p className="font-bold text-[#1C1C1E] text-sm">Hình ảnh dự án</p>
+                      <p className="text-[11px] text-[#8E8E93] mt-0.5">
+                        {pm.photos.length} ảnh · Kéo thả hoặc chọn file · Thêm bao nhiêu cũng được
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => fileInputRefs.current[proj.id]?.click()}
+                      disabled={isProcessing}
+                      className="flex items-center gap-1.5 text-white text-xs font-bold px-4 py-2 rounded-xl transition disabled:opacity-40"
+                      style={{ background: proj.accent }}
+                    >
+                      {isProcessing ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                      {isProcessing ? "Đang nén…" : "Thêm ảnh"}
+                    </button>
+                    <input
+                      ref={(el) => { fileInputRefs.current[proj.id] = el; }}
+                      type="file" accept="image/*" multiple className="hidden"
+                      onChange={(e) => handlePhotoFiles(e.target.files, proj.id)}
+                    />
+                  </div>
+
+                  <div
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={(e) => { e.preventDefault(); handlePhotoFiles(e.dataTransfer.files, proj.id); }}
+                    onClick={() => pm.photos.length === 0 && fileInputRefs.current[proj.id]?.click()}
+                    className={pm.photos.length === 0 ? "cursor-pointer" : ""}
+                  >
+                    {pm.photos.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center gap-2 py-12 text-[#8E8E93]">
+                        <ImageIcon size={28} className="text-[#C7C7CC]" />
+                        <p className="text-sm">Kéo thả ảnh vào đây hoặc nhấn để chọn</p>
+                        <p className="text-[11px] text-[#C7C7CC]">JPG, PNG, WEBP · Nhiều file cùng lúc</p>
+                      </div>
+                    ) : (
+                      <div className="p-4 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
+                        {pm.photos.map((ph) => (
+                          <div key={ph.id} className="space-y-1">
+                            <div className="relative aspect-video rounded-lg overflow-hidden bg-[#F2F2F7] group">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={ph.url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                              <button
+                                onClick={(e) => { e.stopPropagation(); removePhoto(proj.id, ph.id); }}
+                                className="absolute top-1 right-1 w-5 h-5 bg-black/70 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition hover:bg-red-600"
+                              >
+                                <X size={10} className="text-white" />
+                              </button>
+                            </div>
+                            <input
+                              value={ph.caption}
+                              onChange={(e) => setPhotoCaption(proj.id, ph.id, e.target.value)}
+                              placeholder="Caption..."
+                              onClick={(e) => e.stopPropagation()}
+                              className="w-full text-[9px] border border-black/10 rounded px-1.5 py-1 bg-white focus:outline-none focus:border-[#C9972A]"
+                            />
+                          </div>
+                        ))}
+                        <button
+                          onClick={(e) => { e.stopPropagation(); fileInputRefs.current[proj.id]?.click(); }}
+                          className="aspect-video rounded-lg border-2 border-dashed border-black/15 flex items-center justify-center hover:border-[#C9972A]/50 transition group"
+                        >
+                          <Plus size={18} className="text-[#C7C7CC] group-hover:text-[#C9972A] transition" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── YouTube Links ── */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-semibold text-[#3C3C43] uppercase tracking-wide">YouTube Links</p>
+                    <button
+                      onClick={() => addYtLink(proj.id)}
+                      className="flex items-center gap-1 text-xs text-[#C9972A] hover:text-[#b5862a] font-semibold"
+                    >
+                      <Plus size={13} /> Thêm link
+                    </button>
+                  </div>
+                  {pm.youtubeLinks.length === 0 ? (
+                    <p className="text-xs text-[#8E8E93] italic">Chưa có YouTube link — click &ldquo;Thêm link&rdquo; để thêm</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {pm.youtubeLinks.map((l) => (
+                        <div key={l.id} className="flex items-center gap-2">
+                          <input
+                            value={l.label}
+                            onChange={(e) => setYtField(proj.id, l.id, "label", e.target.value)}
+                            placeholder="Nhãn (VD: Trailer)"
+                            className="flex-1 text-xs border border-black/10 rounded px-3 py-2 bg-[#F2F2F7] focus:outline-none focus:border-[#C9972A]"
+                          />
+                          <input
+                            value={l.ytId}
+                            onChange={(e) => setYtField(proj.id, l.id, "ytId", e.target.value)}
+                            placeholder="YouTube ID hoặc URL"
+                            className="flex-[2] text-xs border border-black/10 rounded px-3 py-2 bg-[#F2F2F7] focus:outline-none focus:border-[#C9972A]"
+                          />
+                          {l.ytId && (
+                            <a
+                              href={l.ytId.startsWith("http") ? l.ytId : `https://youtu.be/${l.ytId}`}
+                              target="_blank" rel="noopener noreferrer"
+                              className="text-[#C9972A] hover:text-[#b5862a]"
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          )}
+                          <button onClick={() => removeYtLink(proj.id, l.id)} className="text-red-400 hover:text-red-600">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── GalleryTab ──────────────────────────────────────────────────
+
+/** Compress a File to JPEG data-URL, max 900px wide, quality 0.78 */
+async function compressImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX = 900;
+        let { width, height } = img;
+        if (width > MAX) { height = Math.round((height * MAX) / width); width = MAX; }
+        const canvas = document.createElement("canvas");
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", 0.78));
+      };
+      img.onerror = reject;
     }));
 
   const setYtField = (pid: string, lid: string, field: "ytId" | "label", value: string) =>
