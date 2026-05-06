@@ -51,6 +51,7 @@ type DirectorProjectMedia = {
   poster: string;
   photos: { id: string; url: string; caption: string }[];
   youtubeLinks: { id: string; ytId: string; label: string }[];
+  heroPhoto?: string;
 };
 type AdminSettings = {
   priceOverrides: Record<string, number>;
@@ -2714,6 +2715,7 @@ const EMPTY_PROJECT_MEDIA = (): DirectorProjectMedia => ({
   poster: "",
   photos: [],
   youtubeLinks: [],
+  heroPhoto: "",
 });
 
 function DirectorMediaTab({
@@ -2731,6 +2733,7 @@ function DirectorMediaTab({
         poster: dm.poster ?? "",
         photos: Array.isArray(dm.photos) ? dm.photos : [],
         youtubeLinks: dm.youtubeLinks ?? [],
+        heroPhoto: dm.heroPhoto ?? "",
       } : EMPTY_PROJECT_MEDIA();
     }
     return init;
@@ -2747,6 +2750,11 @@ function DirectorMediaTab({
   const uploadPoster = async (file: File, pid: string) => {
     const url = await compressImage(file);
     updateProject(pid, { poster: url });
+  };
+
+  const uploadHeroPhoto = async (file: File, pid: string) => {
+    const url = await compressImage(file);
+    updateProject(pid, { heroPhoto: url });
   };
 
   const handlePhotoFiles = async (files: FileList | null, pid: string) => {
@@ -2837,6 +2845,7 @@ function DirectorMediaTab({
                 <span className="font-bold text-[#1C1C1E]">{proj.title}</span>
                 <span className="text-xs text-[#8E8E93]">{proj.year}</span>
                 {pm.poster && <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-full font-semibold">Poster ✓</span>}
+                {pm.heroPhoto && <span className="text-[10px] bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full font-semibold">Hero ✓</span>}
                 {pm.photos.length > 0 && <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-semibold">{pm.photos.length} ảnh</span>}
                 {pm.youtubeLinks.length > 0 && <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-semibold">{pm.youtubeLinks.length} video</span>}
               </div>
@@ -2845,6 +2854,40 @@ function DirectorMediaTab({
 
             {isOpen && (
               <div className="px-5 pb-5 space-y-6 border-t border-black/6 pt-5">
+
+                {/* ── Hero Photo ── */}
+                <div>
+                  <p className="text-xs font-semibold text-[#3C3C43] mb-3 uppercase tracking-wide">Hero Photo — ảnh header trang (ḿỷ đẹp nhất)</p>
+                  <div className="flex items-start gap-4">
+                    <label className="cursor-pointer flex-shrink-0">
+                      <input
+                        type="file" accept="image/*" className="hidden"
+                        onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadHeroPhoto(f, proj.id); }}
+                      />
+                      {pm.heroPhoto ? (
+                        <div className="relative group w-48" style={{ aspectRatio: "16/9" }}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={pm.heroPhoto} alt="hero" className="w-full h-full object-cover rounded-lg" />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center">
+                            <span className="text-white text-[10px] font-semibold">Đổi ảnh</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="w-48 border-2 border-dashed border-black/15 rounded-lg flex flex-col items-center justify-center gap-1 text-[#8E8E93] hover:border-purple-400 transition" style={{ aspectRatio: "16/9" }}>
+                          <Upload size={16} />
+                          <span className="text-[9px] text-center px-2">Upload ảnh chân dung / stills</span>
+                        </div>
+                      )}
+                    </label>
+                    <div className="flex flex-col gap-2 pt-1">
+                      <p className="text-xs text-[#3C3C43]">Hiển thị phía bên phải title trong hero section</p>
+                      <p className="text-[11px] text-[#8E8E93]">Nên dùng ảnh dọc hoặc ngang đẹp của đạo diễn</p>
+                      {pm.heroPhoto && (
+                        <button onClick={() => updateProject(proj.id, { heroPhoto: "" })} className="text-xs text-red-400 hover:text-red-600 text-left">Xóa ảnh</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
 
                 {/* ── Poster ── */}
                 <div>

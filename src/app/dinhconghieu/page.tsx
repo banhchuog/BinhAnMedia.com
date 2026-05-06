@@ -285,6 +285,7 @@ export default async function DinhCongHieuPage() {
     poster?: string;
     photos?: { id: string; url: string; caption: string }[];
     youtubeLinks?: { id: string; ytId: string; label: string }[];
+    heroPhoto?: string;
   };
   let directorMedia: Record<string, DirectorProjectMedia> = {};
   try {
@@ -298,6 +299,9 @@ export default async function DinhCongHieuPage() {
       }
     }
   } catch {}
+
+  // Hero photo — stored under the first project key that has it, or any project
+  const heroPhoto = Object.values(directorMedia).find((dm) => dm.heroPhoto?.startsWith("data:"))?.heroPhoto ?? "";
 
   // Merge DB media into projects
   const mergedProjects = projects.map((p) => {
@@ -318,6 +322,15 @@ export default async function DinhCongHieuPage() {
     >
       {/* ══ HERO ══════════════════════════════════════════════ */}
       <section className="relative min-h-screen flex flex-col justify-end pb-20 px-6 sm:px-12 lg:px-20">
+        {/* Hero photo BG — shows when uploaded */}
+        {heroPhoto && (
+          <div className="absolute inset-0 pointer-events-none">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={heroPhoto} alt="" className="w-full h-full object-cover object-top" />
+            {/* Dark overlay so text remains readable */}
+            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(7,7,7,0.45) 0%, rgba(7,7,7,0.15) 40%, rgba(7,7,7,0.85) 100%)" }} />
+          </div>
+        )}
         {/* Grain BG */}
         <div
           className="absolute inset-0 pointer-events-none opacity-[0.035]"
