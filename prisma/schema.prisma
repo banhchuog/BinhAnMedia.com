@@ -26,6 +26,7 @@ model Settings {
   galleryFrameFolder   String   @default("")
   galleryBtsFolder     String   @default("")
   storyboardPhotos     Json     @default("[]")
+  directorMedia        Json     @default("{}")
   updatedAt            DateTime @updatedAt
 }
 

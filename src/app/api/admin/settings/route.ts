@@ -14,6 +14,7 @@ const EMPTY_RESPONSE = {
   catalogEdits: {},
   galleryPhotos: [],
   storyboardPhotos: [],
+  directorMedia: {},
   dbConnected: false,
   dbError: "",
 };
@@ -64,6 +65,7 @@ export async function GET() {
     catalogEdits: settings.catalogEdits,
     galleryPhotos: settings.galleryPhotos ?? [],
     storyboardPhotos: (settings as unknown as { storyboardPhotos?: unknown }).storyboardPhotos ?? [],
+    directorMedia: (settings as unknown as { directorMedia?: unknown }).directorMedia ?? {},
     dbConnected: true,
     dbError: "",
     videos: videos.map((v) => ({

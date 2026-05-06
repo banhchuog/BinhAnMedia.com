@@ -5,7 +5,7 @@ import { CATALOG, GROUPS, DEFAULT_PRESETS } from "@/lib/catalog";
 import type { CatalogItem, PresetItem } from "@/lib/catalog";
 import {
   Lock, LogOut, DollarSign, Package, Video, Settings,
-  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download, Briefcase, Eye, FileSpreadsheet, FileText, Loader2,
+  Save, RotateCcw, Plus, Trash2, Check, X, ChevronDown, ChevronUp, ExternalLink, Users, Phone, Home, ImageIcon, Sparkles, Upload, Pencil, Download, Briefcase, Eye, FileSpreadsheet, FileText, Loader2, Film, Link,
 } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -47,6 +47,12 @@ type GalleryPhoto = {
   project: string;
 };
 type CatalogEdit = { name?: string; unit?: string };
+type DirectorProjectMedia = {
+  poster: string;
+  wide: string;
+  frames: { id: string; url: string; caption: string }[];
+  youtubeLinks: { id: string; ytId: string; label: string }[];
+};
 type AdminSettings = {
   priceOverrides: Record<string, number>;
   presets: Record<string, PresetItem[]>;
@@ -60,6 +66,7 @@ type AdminSettings = {
   catalogEdits: Record<string, CatalogEdit>;
   galleryPhotos: GalleryPhoto[];
   storyboardPhotos: GalleryPhoto[];
+  directorMedia: Record<string, DirectorProjectMedia>;
 };
 const EMPTY_VIDEO = (): VideoItem => ({
   id: Date.now().toString(), title: "", cat: "TVC", client: "", year: new Date().getFullYear().toString(),
@@ -91,8 +98,8 @@ const svgSize = (svg: string, size: number) => {
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [sessionPw, setSessionPw] = useState("");
-  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {}, galleryPhotos: [], storyboardPhotos: [] });
-  const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "gallery" | "leads" | "applicants" | "settings">("leads");
+  const [settings, setSettings] = useState<AdminSettings>({ priceOverrides: {}, presets: {}, videos: [], heroVideoId: "", clientLogos: [], founder: null, customCatalogItems: [], customServices: [], testimonials: [], catalogEdits: {}, galleryPhotos: [], storyboardPhotos: [], directorMedia: {} });
+  const [tab, setTab] = useState<"homepage" | "prices" | "presets" | "services" | "videos" | "gallery" | "leads" | "applicants" | "settings" | "director">("leads");
   const [toastMsg, setToastMsg] = useState("");
   const [dbError, setDbError] = useState("");
 
@@ -137,6 +144,7 @@ export default function AdminPage() {
       catalogEdits: data.catalogEdits || {},
       galleryPhotos: Array.isArray(data.galleryPhotos) ? data.galleryPhotos : [],
       storyboardPhotos: Array.isArray(data.storyboardPhotos) ? data.storyboardPhotos : [],
+      directorMedia: data.directorMedia && typeof data.directorMedia === "object" ? data.directorMedia : {},
     });
   }, []);
 
@@ -193,6 +201,7 @@ export default function AdminPage() {
     { id: "services" as const, label: "Dịch vụ",         Icon: Sparkles },
     { id: "videos" as const,   label: "Video Showreel",   Icon: Video },
     { id: "gallery" as const,  label: "Thư viện ảnh",     Icon: ImageIcon },
+    { id: "director" as const, label: "Hồ sơ ĐD",          Icon: Film },
     { id: "settings" as const, label: "Cài đặt",          Icon: Settings },
   ];
 
@@ -295,6 +304,12 @@ export default function AdminPage() {
             photos={settings.galleryPhotos}
             storyboardPhotos={settings.storyboardPhotos}
             onSave={(galleryPhotos, storyboardPhotos) => save({ galleryPhotos, storyboardPhotos })}
+          />
+        )}
+        {tab === "director" && (
+          <DirectorMediaTab
+            directorMedia={settings.directorMedia}
+            onSave={(directorMedia) => save({ directorMedia })}
           />
         )}
         {tab === "settings" && (
@@ -2684,6 +2699,258 @@ function StoryboardUploadZone({ photos, onAdd, onRemove }: { photos: GalleryPhot
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ─── DirectorMediaTab ────────────────────────────────────────────
+const DIRECTOR_PROJECTS = [
+  { id: "hon-ma",   title: "Hồn Ma",              year: "2019",      accent: "#E50914" },
+  { id: "vo-dien",  title: "Vô Diện Sát Nhân",    year: "2020-2022", accent: "#C9972A" },
+  { id: "platform", title: "Platform",             year: "2025",      accent: "#6C63FF" },
+  { id: "ads",      title: "TVC / Brand Film",     year: "Ongoing",   accent: "#2DD4BF" },
+];
+
+const EMPTY_PROJECT_MEDIA = (): DirectorProjectMedia => ({
+  poster: "",
+  wide: "",
+  frames: Array.from({ length: 8 }, (_, i) => ({ id: `f${i}`, url: "", caption: "" })),
+  youtubeLinks: [],
+});
+
+function DirectorMediaTab({
+  directorMedia,
+  onSave,
+}: {
+  directorMedia: Record<string, DirectorProjectMedia>;
+  onSave: (media: Record<string, DirectorProjectMedia>) => void;
+}) {
+  const [local, setLocal] = useState<Record<string, DirectorProjectMedia>>(() => {
+    const init: Record<string, DirectorProjectMedia> = {};
+    for (const p of DIRECTOR_PROJECTS) {
+      init[p.id] = directorMedia[p.id] ? {
+        poster: directorMedia[p.id].poster ?? "",
+        wide: directorMedia[p.id].wide ?? "",
+        frames: Array.from({ length: 8 }, (_, i) => directorMedia[p.id].frames?.[i] ?? { id: `f${i}`, url: "", caption: "" }),
+        youtubeLinks: directorMedia[p.id].youtubeLinks ?? [],
+      } : EMPTY_PROJECT_MEDIA();
+    }
+    return init;
+  });
+  const [saving, setSaving] = useState(false);
+  const [openProject, setOpenProject] = useState<string>(DIRECTOR_PROJECTS[0].id);
+
+  const updateProject = (pid: string, patch: Partial<DirectorProjectMedia>) =>
+    setLocal((prev) => ({ ...prev, [pid]: { ...prev[pid], ...patch } }));
+
+  const uploadSingle = async (file: File, pid: string, field: "poster" | "wide") => {
+    const url = await compressImage(file);
+    updateProject(pid, { [field]: url });
+  };
+
+  const uploadFrame = async (file: File, pid: string, frameIdx: number) => {
+    const url = await compressImage(file);
+    setLocal((prev) => {
+      const frames = [...prev[pid].frames];
+      frames[frameIdx] = { ...frames[frameIdx], url };
+      return { ...prev, [pid]: { ...prev[pid], frames } };
+    });
+  };
+
+  const setFrameCaption = (pid: string, frameIdx: number, caption: string) =>
+    setLocal((prev) => {
+      const frames = [...prev[pid].frames];
+      frames[frameIdx] = { ...frames[frameIdx], caption };
+      return { ...prev, [pid]: { ...prev[pid], frames } };
+    });
+
+  const addYtLink = (pid: string) =>
+    setLocal((prev) => ({
+      ...prev,
+      [pid]: {
+        ...prev[pid],
+        youtubeLinks: [...prev[pid].youtubeLinks, { id: Date.now().toString(), ytId: "", label: "" }],
+      },
+    }));
+
+  const removeYtLink = (pid: string, lid: string) =>
+    setLocal((prev) => ({
+      ...prev,
+      [pid]: { ...prev[pid], youtubeLinks: prev[pid].youtubeLinks.filter((l) => l.id !== lid) },
+    }));
+
+  const setYtField = (pid: string, lid: string, field: "ytId" | "label", value: string) =>
+    setLocal((prev) => ({
+      ...prev,
+      [pid]: {
+        ...prev[pid],
+        youtubeLinks: prev[pid].youtubeLinks.map((l) => l.id === lid ? { ...l, [field]: value } : l),
+      },
+    }));
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold text-[#1C1C1E] flex items-center gap-2">
+          <Film size={18} className="text-[#C9972A]" /> Hồ sơ Đạo diễn — Quản lý media
+        </h2>
+        <button
+          onClick={async () => { setSaving(true); await onSave(local); setSaving(false); }}
+          disabled={saving}
+          className="flex items-center gap-1.5 bg-[#C9972A] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#b5862a] transition disabled:opacity-50"
+        >
+          {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} Lưu tất cả
+        </button>
+      </div>
+
+      {DIRECTOR_PROJECTS.map((proj) => {
+        const pm = local[proj.id];
+        const isOpen = openProject === proj.id;
+        return (
+          <div key={proj.id} className="bg-white rounded-xl border border-black/8 overflow-hidden">
+            {/* Header */}
+            <button
+              onClick={() => setOpenProject(isOpen ? "" : proj.id)}
+              className="w-full flex items-center justify-between px-5 py-4 hover:bg-black/2 transition"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ background: proj.accent }} />
+                <span className="font-bold text-[#1C1C1E]">{proj.title}</span>
+                <span className="text-xs text-[#8E8E93]">{proj.year}</span>
+              </div>
+              {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            </button>
+
+            {isOpen && (
+              <div className="px-5 pb-5 space-y-6 border-t border-black/6 pt-5">
+                {/* Poster + Wide */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {(["poster", "wide"] as const).map((field) => (
+                    <div key={field}>
+                      <p className="text-xs font-semibold text-[#3C3C43] mb-2 uppercase tracking-wide">
+                        {field === "poster" ? "Poster (2:3)" : "Wide Banner (21:9)"}
+                      </p>
+                      <label className="block cursor-pointer">
+                        <input
+                          type="file" accept="image/*" className="hidden"
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadSingle(f, proj.id, field); }}
+                        />
+                        {pm[field] ? (
+                          <div className="relative group">
+                            <img
+                              src={pm[field]} alt={field}
+                              className={`w-full object-cover rounded-lg ${field === "poster" ? "aspect-[2/3] max-w-[160px]" : "aspect-[21/9]"}`}
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center">
+                              <span className="text-white text-xs font-semibold">Đổi ảnh</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className={`border-2 border-dashed border-black/15 rounded-lg flex flex-col items-center justify-center gap-1.5 text-[#8E8E93] hover:border-[#C9972A] transition ${field === "poster" ? "aspect-[2/3] max-w-[160px]" : "aspect-[21/9]"}`}>
+                            <Upload size={20} />
+                            <span className="text-xs">Upload {field}</span>
+                          </div>
+                        )}
+                      </label>
+                      {pm[field] && (
+                        <button onClick={() => updateProject(proj.id, { [field]: "" })} className="mt-1 text-xs text-red-400 hover:text-red-600">
+                          Xóa ảnh
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* 8 Frames */}
+                <div>
+                  <p className="text-xs font-semibold text-[#3C3C43] mb-3 uppercase tracking-wide">8 Frame Shots</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {pm.frames.map((frame, idx) => (
+                      <div key={frame.id} className="space-y-1">
+                        <label className="block cursor-pointer">
+                          <input
+                            type="file" accept="image/*" className="hidden"
+                            onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFrame(f, proj.id, idx); }}
+                          />
+                          {frame.url ? (
+                            <div className="relative group">
+                              <img src={frame.url} alt={`frame-${idx}`} className="w-full aspect-video object-cover rounded-lg" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition rounded-lg flex items-center justify-center">
+                                <span className="text-white text-xs">Đổi</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="border-2 border-dashed border-black/15 rounded-lg aspect-video flex flex-col items-center justify-center gap-1 text-[#8E8E93] hover:border-[#C9972A] transition">
+                              <Upload size={14} />
+                              <span className="text-[10px]">Frame {idx + 1}</span>
+                            </div>
+                          )}
+                        </label>
+                        <input
+                          value={frame.caption}
+                          onChange={(e) => setFrameCaption(proj.id, idx, e.target.value)}
+                          placeholder="Caption..."
+                          className="w-full text-[10px] border border-black/10 rounded px-2 py-1 bg-[#F2F2F7] focus:outline-none focus:border-[#C9972A]"
+                        />
+                        {frame.url && (
+                          <button onClick={() => uploadFrame(new File([], ""), proj.id, idx)} className="text-[10px] text-red-400" onClick={(e) => { e.preventDefault(); setLocal((prev) => { const frames = [...prev[proj.id].frames]; frames[idx] = { ...frames[idx], url: "" }; return { ...prev, [proj.id]: { ...prev[proj.id], frames } }; }); }}>Xóa</button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* YouTube Links */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-semibold text-[#3C3C43] uppercase tracking-wide">YouTube Links</p>
+                    <button
+                      onClick={() => addYtLink(proj.id)}
+                      className="flex items-center gap-1 text-xs text-[#C9972A] hover:text-[#b5862a] font-semibold"
+                    >
+                      <Plus size={13} /> Thêm link
+                    </button>
+                  </div>
+                  {pm.youtubeLinks.length === 0 ? (
+                    <p className="text-xs text-[#8E8E93] italic">Chưa có YouTube link — click "Thêm link" để thêm</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {pm.youtubeLinks.map((l) => (
+                        <div key={l.id} className="flex items-center gap-2">
+                          <input
+                            value={l.label}
+                            onChange={(e) => setYtField(proj.id, l.id, "label", e.target.value)}
+                            placeholder="Nhãn (VD: Trailer)"
+                            className="flex-1 text-xs border border-black/10 rounded px-3 py-2 bg-[#F2F2F7] focus:outline-none focus:border-[#C9972A]"
+                          />
+                          <input
+                            value={l.ytId}
+                            onChange={(e) => setYtField(proj.id, l.id, "ytId", e.target.value)}
+                            placeholder="YouTube ID hoặc URL"
+                            className="flex-[2] text-xs border border-black/10 rounded px-3 py-2 bg-[#F2F2F7] focus:outline-none focus:border-[#C9972A]"
+                          />
+                          {l.ytId && (
+                            <a
+                              href={l.ytId.startsWith("http") ? l.ytId : `https://youtu.be/${l.ytId}`}
+                              target="_blank" rel="noopener noreferrer"
+                              className="text-[#C9972A] hover:text-[#b5862a]"
+                            >
+                              <ExternalLink size={14} />
+                            </a>
+                          )}
+                          <button onClick={() => removeYtLink(proj.id, l.id)} className="text-red-400 hover:text-red-600">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
