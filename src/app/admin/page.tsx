@@ -2893,7 +2893,10 @@ function DirectorMediaTab({
                           className="w-full text-[10px] border border-black/10 rounded px-2 py-1 bg-[#F2F2F7] focus:outline-none focus:border-[#C9972A]"
                         />
                         {frame.url && (
-                          <button onClick={() => uploadFrame(new File([], ""), proj.id, idx)} className="text-[10px] text-red-400" onClick={(e) => { e.preventDefault(); setLocal((prev) => { const frames = [...prev[proj.id].frames]; frames[idx] = { ...frames[idx], url: "" }; return { ...prev, [proj.id]: { ...prev[proj.id], frames } }; }); }}>Xóa</button>
+                          <button
+                            onClick={() => setLocal((prev) => { const frames = [...prev[proj.id].frames]; frames[idx] = { ...frames[idx], url: "" }; return { ...prev, [proj.id]: { ...prev[proj.id], frames } }; })}
+                            className="text-[10px] text-red-400 hover:text-red-600"
+                          >Xóa</button>
                         )}
                       </div>
                     ))}
