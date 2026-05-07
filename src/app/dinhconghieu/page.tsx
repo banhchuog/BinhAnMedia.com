@@ -52,7 +52,7 @@ const projects = [
     index: "02",
     category: "Phim điện ảnh chiếu rạp",
     title: "Vô Diện\nSát Nhân",
-    logline: "Hắn không có mặt — nhưng hắn đang nhìn bạn.",
+    logline: "Ác mộng bắt đầu khi ta tỉnh giấc.",
     desc: "Phim kinh dị tâm lý chiếu rạp toàn quốc. Sản xuất từ 2020, ra rạp năm 2022. Câu chuyện về kẻ giết người không danh tính gieo rắc nỗi kinh hoàng trong một thành phố ẩn chứa bí mật tối tăm.",
     meta: ["Chiếu rạp toàn quốc", "Ra rạp 2022", "Horror · Thriller"],
     accent: "#C9972A",
@@ -79,14 +79,6 @@ const projects = [
     logline: "Hệ sinh thái nội dung bản địa — 104 tập phim mới mỗi năm.",
     desc: "Sáng lập nền tảng kết hợp mạng xã hội và chiếu phim trả phí. Vận hành với hiệu suất 104 tập phim mới mỗi năm — tương đương 2 tập/tuần liên tục — kiến tạo hệ sinh thái nội dung bản địa bền vững.",
     meta: ["Founder & Director", "Ra mắt 2025", "104 tập / năm"],
-    platformFilms: [
-      { title: "Máu Miền Nam", views: "400.000", genre: "Drama" },
-      { title: "Blind Spot", views: "500.000", genre: "Thriller" },
-      { title: "Người Trong Bóng Tối", views: "320.000", genre: "Horror" },
-      { title: "Tình Địt Xuất", views: "280.000", genre: "Romance" },
-      { title: "Lổ Đen", views: "350.000", genre: "Sci-Fi" },
-      { title: "Nước Mắt Thắng", views: "210.000", genre: "Action" },
-    ],
     accent: "#6C63FF",
     accentDim: "rgba(108,99,255,0.10)",
     poster: "/images/dcv/platform-poster.jpg",
@@ -582,111 +574,6 @@ export default async function DinhCongHieuPage() {
               );
             })()}
 
-            {/* ── Platform Films ── */}
-            {"platformFilms" in p && Array.isArray((p as {platformFilms?: unknown}).platformFilms) && (
-              <div className="mt-12">
-                <p
-                  className="text-[9px] tracking-[0.4em] uppercase font-black mb-5"
-                  style={{ color: p.accent }}
-                >
-                  Anh Em Phim — Phân nền tảng
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {((p as {platformFilms: {title:string;views:string;genre:string}[]}).platformFilms).map((film, fi) => (
-                    <div
-                      key={fi}
-                      className="relative overflow-hidden px-4 py-4 flex flex-col justify-between"
-                      style={{
-                        borderRadius: 3,
-                        background: `${p.accentDim}`,
-                        border: `1px solid ${p.accent}25`,
-                      }}
-                    >
-                      <div>
-                        <p
-                          className="text-[8px] tracking-[0.25em] uppercase font-bold mb-1"
-                          style={{ color: `${p.accent}80` }}
-                        >
-                          {film.genre}
-                        </p>
-                        <p
-                          className="font-black text-sm leading-tight"
-                          style={{ color: "#F5F5F7" }}
-                        >
-                          {film.title}
-                        </p>
-                      </div>
-                      <div className="mt-4 pt-3" style={{ borderTop: `1px solid ${p.accent}20` }}>
-                        <p
-                          className="font-black tabular-nums leading-none"
-                          style={{ fontSize: "clamp(1rem, 2.5vw, 1.4rem)", color: p.accent }}
-                        >
-                          {film.views}
-                        </p>
-                        <p
-                          className="text-[8px] tracking-[0.2em] uppercase font-bold mt-0.5"
-                          style={{ color: `${p.accent}60` }}
-                        >
-                          Lượt xem trả phí
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ── Platform Films ── */}
-            {"platformFilms" in p && Array.isArray((p as { platformFilms?: unknown }).platformFilms) && (
-              <div className="mt-12">
-                <p
-                  className="text-[9px] tracking-[0.4em] uppercase font-black mb-5"
-                  style={{ color: p.accent }}
-                >
-                  Anh Em Phim — Phim nền tảng
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                  {((p as { platformFilms: { title: string; views: string; genre: string }[] }).platformFilms).map((film, fi) => (
-                    <div
-                      key={fi}
-                      className="relative overflow-hidden px-4 py-4 flex flex-col justify-between"
-                      style={{
-                        borderRadius: 3,
-                        background: p.accentDim,
-                        border: `1px solid ${p.accent}25`,
-                      }}
-                    >
-                      <div>
-                        <p
-                          className="text-[8px] tracking-[0.25em] uppercase font-bold mb-1"
-                          style={{ color: `${p.accent}80` }}
-                        >
-                          {film.genre}
-                        </p>
-                        <p className="font-black text-sm leading-tight" style={{ color: "#F5F5F7" }}>
-                          {film.title}
-                        </p>
-                      </div>
-                      <div className="mt-4 pt-3" style={{ borderTop: `1px solid ${p.accent}20` }}>
-                        <p
-                          className="font-black tabular-nums leading-none"
-                          style={{ fontSize: "clamp(1rem, 2.5vw, 1.4rem)", color: p.accent }}
-                        >
-                          {film.views}
-                        </p>
-                        <p
-                          className="text-[8px] tracking-[0.2em] uppercase font-bold mt-0.5"
-                          style={{ color: `${p.accent}60` }}
-                        >
-                          Lượt xem trả phí
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* ── Trailer Embed ── */}
             {p.trailerYtId && (() => {
               const raw = p.trailerYtId;
@@ -702,15 +589,15 @@ export default async function DinhCongHieuPage() {
                     Trailer chính thức
                   </p>
                   <div
-                    className="relative w-full overflow-hidden"
-                    style={{ aspectRatio: "16/9", maxWidth: 800, borderRadius: 3, border: `1px solid ${p.accent}22` }}
+                    className="w-full max-w-[800px] aspect-video overflow-hidden"
+                    style={{ borderRadius: 3, border: `1px solid ${p.accent}22` }}
                   >
                     <iframe
                       src={`https://www.youtube.com/embed/${tid}?rel=0&modestbranding=1`}
                       title={`${p.title} Trailer`}
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
-                      className="absolute inset-0 w-full h-full border-0"
+                      className="w-full h-full border-0"
                     />
                   </div>
                 </div>
