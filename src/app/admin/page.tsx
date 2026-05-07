@@ -2706,9 +2706,8 @@ function StoryboardUploadZone({ photos, onAdd, onRemove }: { photos: GalleryPhot
 
 // ─── DirectorMediaTab ────────────────────────────────────────────
 const DIRECTOR_PROJECTS = [
-  { id: "hon-ma",   title: "Hồn Ma",              year: "2019",      accent: "#E50914" },
   { id: "vo-dien",  title: "Vô Diện Sát Nhân",    year: "2020-2022", accent: "#C9972A" },
-  { id: "platform", title: "Platform",             year: "2025",      accent: "#6C63FF" },
+  { id: "platform", title: "Anh Em Phim Platform", year: "2025",      accent: "#6C63FF" },
   { id: "ads",      title: "TVC / Brand Film",     year: "Ongoing",   accent: "#2DD4BF" },
 ];
 
