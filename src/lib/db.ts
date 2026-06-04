@@ -3,7 +3,7 @@ import { PrismaClient } from "@/generated/prisma";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | null };
 
 function createPrismaClient(): PrismaClient | null {
-  const url = process.env.DATABASE_URL ?? process.env.DATABASE_PUBLIC_URL;
+  const url = process.env.DATABASE_PUBLIC_URL ?? process.env.DATABASE_URL;
   if (!url || url.includes("johndoe") || url.includes("randompassword")) {
     console.warn("[DB] DATABASE_URL not configured — running without database");
     return null;
