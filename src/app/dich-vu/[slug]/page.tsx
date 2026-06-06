@@ -163,22 +163,22 @@ export default async function ServicePage({
   const youtubeId = await getRefVideoId(svc.serviceId);
 
   return (
-    <main className="min-h-screen bg-[#0A0A0A]">
+    <main className="min-h-screen soft-page">
       {/* Hero */}
       <section className="pt-24 pb-12 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-[#C9972A] text-xs font-semibold tracking-[0.15em] uppercase mb-4">
             {svc.tagline}
           </p>
-          <h1 className="text-[clamp(2rem,5vw,3.5rem)] font-black text-white tracking-[-0.03em] leading-tight mb-5">
+          <h1 className="text-[clamp(2rem,5vw,3.5rem)] font-black text-[#1F241E] tracking-[-0.03em] leading-tight mb-5">
             {svc.title}
           </h1>
-          <p className="text-white/50 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto mb-8">
+          <p className="text-[#6F746A] text-base sm:text-lg leading-relaxed max-w-2xl mx-auto mb-8">
             {svc.description}
           </p>
           <Link
             href={`/quote?service=${svc.serviceId}`}
-            className="inline-flex items-center gap-2 bg-[#C9972A] text-black font-bold px-7 py-3.5 rounded-full hover:bg-[#DBA93A] transition text-base"
+            className="inline-flex items-center gap-2 bg-[#1F241E] text-white font-bold px-7 py-3.5 rounded-full hover:bg-[#34392F] transition text-base"
           >
             Nhận báo giá miễn phí <ArrowRight size={16} strokeWidth={2.5} />
           </Link>
@@ -188,7 +188,7 @@ export default async function ServicePage({
       {/* Video Showreel */}
       {youtubeId && (
         <section className="px-4 sm:px-6 pb-14">
-          <div className="max-w-4xl mx-auto rounded-2xl overflow-hidden border border-white/8">
+          <div className="max-w-4xl mx-auto rounded-[1.7rem] overflow-hidden border border-white/70 shadow-[0_24px_80px_rgba(46,42,34,0.14)]">
             <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
               <iframe
                 src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&rel=0`}
@@ -203,21 +203,21 @@ export default async function ServicePage({
       )}
 
       {/* Features */}
-      <section className="px-4 sm:px-6 py-14 bg-[#111]">
+      <section className="px-4 sm:px-6 py-14 soft-section-muted">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
             <div>
               <p className="text-[#C9972A] text-xs font-semibold tracking-[0.15em] uppercase mb-3">
                 Cam kết chất lượng
               </p>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-[-0.03em] mb-6">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#1F241E] tracking-[-0.03em] mb-6">
                 Tại sao chọn Bình An Media?
               </h2>
               <ul className="space-y-3.5">
                 {svc.features.map((f) => (
                   <li key={f} className="flex items-start gap-3">
                     <CheckCircle size={17} className="text-[#C9972A] flex-shrink-0 mt-0.5" />
-                    <span className="text-white/70 text-sm leading-relaxed">{f}</span>
+                    <span className="text-[#5D6359] text-sm leading-relaxed">{f}</span>
                   </li>
                 ))}
               </ul>
@@ -226,14 +226,14 @@ export default async function ServicePage({
               <p className="text-[#C9972A] text-xs font-semibold tracking-[0.15em] uppercase mb-3">
                 Phù hợp cho
               </p>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-[-0.03em] mb-6">
+              <h2 className="text-2xl sm:text-3xl font-black text-[#1F241E] tracking-[-0.03em] mb-6">
                 Ứng dụng thực tế
               </h2>
               <div className="flex flex-wrap gap-2.5">
                 {svc.useCases.map((u) => (
                   <span
                     key={u}
-                    className="border border-white/12 text-white/60 text-sm px-4 py-2 rounded-full"
+                    className="border border-black/10 bg-white/45 text-[#5D6359] text-sm px-4 py-2 rounded-full"
                   >
                     {u}
                   </span>
@@ -241,20 +241,20 @@ export default async function ServicePage({
               </div>
 
               {/* Contact box */}
-              <div className="mt-8 bg-white/4 border border-white/8 rounded-2xl p-5">
-                <p className="text-white/40 text-xs uppercase tracking-widest mb-3">
+              <div className="mt-8 soft-card rounded-2xl p-5">
+                <p className="text-[#8A8F83] text-xs uppercase tracking-widest mb-3">
                   Tư vấn trực tiếp
                 </p>
                 <a
                   href="tel:0969427639"
-                  className="flex items-center gap-3 text-white hover:text-[#C9972A] transition-colors"
+                  className="flex items-center gap-3 text-[#1F241E] hover:text-[#C9972A] transition-colors"
                 >
                   <div className="w-9 h-9 rounded-full bg-[#C9972A]/15 flex items-center justify-center flex-shrink-0">
                     <Phone size={15} className="text-[#C9972A]" />
                   </div>
                   <div>
                     <p className="font-bold text-base">0969 427 639</p>
-                    <p className="text-white/40 text-xs">Ông Đinh Công Hiếu — Giám đốc</p>
+                    <p className="text-[#6F746A] text-xs">Ông Đinh Công Hiếu — Giám đốc</p>
                   </div>
                 </a>
               </div>
@@ -266,15 +266,15 @@ export default async function ServicePage({
       {/* CTA Bottom */}
       <section className="px-4 sm:px-6 py-16 text-center">
         <div className="max-w-2xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-black text-white tracking-[-0.03em] mb-4">
+          <h2 className="text-2xl sm:text-3xl font-black text-[#1F241E] tracking-[-0.03em] mb-4">
             Sẵn sàng bắt đầu?
           </h2>
-          <p className="text-white/45 mb-8">
+          <p className="text-[#6F746A] mb-8">
             Nhận báo giá chính xác trong vòng 1 phút — không cần gọi điện, không cần chờ đợi.
           </p>
           <Link
             href={`/quote?service=${svc.serviceId}`}
-            className="inline-flex items-center gap-2 bg-[#C9972A] text-black font-bold px-8 py-4 rounded-full hover:bg-[#DBA93A] transition text-base"
+            className="inline-flex items-center gap-2 bg-[#C9972A] text-white font-bold px-8 py-4 rounded-full hover:bg-[#B8841E] transition text-base"
           >
             Tính giá ngay — Miễn phí <ArrowRight size={16} strokeWidth={2.5} />
           </Link>

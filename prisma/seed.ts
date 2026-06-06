@@ -1,9 +1,42 @@
-// prisma/seed.ts — Seed dữ liệu ban đầu từ data/settings.json cũ
-import { PrismaClient } from "../src/generated/prisma";
+import { Prisma, PrismaClient } from "../src/generated/prisma";
+import seedSettings from "../data/settings.json";
 
 const prisma = new PrismaClient();
 
-const VIDEOS = [
+type SeedVideo = {
+  id?: string;
+  title?: string;
+  cat?: string;
+  client?: string;
+  year?: string;
+  views?: string;
+  duration?: string;
+  ytId?: string;
+  desc?: string;
+  thumbnail?: string;
+  sortOrder?: number;
+};
+
+type SeedSettings = {
+  password?: string;
+  heroVideoId?: string;
+  priceOverrides?: object;
+  presets?: object;
+  clientLogos?: unknown[];
+  founder?: unknown;
+  customCatalogItems?: unknown[];
+  customServices?: unknown[];
+  testimonials?: unknown[];
+  catalogEdits?: object;
+  galleryPhotos?: unknown[];
+  storyboardPhotos?: unknown[];
+  directorMedia?: object;
+  videos?: SeedVideo[];
+};
+
+const dataSettings = seedSettings as SeedSettings;
+
+const FALLBACK_VIDEOS: Required<SeedVideo>[] = [
   {
     id: "1773148901776",
     title: "Gunny PC 16 năm",
@@ -84,39 +117,92 @@ const VIDEOS = [
   },
 ];
 
+const isEmptyObject = (value: unknown) =>
+  !value || (typeof value === "object" && !Array.isArray(value) && Object.keys(value).length === 0);
+
+const isEmptyArray = (value: unknown) => !Array.isArray(value) || value.length === 0;
+
+const asJson = (value: unknown, fallback: Prisma.InputJsonValue): Prisma.InputJsonValue =>
+  (value ?? fallback) as Prisma.InputJsonValue;
+
+function normalizeVideo(video: SeedVideo, sortOrder: number) {
+  return {
+    id: video.id || undefined,
+    title: video.title || "",
+    cat: video.cat || "TVC",
+    client: video.client || "",
+    year: video.year || "",
+    views: video.views || "",
+    duration: video.duration || "",
+    ytId: video.ytId || "",
+    desc: video.desc || "",
+    thumbnail: video.thumbnail || "",
+    sortOrder: video.sortOrder ?? sortOrder,
+  };
+}
+
 async function main() {
-  console.log("🌱 Seeding database...");
+  console.log("Seeding database...");
 
-  // Seed Settings (single row)
-  await prisma.settings.upsert({
-    where: { id: 1 },
-    create: {
-      id: 1,
-      password: "admin@2026",
-      heroVideoId: "jtj_nHxkGGY",
-      priceOverrides: {},
-      presets: {},
-      clientLogos: [],
-      customCatalogItems: [],
-      customServices: [],
-      testimonials: [],
-      catalogEdits: {},
-    },
-    update: {
-      heroVideoId: "jtj_nHxkGGY",
-    },
-  });
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  const settingsData = {
+    password: dataSettings.password || "admin@2026",
+    heroVideoId: dataSettings.heroVideoId || "jtj_nHxkGGY",
+    priceOverrides: asJson(dataSettings.priceOverrides, {}),
+    presets: asJson(dataSettings.presets, {}),
+    clientLogos: asJson(dataSettings.clientLogos, []),
+    founder: dataSettings.founder ? asJson(dataSettings.founder, {}) : undefined,
+    customCatalogItems: asJson(dataSettings.customCatalogItems, []),
+    customServices: asJson(dataSettings.customServices, []),
+    testimonials: asJson(dataSettings.testimonials, []),
+    catalogEdits: asJson(dataSettings.catalogEdits, {}),
+    galleryPhotos: asJson(dataSettings.galleryPhotos, []),
+    storyboardPhotos: asJson(dataSettings.storyboardPhotos, []),
+    directorMedia: asJson(dataSettings.directorMedia, {}),
+  };
 
-  // Seed Videos (only if empty)
-  const count = await prisma.video.count();
-  if (count === 0) {
-    await prisma.video.createMany({ data: VIDEOS });
-    console.log(`✅ Seeded ${VIDEOS.length} videos`);
+  if (!settings) {
+    await prisma.settings.create({
+      data: {
+        id: 1,
+        ...settingsData,
+      },
+    });
+    console.log("Seeded settings row from data/settings.json");
   } else {
-    console.log(`⏭  Videos already exist (${count}), skipping`);
+    const backfill = {
+      ...(settings.heroVideoId ? {} : { heroVideoId: settingsData.heroVideoId }),
+      ...(isEmptyObject(settings.priceOverrides) ? { priceOverrides: settingsData.priceOverrides } : {}),
+      ...(isEmptyObject(settings.presets) ? { presets: settingsData.presets } : {}),
+      ...(isEmptyArray(settings.clientLogos) ? { clientLogos: settingsData.clientLogos } : {}),
+      ...(settings.founder ? {} : { founder: settingsData.founder }),
+      ...(isEmptyArray(settings.customCatalogItems) ? { customCatalogItems: settingsData.customCatalogItems } : {}),
+      ...(isEmptyArray(settings.customServices) ? { customServices: settingsData.customServices } : {}),
+      ...(isEmptyArray(settings.testimonials) ? { testimonials: settingsData.testimonials } : {}),
+      ...(isEmptyObject(settings.catalogEdits) ? { catalogEdits: settingsData.catalogEdits } : {}),
+      ...(isEmptyArray(settings.galleryPhotos) ? { galleryPhotos: settingsData.galleryPhotos } : {}),
+      ...(isEmptyArray(settings.storyboardPhotos) ? { storyboardPhotos: settingsData.storyboardPhotos } : {}),
+      ...(isEmptyObject(settings.directorMedia) ? { directorMedia: settingsData.directorMedia } : {}),
+    };
+
+    if (Object.keys(backfill).length > 0) {
+      await prisma.settings.update({ where: { id: 1 }, data: backfill });
+      console.log(`Backfilled ${Object.keys(backfill).length} empty settings fields from data/settings.json`);
+    } else {
+      console.log("Settings already contain data, skipping backfill");
+    }
   }
 
-  console.log("✅ Seed complete!");
+  const count = await prisma.video.count();
+  if (count === 0) {
+    const sourceVideos = dataSettings.videos?.length ? dataSettings.videos : FALLBACK_VIDEOS;
+    await prisma.video.createMany({ data: sourceVideos.map(normalizeVideo) });
+    console.log(`Seeded ${sourceVideos.length} videos`);
+  } else {
+    console.log(`Videos already exist (${count}), skipping`);
+  }
+
+  console.log("Seed complete!");
 }
 
 main()

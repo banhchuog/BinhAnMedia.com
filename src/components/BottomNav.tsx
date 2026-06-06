@@ -16,7 +16,7 @@ export default function BottomNav() {
 
   return (
     <nav className="sm:hidden fixed bottom-6 inset-x-0 z-50 flex justify-center pointer-events-none">
-      <div className="pointer-events-auto flex items-center gap-1 bg-[#161616]/96 backdrop-blur-2xl border border-white/10 rounded-full shadow-2xl shadow-black/70 px-2 py-2">
+      <div className="pointer-events-auto flex items-center gap-1 bg-white/92 backdrop-blur-2xl border border-black/10 rounded-full shadow-2xl shadow-black/15 px-2 py-2">
         {tabs.map(({ href, label, Icon }) => {
           const active = pathname === href;
           return (
@@ -26,11 +26,11 @@ export default function BottomNav() {
               className={`relative flex flex-col items-center justify-center gap-1 px-5 py-2 rounded-full transition-all
                 ${active
                   ? "bg-[#C9972A]/15 text-[#C9972A]"
-                  : "text-white/40 active:bg-white/8 active:text-white/70"
+                  : "text-[#8A8F83] active:bg-black/6 active:text-[#1F241E]"
                 }`}
             >
               <Icon size={19} strokeWidth={active ? 2.5 : 1.8} />
-              <span className={`text-[10px] font-semibold tracking-wide leading-none ${active ? "text-[#C9972A]" : "text-white/35"}`}>{label}</span>
+              <span className={`text-[10px] font-semibold tracking-wide leading-none ${active ? "text-[#C9972A]" : "text-[#8A8F83]"}`}>{label}</span>
             </Link>
           );
         })}

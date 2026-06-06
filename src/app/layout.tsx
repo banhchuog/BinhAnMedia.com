@@ -97,7 +97,8 @@ const jsonLd = {
   },
   address: {
     "@type": "PostalAddress",
-    addressLocality: "Hồ Chí Minh",
+    streetAddress: "63 Tôn Đức Thắng, Phường Trị An",
+    addressLocality: "thành phố Đồng Nai",
     addressCountry: "VN",
   },
   sameAs: [],

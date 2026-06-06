@@ -3,8 +3,10 @@ import { PrismaClient } from "@/generated/prisma";
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient | null };
 
 function createPrismaClient(): PrismaClient | null {
-  // Prefer public URL (works across Railway's network), fallback to private
-  let url = process.env.DATABASE_PUBLIC_URL ?? process.env.DATABASE_URL;
+  // On Railway, DATABASE_URL is the private in-network URL and is the most stable
+  // choice for the app runtime. DATABASE_PUBLIC_URL remains useful as a fallback
+  // for local/remote access.
+  let url = process.env.DATABASE_URL ?? process.env.DATABASE_PUBLIC_URL;
   if (!url || url.includes("johndoe") || url.includes("randompassword")) {
     console.warn("[DB] DATABASE_URL not configured — running without database");
     return null;

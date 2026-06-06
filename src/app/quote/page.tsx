@@ -57,7 +57,7 @@ const DEFAULT_SERVICE_OPTIONS: ServiceDef[] = [
 // ─────────────────────────────────────────────────────────────────
 export default function QuotePage() {
   return (
-    <Suspense fallback={<div className="pt-40 text-center text-[#8E8E93]">Đang tải...</div>}>
+    <Suspense fallback={<div className="pt-40 min-h-screen soft-page text-center text-[#8E8E93]">Đang tải...</div>}>
       <QuoteBuilder />
     </Suspense>
   );
@@ -277,7 +277,7 @@ function QuoteBuilder() {
           <div class="brand">BinhAn<span>Media</span><span style="font-size:14px;opacity:0.7">.com</span></div>
           <div class="company-info">
             <strong>CÔNG TY TNHH BÌNH AN MEDIA</strong><br>
-            📍 123 Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh<br>
+            📍 63 Tôn Đức Thắng, Phường Trị An, thành phố Đồng Nai<br>
             📞 0901 234 567 &nbsp;&nbsp; ✉ hello@binhanmedia.com<br>
             🌐 binhanmedia.com &nbsp;&nbsp; MST: 0312345678
           </div>
@@ -329,10 +329,10 @@ function QuoteBuilder() {
 
   if (!settingsLoaded) {
     return (
-      <div className="pt-20 min-h-screen flex items-center justify-center bg-[#0A0A0A]">
+      <div className="pt-20 min-h-screen flex items-center justify-center soft-page light-public">
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-2 border-[#C9972A]/30 border-t-[#C9972A] rounded-full animate-spin" />
-          <p className="text-white/30 text-sm">Đang tải...</p>
+          <p className="text-[#6F746A] text-sm">Đang tải...</p>
         </div>
       </div>
     );
@@ -340,8 +340,8 @@ function QuoteBuilder() {
 
   if (submitted) {
     return (
-      <div className="pt-20 min-h-screen flex items-center justify-center px-6 bg-[#0A0A0A]">
-        <div className="text-center max-w-lg">
+      <div className="pt-20 min-h-screen flex items-center justify-center px-6 soft-page light-public">
+        <div className="text-center max-w-lg soft-card rounded-[2rem] p-8">
           <div className="w-20 h-20 bg-[#C9972A] rounded-full flex items-center justify-center mx-auto mb-6">
             <Check size={36} className="text-black" />
           </div>
@@ -371,7 +371,7 @@ function QuoteBuilder() {
   }
 
   return (
-    <div className="pt-20 min-h-screen bg-[#0A0A0A]">
+    <div className="pt-20 min-h-screen soft-page light-public">
       {/* Header */}
       <div className="border-b border-white/6 py-3 sm:py-10 px-4 sm:px-6 text-center">
         <p className="text-[#C9972A] text-[10px] sm:text-xs font-semibold tracking-widest uppercase mb-0.5 sm:mb-2">Báo giá</p>

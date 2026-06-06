@@ -138,6 +138,7 @@ exports.Prisma.SettingsScalarFieldEnum = {
   galleryFrameFolder: 'galleryFrameFolder',
   galleryBtsFolder: 'galleryBtsFolder',
   storyboardPhotos: 'storyboardPhotos',
+  directorMedia: 'directorMedia',
   updatedAt: 'updatedAt'
 };
 

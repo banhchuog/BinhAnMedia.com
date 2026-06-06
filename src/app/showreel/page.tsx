@@ -77,18 +77,18 @@ export default function ShowreelPage() {
   }, [preview]);
 
   return (
-    <div className="pt-20 min-h-screen bg-[#0A0A0A]">
+    <div className="pt-20 min-h-screen soft-page">
       {/* Header */}
-      <div className="bg-[#111] border-b border-white/6 py-8 sm:py-12 px-4 sm:px-6 text-center">
+      <div className="border-b border-black/8 py-8 sm:py-12 px-4 sm:px-6 text-center">
         <p className="text-[#C9972A] text-xs font-semibold tracking-widest uppercase mb-2">Showreel</p>
-        <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">Tác phẩm của chúng tôi</h1>
-        <p className="text-white/40 max-w-lg mx-auto text-xs sm:text-sm">
+        <h1 className="text-3xl sm:text-4xl font-black text-[#1F241E] mb-2">Tác phẩm của chúng tôi</h1>
+        <p className="text-[#6F746A] max-w-lg mx-auto text-xs sm:text-sm">
           200+ dự án từ 2016 — TVC, MV, phim doanh nghiệp, content số.
         </p>
       </div>
 
       {/* Filter pills */}
-      <div className="sticky top-[56px] z-30 bg-[#0A0A0A]/95 backdrop-blur-sm border-b border-white/6 px-4 sm:px-6 py-2.5 sm:py-3">
+      <div className="sticky top-[56px] z-30 bg-white/84 backdrop-blur-xl border-b border-black/8 px-4 sm:px-6 py-2.5 sm:py-3">
         <div className="max-w-7xl mx-auto flex gap-1.5 sm:gap-2 overflow-x-auto pb-0.5 scrollbar-hide">
           {CATEGORIES.map((cat) => (
             <button
@@ -97,7 +97,7 @@ export default function ShowreelPage() {
               className={`flex-shrink-0 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all ${
                 active === cat
                   ? "bg-[#C9972A] text-white shadow-sm"
-                  : "bg-white/6 border border-white/10 text-white/60 hover:border-[#C9972A]/50 hover:text-white"
+                  : "bg-white/70 border border-black/10 text-[#6F746A] hover:border-[#C9972A]/50 hover:text-[#1F241E]"
               }`}
             >
               {cat}
@@ -111,7 +111,7 @@ export default function ShowreelPage() {
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="rounded-2xl bg-white/5 animate-pulse aspect-video" />
+              <div key={i} className="rounded-2xl bg-black/5 animate-pulse aspect-video" />
             ))}
           </div>
         ) : (
@@ -123,7 +123,7 @@ export default function ShowreelPage() {
                 <button
                   key={p.id}
                   onClick={() => setPreview(p)}
-                  className="group relative w-full aspect-video rounded-2xl overflow-hidden bg-black"
+                  className="group relative w-full aspect-video rounded-[1.6rem] overflow-hidden bg-white border border-white/70 shadow-[0_22px_70px_rgba(46,42,34,0.12)]"
                 >
                   {/* Thumbnail */}
                   {p.thumbnail ? (
@@ -145,7 +145,7 @@ export default function ShowreelPage() {
                   )}
 
                   {/* Dim overlay on hover */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/12 transition-colors duration-300" />
 
                   {/* Play button */}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -174,18 +174,18 @@ export default function ShowreelPage() {
 
         {filtered.length === 0 && !loading && (
           <div className="text-center py-20">
-            <p className="text-white/30">Không có video nào trong danh mục này.</p>
+            <p className="text-[#8A8F83]">Không có video nào trong danh mục này.</p>
           </div>
         )}
       </div>
 
       {/* CTA */}
       <div className="max-w-7xl mx-auto px-4 pb-16 sm:pb-20">
-        <div className="border border-dashed border-white/12 rounded-2xl py-10 sm:py-14 px-4 sm:px-6 text-center bg-white/3">
-          <p className="text-white/40 mb-4 text-xs sm:text-sm">Thích những gì bạn thấy?</p>
+        <div className="soft-card border-dashed rounded-[1.7rem] py-10 sm:py-14 px-4 sm:px-6 text-center">
+          <p className="text-[#6F746A] mb-4 text-xs sm:text-sm">Thích những gì bạn thấy?</p>
           <Link
             href="/quote"
-            className="inline-flex items-center gap-2 bg-[#C9972A] text-white font-bold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full hover:bg-[#DBA93A] transition-all hover:shadow-[0_4px_24px_rgba(201,151,42,0.35)] text-sm sm:text-base"
+            className="inline-flex items-center gap-2 bg-[#1F241E] text-white font-bold px-6 sm:px-8 py-3.5 sm:py-4 rounded-full hover:bg-[#34392F] transition-all text-sm sm:text-base"
           >
             Bắt đầu dự án của bạn →
           </Link>
@@ -199,7 +199,7 @@ export default function ShowreelPage() {
           onClick={() => setPreview(null)}
         >
           <div
-            className="bg-[#161616] border-t sm:border border-white/8 rounded-t-2xl sm:rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto mb-[84px] sm:mb-0"
+            className="bg-white border-t sm:border border-black/10 rounded-t-2xl sm:rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl max-h-[90vh] sm:max-h-[85vh] overflow-y-auto mb-[84px] sm:mb-0"
             onClick={(e) => e.stopPropagation()}
           >
             {extractYtId(preview.ytId) ? (
@@ -217,7 +217,7 @@ export default function ShowreelPage() {
                   <div className="w-14 h-14 rounded-full bg-black/40 shadow-lg flex items-center justify-center mx-auto mb-2">
                     <Play size={20} fill="#C9972A" className="ml-0.5 text-[#C9972A]" />
                   </div>
-                  <p className="text-white/50 text-xs">Video sẽ được cập nhật sớm</p>
+                  <p className="text-[#6F746A] text-xs">Video sẽ được cập nhật sớm</p>
                 </div>
                 <button
                   onClick={() => setPreview(null)}
@@ -233,8 +233,8 @@ export default function ShowreelPage() {
                   <span className={`text-[10px] font-bold uppercase tracking-wider ${(CAT_COLORS[preview.cat] || CAT_COLORS["TVC"]).text}`}>
                     {preview.cat}
                   </span>
-                  <h3 className="text-base sm:text-lg font-black text-white mt-0.5 leading-tight">{preview.title}</h3>
-                  <p className="text-white/40 text-xs mt-1">
+                  <h3 className="text-base sm:text-lg font-black text-[#1F241E] mt-0.5 leading-tight">{preview.title}</h3>
+                  <p className="text-[#6F746A] text-xs mt-1">
                     {preview.client} · {preview.year}
                     {preview.duration && ` · ${preview.duration}`}
                     {preview.views && ` · ${preview.views}`}
@@ -246,32 +246,32 @@ export default function ShowreelPage() {
                       href={`https://youtube.com/watch?v=${extractYtId(preview.ytId)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-xs text-white/40 hover:text-[#C9972A] transition"
+                      className="flex items-center gap-1 text-xs text-[#8A8F83] hover:text-[#C9972A] transition"
                     >
                       <ExternalLink size={13} />
                     </a>
                   )}
                   <button
                     onClick={() => setPreview(null)}
-                    className="text-white/40 hover:text-white transition"
+                    className="text-[#8A8F83] hover:text-[#1F241E] transition"
                   >
                     <X size={18} />
                   </button>
                 </div>
               </div>
               {preview.desc && (
-                <p className="text-white/50 text-sm mt-3 leading-relaxed">{preview.desc}</p>
+                <p className="text-[#5D6359] text-sm mt-3 leading-relaxed">{preview.desc}</p>
               )}
               <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4 sm:mt-5">
                 <Link
                   href="/quote"
-                  className="flex-1 bg-[#C9972A] text-white font-bold text-sm py-2.5 rounded-xl text-center hover:bg-[#DBA93A] transition"
+                  className="flex-1 bg-[#1F241E] text-white font-bold text-sm py-2.5 rounded-xl text-center hover:bg-[#34392F] transition"
                 >
                   Làm dự án tương tự →
                 </Link>
                 <button
                   onClick={() => setPreview(null)}
-                  className="px-5 py-2.5 rounded-xl border border-white/10 text-white/50 hover:border-white/20 text-sm transition"
+                  className="px-5 py-2.5 rounded-xl border border-black/10 text-[#6F746A] hover:border-black/20 text-sm transition"
                 >
                   Đóng
                 </button>

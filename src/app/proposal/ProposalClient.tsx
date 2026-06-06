@@ -607,7 +607,7 @@ export default function ProposalClient({ heroId, clientLogos, founder, testimoni
                     { Icon: Phone,  v: "0969 427 639" },
                     { Icon: Mail,   v: "Dinhconghieufilm@gmail.com" },
                     { Icon: Globe2, v: "binhanmedia.com" },
-                    { Icon: MapPin, v: vi ? "TP. Hồ Chí Minh, Việt Nam" : "Ho Chi Minh City, Vietnam" },
+                    { Icon: MapPin, v: vi ? "63 Tôn Đức Thắng, Phường Trị An, thành phố Đồng Nai" : "63 Ton Duc Thang, Tri An Ward, Dong Nai City" },
                   ].map(({ Icon, v }) => (
                     <div key={v} style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 12, color: "#6b6259" }}>
                       <Icon size={11} className="text-[#C9972A]" style={{ flexShrink: 0, color: "#C9972A" }} />{v}

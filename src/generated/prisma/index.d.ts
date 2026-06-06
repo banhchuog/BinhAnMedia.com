@@ -1069,6 +1069,7 @@ export namespace Prisma {
     galleryFrameFolder: number
     galleryBtsFolder: number
     storyboardPhotos: number
+    directorMedia: number
     updatedAt: number
     _all: number
   }
@@ -1116,6 +1117,7 @@ export namespace Prisma {
     galleryFrameFolder?: true
     galleryBtsFolder?: true
     storyboardPhotos?: true
+    directorMedia?: true
     updatedAt?: true
     _all?: true
   }
@@ -1222,6 +1224,7 @@ export namespace Prisma {
     galleryFrameFolder: string
     galleryBtsFolder: string
     storyboardPhotos: JsonValue
+    directorMedia: JsonValue
     updatedAt: Date
     _count: SettingsCountAggregateOutputType | null
     _avg: SettingsAvgAggregateOutputType | null
@@ -1260,6 +1263,7 @@ export namespace Prisma {
     galleryFrameFolder?: boolean
     galleryBtsFolder?: boolean
     storyboardPhotos?: boolean
+    directorMedia?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["settings"]>
 
@@ -1279,6 +1283,7 @@ export namespace Prisma {
     galleryFrameFolder?: boolean
     galleryBtsFolder?: boolean
     storyboardPhotos?: boolean
+    directorMedia?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["settings"]>
 
@@ -1298,6 +1303,7 @@ export namespace Prisma {
     galleryFrameFolder?: boolean
     galleryBtsFolder?: boolean
     storyboardPhotos?: boolean
+    directorMedia?: boolean
     updatedAt?: boolean
   }
 
@@ -1321,6 +1327,7 @@ export namespace Prisma {
       galleryFrameFolder: string
       galleryBtsFolder: string
       storyboardPhotos: Prisma.JsonValue
+      directorMedia: Prisma.JsonValue
       updatedAt: Date
     }, ExtArgs["result"]["settings"]>
     composites: {}
@@ -1730,6 +1737,7 @@ export namespace Prisma {
     readonly galleryFrameFolder: FieldRef<"Settings", 'String'>
     readonly galleryBtsFolder: FieldRef<"Settings", 'String'>
     readonly storyboardPhotos: FieldRef<"Settings", 'Json'>
+    readonly directorMedia: FieldRef<"Settings", 'Json'>
     readonly updatedAt: FieldRef<"Settings", 'DateTime'>
   }
     
@@ -4001,6 +4009,7 @@ export namespace Prisma {
     galleryFrameFolder: 'galleryFrameFolder',
     galleryBtsFolder: 'galleryBtsFolder',
     storyboardPhotos: 'storyboardPhotos',
+    directorMedia: 'directorMedia',
     updatedAt: 'updatedAt'
   };
 
@@ -4185,6 +4194,7 @@ export namespace Prisma {
     galleryFrameFolder?: StringFilter<"Settings"> | string
     galleryBtsFolder?: StringFilter<"Settings"> | string
     storyboardPhotos?: JsonFilter<"Settings">
+    directorMedia?: JsonFilter<"Settings">
     updatedAt?: DateTimeFilter<"Settings"> | Date | string
   }
 
@@ -4204,6 +4214,7 @@ export namespace Prisma {
     galleryFrameFolder?: SortOrder
     galleryBtsFolder?: SortOrder
     storyboardPhotos?: SortOrder
+    directorMedia?: SortOrder
     updatedAt?: SortOrder
   }
 
@@ -4226,6 +4237,7 @@ export namespace Prisma {
     galleryFrameFolder?: StringFilter<"Settings"> | string
     galleryBtsFolder?: StringFilter<"Settings"> | string
     storyboardPhotos?: JsonFilter<"Settings">
+    directorMedia?: JsonFilter<"Settings">
     updatedAt?: DateTimeFilter<"Settings"> | Date | string
   }, "id">
 
@@ -4245,6 +4257,7 @@ export namespace Prisma {
     galleryFrameFolder?: SortOrder
     galleryBtsFolder?: SortOrder
     storyboardPhotos?: SortOrder
+    directorMedia?: SortOrder
     updatedAt?: SortOrder
     _count?: SettingsCountOrderByAggregateInput
     _avg?: SettingsAvgOrderByAggregateInput
@@ -4272,6 +4285,7 @@ export namespace Prisma {
     galleryFrameFolder?: StringWithAggregatesFilter<"Settings"> | string
     galleryBtsFolder?: StringWithAggregatesFilter<"Settings"> | string
     storyboardPhotos?: JsonWithAggregatesFilter<"Settings">
+    directorMedia?: JsonWithAggregatesFilter<"Settings">
     updatedAt?: DateTimeWithAggregatesFilter<"Settings"> | Date | string
   }
 
@@ -4454,6 +4468,7 @@ export namespace Prisma {
     galleryFrameFolder?: string
     galleryBtsFolder?: string
     storyboardPhotos?: JsonNullValueInput | InputJsonValue
+    directorMedia?: JsonNullValueInput | InputJsonValue
     updatedAt?: Date | string
   }
 
@@ -4473,6 +4488,7 @@ export namespace Prisma {
     galleryFrameFolder?: string
     galleryBtsFolder?: string
     storyboardPhotos?: JsonNullValueInput | InputJsonValue
+    directorMedia?: JsonNullValueInput | InputJsonValue
     updatedAt?: Date | string
   }
 
@@ -4492,6 +4508,7 @@ export namespace Prisma {
     galleryFrameFolder?: StringFieldUpdateOperationsInput | string
     galleryBtsFolder?: StringFieldUpdateOperationsInput | string
     storyboardPhotos?: JsonNullValueInput | InputJsonValue
+    directorMedia?: JsonNullValueInput | InputJsonValue
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -4511,6 +4528,7 @@ export namespace Prisma {
     galleryFrameFolder?: StringFieldUpdateOperationsInput | string
     galleryBtsFolder?: StringFieldUpdateOperationsInput | string
     storyboardPhotos?: JsonNullValueInput | InputJsonValue
+    directorMedia?: JsonNullValueInput | InputJsonValue
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -4530,6 +4548,7 @@ export namespace Prisma {
     galleryFrameFolder?: string
     galleryBtsFolder?: string
     storyboardPhotos?: JsonNullValueInput | InputJsonValue
+    directorMedia?: JsonNullValueInput | InputJsonValue
     updatedAt?: Date | string
   }
 
@@ -4549,6 +4568,7 @@ export namespace Prisma {
     galleryFrameFolder?: StringFieldUpdateOperationsInput | string
     galleryBtsFolder?: StringFieldUpdateOperationsInput | string
     storyboardPhotos?: JsonNullValueInput | InputJsonValue
+    directorMedia?: JsonNullValueInput | InputJsonValue
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -4568,6 +4588,7 @@ export namespace Prisma {
     galleryFrameFolder?: StringFieldUpdateOperationsInput | string
     galleryBtsFolder?: StringFieldUpdateOperationsInput | string
     storyboardPhotos?: JsonNullValueInput | InputJsonValue
+    directorMedia?: JsonNullValueInput | InputJsonValue
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -4862,6 +4883,7 @@ export namespace Prisma {
     galleryFrameFolder?: SortOrder
     galleryBtsFolder?: SortOrder
     storyboardPhotos?: SortOrder
+    directorMedia?: SortOrder
     updatedAt?: SortOrder
   }
 

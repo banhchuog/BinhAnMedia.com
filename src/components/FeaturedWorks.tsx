@@ -11,12 +11,12 @@ type Project = {
 };
 
 const CAT_COLORS: Record<string, { text: string; thumb: string }> = {
-  TVC:       { text: "text-orange-400", thumb: "from-orange-900/50 to-orange-900/20" },
-  MV:        { text: "text-purple-400", thumb: "from-purple-900/50 to-purple-900/20" },
-  Corporate: { text: "text-blue-400",   thumb: "from-blue-900/50 to-blue-900/20" },
-  Social:    { text: "text-green-400",  thumb: "from-green-900/50 to-green-900/20" },
-  Event:     { text: "text-amber-400",  thumb: "from-amber-900/50 to-amber-900/20" },
-  Motion:    { text: "text-pink-400",   thumb: "from-pink-900/50 to-pink-900/20" },
+  TVC:       { text: "text-orange-600", thumb: "from-orange-200 to-orange-50" },
+  MV:        { text: "text-purple-600", thumb: "from-purple-200 to-purple-50" },
+  Corporate: { text: "text-blue-600",   thumb: "from-blue-200 to-blue-50" },
+  Social:    { text: "text-green-600",  thumb: "from-green-200 to-green-50" },
+  Event:     { text: "text-amber-600",  thumb: "from-amber-200 to-amber-50" },
+  Motion:    { text: "text-pink-600",   thumb: "from-pink-200 to-pink-50" },
 };
 
 const FALLBACK: Project[] = [
@@ -51,19 +51,19 @@ export default function FeaturedWorks() {
   const featured = projects.slice(0, 6);
 
   return (
-    <section className="bg-[#111] py-16 sm:py-24 px-4 sm:px-6">
+    <section className="soft-section-muted py-16 sm:py-24 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-end mb-8 sm:mb-12">
           <div>
             <p className="eyebrow mb-2">Tác phẩm</p>
-            <h2 className="text-[clamp(2rem,4vw,3rem)] font-black text-white tracking-[-0.03em] leading-tight">
+            <h2 className="text-[clamp(2rem,4vw,3rem)] font-black text-[#1F241E] tracking-[-0.03em] leading-tight">
               Dự án nổi bật
             </h2>
           </div>
           <Link
             href="/showreel"
-            className="hidden md:flex items-center gap-1 text-sm text-white/40 hover:text-white transition-colors font-medium"
+            className="hidden md:flex items-center gap-1 text-sm text-[#6F746A] hover:text-[#1F241E] transition-colors font-medium"
           >
             Xem tất cả <ArrowRight size={14} />
           </Link>
@@ -78,7 +78,7 @@ export default function FeaturedWorks() {
               <Link
                 key={p.id}
                 href="/showreel"
-                className="group relative w-full aspect-video rounded-2xl overflow-hidden bg-black"
+                className="group relative w-full aspect-video rounded-[1.6rem] overflow-hidden bg-white border border-white/70 shadow-[0_22px_70px_rgba(46,42,34,0.12)]"
               >
                 {/* Thumbnail */}
                 {p.thumbnail ? (
@@ -100,7 +100,7 @@ export default function FeaturedWorks() {
                 )}
 
                 {/* Hover dim */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/12 transition-colors duration-300" />
 
                 {/* Play button */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -114,7 +114,7 @@ export default function FeaturedWorks() {
                   <div className="bg-black/70 backdrop-blur-md rounded-xl px-3 py-2 shadow-lg max-w-[80%]">
                     <span className={`text-[9px] font-bold uppercase tracking-wider ${cc.text} block leading-none mb-0.5`}>{p.cat}</span>
                     <span className="text-white font-bold text-[12px] leading-tight line-clamp-1 block">{p.title}</span>
-                    {p.views && <span className="text-white/50 text-[10px]">{p.views}</span>}
+                    {p.views && <span className="text-white/60 text-[10px]">{p.views}</span>}
                   </div>
                 </div>
               </Link>

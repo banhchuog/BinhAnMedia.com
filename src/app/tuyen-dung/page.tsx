@@ -75,7 +75,7 @@ export default function RecruitmentPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0A0A0A]">
+    <main className="min-h-screen soft-page light-public">
       {/* Hero */}
       <section className="pt-24 pb-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center">
@@ -87,7 +87,7 @@ export default function RecruitmentPage() {
           </h1>
           <p className="text-white/50 text-base sm:text-lg leading-relaxed max-w-2xl mx-auto">
             Bình An Media đang tìm kiếm editor tài năng, đam mê kể chuyện bằng hình ảnh.
-            Gia nhập đội ngũ sản xuất video chuyên nghiệp tại TP.HCM.
+            Gia nhập đội ngũ sản xuất video chuyên nghiệp tại Đồng Nai.
           </p>
         </div>
       </section>
@@ -137,7 +137,7 @@ export default function RecruitmentPage() {
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Sau 3 tháng thử việc, review tốt sẽ vào <strong className="text-white/80">biên chế chính thức</strong> — đóng bảo hiểm xã hội, bảo hiểm y tế đầy đủ</li>
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Được tham gia các dự án TVC, MV lớn, phim dài tập — có tên trong credit</li>
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Môi trường trẻ, sáng tạo, không gò bó</li>
-                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Làm việc tại shophouse Vinhomes Grand Park — không gian rộng, tiện ích đầy đủ</li>
+                <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Làm việc tại 63 Tôn Đức Thắng, Phường Trị An — không gian rộng, tiện ích đầy đủ</li>
                 <li className="flex gap-2.5"><span className="text-[#C9972A] mt-0.5">•</span>Cơ hội học hỏi từ đạo diễn & quay phim chuyên nghiệp</li>
               </ul>
             </div>
@@ -148,10 +148,10 @@ export default function RecruitmentPage() {
                 <MapPin size={18} className="text-[#C9972A]" /> Địa điểm làm việc
               </h2>
               <p className="text-white/60 text-sm mb-4">
-                <strong className="text-white/80">Shophouse S3.03 Vinhomes Grand Park</strong>, Nguyễn Xiển, Long Thạnh Mỹ, TP. Thủ Đức, TP.HCM
+                <strong className="text-white/80">63 Tôn Đức Thắng</strong>, Phường Trị An, thành phố Đồng Nai
               </p>
               <a
-                href="https://maps.app.goo.gl/v6iyXPa1RedXixZZA"
+                href="https://www.google.com/maps/search/?api=1&query=63%20T%C3%B4n%20%C4%90%E1%BB%A9c%20Th%E1%BA%AFng%2C%20Ph%C6%B0%E1%BB%9Dng%20Tr%E1%BB%8B%20An%2C%20th%C3%A0nh%20ph%E1%BB%91%20%C4%90%E1%BB%93ng%20Nai"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-[#C9972A] text-sm font-medium hover:underline"
@@ -160,14 +160,14 @@ export default function RecruitmentPage() {
               </a>
               <div className="mt-4 rounded-xl overflow-hidden border border-white/8">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3918.8552246863175!2d106.83!3d10.82!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3175275cf5b40d5d%3A0x51c4fa04e08a1dbb!2sVinhomes%20Grand%20Park!5e0!3m2!1svi!2svn!4v1710000000000!5m2!1svi!2svn"
+                  src="https://www.google.com/maps?q=63%20T%C3%B4n%20%C4%90%E1%BB%A9c%20Th%E1%BA%AFng%2C%20Ph%C6%B0%E1%BB%9Dng%20Tr%E1%BB%8B%20An%2C%20th%C3%A0nh%20ph%E1%BB%91%20%C4%90%E1%BB%93ng%20Nai&output=embed"
                   width="100%"
                   height="200"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title="Vinhomes Grand Park"
+                  title="63 Tôn Đức Thắng, Phường Trị An, thành phố Đồng Nai"
                 />
               </div>
             </div>
